@@ -1,4 +1,4 @@
-package exceptions;
+package exception;
 
 public class InvalidDateFormatException extends Exception {
     public InvalidDateFormatException(){
