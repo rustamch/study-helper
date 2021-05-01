@@ -35,6 +35,7 @@ public class Bot extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         MessageChannel channel = event.getChannel();
+        Message msg = event.getMessage();
         String rawMsg = msg.getContentRaw();
         if (rawMsg.equals("!ping")) {
             long time = System.currentTimeMillis();
