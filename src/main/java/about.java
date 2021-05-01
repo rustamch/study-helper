@@ -6,7 +6,7 @@ public class about {
 
     public static void main(String args[]) throws Exception{
 
-        JDA jda = new JDABuilder("ODM3ODczNTI2MzYyODY1Njc1.YIy4hw.kxwmuTN0n1Ba6zdxkFAIJZKI7xo").build();
+        JDA jda = new JDABuilder("ODM3OTIyMTc5MjkwNzU5MjA4.YIzl1w.zxiD1l_7_dH_c3WFQYojw-g4dk4").build();
 
         jda.addEventListener(new aboutevent());
     }
