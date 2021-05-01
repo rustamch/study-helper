@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class ReminderManager {
     private Map<LocalDateTime, User> reminders;
 
+
     // constructs ReminderManager object
     public ReminderManager() {
         reminders = new HashMap<>();
@@ -32,6 +33,11 @@ public class ReminderManager {
 
         reminders.put(reminder, user);
     }
+
+    public String buildReminder() {
+        return null;
+    }
+
 
     // parses an event to a LocalDateTime
     private LocalDateTime parseEventToLocalDateTime(MessageReceivedEvent event)

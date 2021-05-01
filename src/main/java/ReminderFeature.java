@@ -7,7 +7,11 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-public class ReminderFeature extends ListenerAdapter {
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Timer;
+
+public class ReminderFeature extends ListenerAdapter implements ActionListener {
 
     public ReminderFeature() {}
 
@@ -29,5 +33,10 @@ public class ReminderFeature extends ListenerAdapter {
                 channel.sendMessage("Invalid reminder format.").queue();
             }
         }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
     }
 }
