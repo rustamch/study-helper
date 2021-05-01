@@ -28,6 +28,7 @@ public class Bot extends ListenerAdapter {
                 .addEventListeners(new Bot())
                 .addEventListeners(new AboutEvent())
                 .addEventListeners(new BirthdayEvent())
+                .addEventListeners(new ReminderFeature())
                 .setActivity(Activity.playing("Type !ping"))
                 .build();
     }
