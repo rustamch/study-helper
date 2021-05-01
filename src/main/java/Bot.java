@@ -1,3 +1,4 @@
+import events.AboutEvent;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
@@ -23,6 +24,7 @@ public class Bot extends ListenerAdapter {
         // All other events will be disabled.
         JDABuilder.createLight(args[0], GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
                 .addEventListeners(new Bot())
+                .addEventListeners(new AboutEvent())
                 .setActivity(Activity.playing("Type !ping"))
                 .build();
     }
@@ -31,6 +33,7 @@ public class Bot extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event)
     {
         Message msg = event.getMessage();
+        event.getAuthor();
         if (msg.getContentRaw().equals("!ping"))
         {
             MessageChannel channel = event.getChannel();
