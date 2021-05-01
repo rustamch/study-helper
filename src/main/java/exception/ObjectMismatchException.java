@@ -1,4 +1,4 @@
-package exceptions;
+package exception;
 
 public class ObjectMismatchException extends RuntimeException {
 }

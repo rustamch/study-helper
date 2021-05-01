@@ -60,7 +60,6 @@ public class ReminderManager {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("uuuu.M.d H:mm");
         try {
             localDateTime = LocalDateTime.parse(dateAndTimeString, format);
-
         } catch (DateTimeParseException e) {
             throw new InvalidReminderFormatException();
         }

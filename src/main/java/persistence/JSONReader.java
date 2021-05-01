@@ -1,9 +1,9 @@
 package persistence;
 
 import events.birthdayEvent.BirthdayEvent;
-import exceptions.IllegalDateException;
-import exceptions.InvalidDateFormatException;
-import exceptions.ObjectMismatchException;
+import exception.IllegalDateException;
+import exception.InvalidDateFormatException;
+import exception.ObjectMismatchException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

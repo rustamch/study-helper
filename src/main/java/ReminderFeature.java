@@ -22,11 +22,11 @@ public class ReminderFeature extends ListenerAdapter {
             ReminderManager reminderManager = new ReminderManager();
             try {
                 reminderManager.addReminder(event);
-                System.out.println("Reminder was added");
+                channel.sendMessage("Reminder was added!").queue();
             } catch (DuplicateReminderException e) {
-                System.out.println("Duplicated reminder.");
+                channel.sendMessage("Duplicated reminder.").queue();
             } catch (InvalidReminderFormatException e) {
-                System.out.println("Invalid reminder format.");
+                channel.sendMessage("Invalid reminder format.").queue();
             }
         }
     }
