@@ -14,21 +14,17 @@ public class StudyTimeEvent {
     TextChannel textChannel;
     Instant start;
     Instant finish;
-    int startt;
-    int finishh;
 
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
         start = Instant.now();
         textChannel = event.getGuild().getTextChannelsByName("general", true).get(0);
         textChannel.sendMessage("User has joined vc!").queue();
-        startt = 1;
     }
 
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
         finish = Instant.now();
         long timeElapsed = Duration.between(start, finish).toMillis();
         textChannel.sendMessage("User has left vc after " + timeElapsed*1000 + " seconds!");
-        finishh = 3;
         textChannel.sendMessage("The methods are running, but the time counter is not.");
     }
 }

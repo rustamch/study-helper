@@ -1,5 +1,6 @@
 
 import events.AboutEvent;
+import events.StudyTimeEvent;
 import events.birthdayEvent.BirthdayEvent;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -28,6 +29,7 @@ public class Bot extends ListenerAdapter {
                 .addEventListeners(new Bot())
                 .addEventListeners(new AboutEvent())
                 .addEventListeners(new BirthdayEvent())
+                .addEventListeners(new StudyTimeEvent())
                 .setActivity(Activity.playing("Type !ping"))
                 .build();
     }
