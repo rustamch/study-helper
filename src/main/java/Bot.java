@@ -1,7 +1,6 @@
 
 import events.AboutEvent;
-import birthdays.BirthdayManager;
-import exceptions.InvalidDateFormatException;
+import events.birthdayEvent.BirthdayEvent;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
@@ -28,6 +27,7 @@ public class Bot extends ListenerAdapter {
         JDABuilder.createLight(args[0], GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
                 .addEventListeners(new Bot())
                 .addEventListeners(new AboutEvent())
+                .addEventListeners(new BirthdayEvent())
                 .setActivity(Activity.playing("Type !ping"))
                 .build();
     }
@@ -35,6 +35,7 @@ public class Bot extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         MessageChannel channel = event.getChannel();
+        Message msg = event.getMessage();
         String rawMsg = msg.getContentRaw();
         if (rawMsg.equals("!ping")) {
             long time = System.currentTimeMillis();
@@ -42,11 +43,6 @@ public class Bot extends ListenerAdapter {
                     .queue(response /* => Message */ -> {
                         response.editMessageFormat("Pong: %d ms", System.currentTimeMillis() - time).queue();
                     });
-        } else if (rawMsg.equalsIgnoreCase("!hi")) {
-            channel.sendMessage("hi!!!!").queue();
-        } else if (rawMsg.length() > 5 && rawMsg.substring(0, 5).equalsIgnoreCase("!bday")) {
-            BirthdayManager bdayManager = new BirthdayManager();
-            bdayManager.handleBdayActions(event);
         }
     }
 }
