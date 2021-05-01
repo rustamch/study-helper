@@ -1,3 +1,5 @@
+
+import events.AboutEvent;
 import birthdays.BirthdayManager;
 import exceptions.InvalidDateFormatException;
 import net.dv8tion.jda.api.JDABuilder;
@@ -25,15 +27,14 @@ public class Bot extends ListenerAdapter {
         // All other events will be disabled.
         JDABuilder.createLight(args[0], GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
                 .addEventListeners(new Bot())
+                .addEventListeners(new AboutEvent())
                 .setActivity(Activity.playing("Type !ping"))
                 .build();
     }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        Message msg = event.getMessage();
         MessageChannel channel = event.getChannel();
-
         String rawMsg = msg.getContentRaw();
         if (rawMsg.equals("!ping")) {
             long time = System.currentTimeMillis();
