@@ -21,7 +21,6 @@ public class BirthdayEvent extends ListenerAdapter {
     private JSONWriter writer = new JSONWriter(BirthdayLog.BDAYLOG_LOCATION);
 
     public BirthdayEvent() {
-        reader.loadObject();
         bdayLog = new BirthdayLog(reader.getBDayLog());
     }
 
@@ -94,7 +93,6 @@ public class BirthdayEvent extends ListenerAdapter {
      * @throws IllegalDateException when given date has illegal year/month/day values
      */
     public void recordBDay(String name, String date) throws InvalidDateFormatException, IllegalDateException {
-        reader.loadObject();
         bdayLog = new BirthdayLog(reader.getBDayLog());
         Date bday = getDateFromStr(date);
         bdayLog.addMemberBirthday(name, bday);

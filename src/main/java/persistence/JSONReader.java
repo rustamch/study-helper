@@ -1,5 +1,7 @@
 package persistence;
 
+import events.TodoEvent.Todo;
+import events.TodoEvent.TodoList;
 import events.birthdayEvent.BirthdayEvent;
 import exceptions.IllegalDateException;
 import exceptions.InvalidDateFormatException;
@@ -9,6 +11,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,16 +27,17 @@ public class JSONReader {
         this.fileLocation = fileLocation;
     }
 
-    public void loadObject() {
+    private void loadObject() {
         try {
             String jsonData = readFile();
             jsonObject = new JSONObject(jsonData);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public Map<String, Date> getBDayLog() {
+        loadObject();
         Map<String, Date> map = new HashMap<>();
         if (jsonObject.has("no data")) {
             return map;
@@ -56,8 +61,12 @@ public class JSONReader {
         }
     }
 
-    private String readFile() throws FileNotFoundException {
+    private String readFile() throws IOException {
         File save = new File(fileLocation);
+        if (save.createNewFile()) {
+            JSONWriter writer = new JSONWriter(fileLocation);
+            writer.saveObject(new TodoList());
+        }
         Scanner scanner = new Scanner(save);
         StringBuilder builder = new StringBuilder();
         while (scanner.hasNextLine()) {
@@ -66,5 +75,25 @@ public class JSONReader {
         scanner.close();
 
         return builder.toString();
+    }
+
+    public TodoList getTodos() {
+        loadObject();
+        TodoList todos = new TodoList();
+        if (! jsonObject.has("todos")) {
+            return todos;
+        }
+        JSONArray array = (JSONArray) jsonObject.get("todos");
+        for (Object obj : array) {
+            todos.addTodo(getTodo((JSONObject) obj));
+        }
+        return todos;
+    }
+
+    private Todo getTodo(JSONObject obj) {
+        String[] dateStr = obj.getString("dueDate").split("-");
+        LocalDate date =
+                LocalDate.of(Integer.parseInt(dateStr[0]), Integer.parseInt(dateStr[1]), Integer.parseInt(dateStr[2]));
+        return new Todo(obj.getString("course"), obj.getString("description"), date);
     }
 }

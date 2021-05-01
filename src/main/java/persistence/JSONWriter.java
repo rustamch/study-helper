@@ -19,7 +19,7 @@ public class JSONWriter {
 
     public void saveObject(Writable writable) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(new File(fileLocation));
-        writer.print(writable.toJSON().toString());
+        writer.print(writable.toJSON().toString(4));
         writer.close();
     }
 }
