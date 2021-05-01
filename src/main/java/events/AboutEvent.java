@@ -6,10 +6,9 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class AboutEvent extends ListenerAdapter {
-
-    public void onGuildMessageReceived(GuildMessageReceivedEvent event){
+    public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         String messageSent = event.getMessage().getContentRaw();
-        if(messageSent.equalsIgnoreCase("!about")){
+        if(messageSent.equalsIgnoreCase("!about")) {
             EmbedBuilder about = new EmbedBuilder();
             about.setTitle("Study Hall Bot Information");
             about.setDescription("A bot to help YOU study better :D");
