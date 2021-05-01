@@ -1,3 +1,5 @@
+import birthdays.BirthdayManager;
+import exceptions.InvalidDateFormatException;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
@@ -28,17 +30,22 @@ public class Bot extends ListenerAdapter {
     }
 
     @Override
-    public void onMessageReceived(MessageReceivedEvent event)
-    {
+    public void onMessageReceived(MessageReceivedEvent event) {
         Message msg = event.getMessage();
-        if (msg.getContentRaw().equals("!ping"))
-        {
-            MessageChannel channel = event.getChannel();
+        MessageChannel channel = event.getChannel();
+
+        String rawMsg = msg.getContentRaw();
+        if (rawMsg.equals("!ping")) {
             long time = System.currentTimeMillis();
             channel.sendMessage("Pong!") /* => RestAction<Message> */
                     .queue(response /* => Message */ -> {
                         response.editMessageFormat("Pong: %d ms", System.currentTimeMillis() - time).queue();
                     });
+        } else if (rawMsg.equalsIgnoreCase("!hi")) {
+            channel.sendMessage("hi!!!!").queue();
+        } else if (rawMsg.length() > 5 && rawMsg.substring(0, 5).equalsIgnoreCase("!bday")) {
+            BirthdayManager bdayManager = new BirthdayManager();
+            bdayManager.handleBdayActions(event);
         }
     }
 }
