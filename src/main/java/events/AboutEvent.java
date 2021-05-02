@@ -11,7 +11,6 @@ public class AboutEvent extends ListenerAdapter {
         String messageSent = event.getMessage().getContentRaw();
         if(messageSent.equalsIgnoreCase("!about")) {
             EmbedBuilder about = new EmbedBuilder();
-
             about.setTitle("🌿 Study Hall Bot Information");
             about.setDescription("A bot to help YOU study better :D");
             about.addField("Creators", "A couple UBC 1st year students in *RUHacks 2021!*\n\n**__Commands List:__**", false);
@@ -25,7 +24,7 @@ public class AboutEvent extends ListenerAdapter {
                     "**Remove a specific todo**: !todo rm <todo #>\n" +
                     "**Remove all todo**: !todo rm all\n" +
                     "**Check existing todo**: !todo check\n" +
-                    "**Mark todo as finished**: !todo done <todo #>" +
+                    "**Mark todo as finished**: !tod
                     "**Post todo to 'todos' channel**: !todo post\n", false);
             about.setColor(0x9CD08F);
 

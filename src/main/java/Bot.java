@@ -1,5 +1,6 @@
 
 import events.AboutEvent;
+import events.StudyTimeEvent;
 import events.TodoEvent.TodoEvent;
 import events.DoraListener;
 import events.PingEvent;
@@ -30,12 +31,18 @@ public class Bot {
         // args[0] should be the token
         // We only need 2 intents in this bot. We only respond to messages in guilds and private channels.
         // All other events will be disabled.
-        JDABuilder.createLight(args[0], GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
-                .addEventListeners(new PingEvent())
+        EnumSet<GatewayIntent> intents = EnumSet.of(
+                GatewayIntent.GUILD_EMOJIS, // for Guild#getEmotes (not very useful)
+                GatewayIntent.GUILD_VOICE_STATES, // for member voice states
+                GatewayIntent.GUILD_MESSAGES // for message received event
+        );
+        JDABuilder.createDefault(args[0], intents)
+                .addEventListeners(new Bot())
                 .addEventListeners(new AboutEvent())
                 .addEventListeners(new BirthdayEvent())
                 .addEventListeners(new TodoEvent())
                 .addEventListeners(new ReminderFeature())
+                .addEventListeners(new StudyTimeEvent())
                 .addEventListeners(new DoraListener())
                 .setActivity(Activity.playing("Type !ping"))
                 .build();
