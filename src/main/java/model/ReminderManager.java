@@ -3,37 +3,25 @@ package model;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import exception.DuplicateReminderException;
-import exception.InvalidReminderFormatException;
+import exception.InvalidReminderException;
+import exception.InvalidTimeInHoursException;
+import exception.InvalidTimeInMinutesException;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-
+// A manager for reminders
 public class ReminderManager {
     private final Map<LocalDateTime, MessageReceivedEvent> reminders;
     private final String DEFAULT_TIME = "9:00";
 
     // constructs ReminderManager object
     public ReminderManager() {
-        reminders = new HashMap<>();
-    }
-
-    // checks for duplicates and adds reminder to reminders
-    public void addReminder(MessageReceivedEvent event)
-            throws DuplicateReminderException, InvalidReminderFormatException {
-        LocalDateTime reminder = parseEventToLocalDateTime(event);
-        reminder = reminder.withSecond(0).withNano(0);
-        User user = event.getAuthor();
-
-        if (containsDateTimeAndUser(reminder, user)) {
-            throw new DuplicateReminderException();
-        }
-
-        reminders.put(reminder, event);
+        reminders = new TreeMap<>();
     }
 
     // returns true if reminder is in reminders
@@ -45,8 +33,8 @@ public class ReminderManager {
     public String getMessage(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
         User user = event.getAuthor();
-        String message = "Reminding <@" + user.getId() + ">! You have something planned right now!";
-        return message;
+        // returns the message for the user with a ping
+        return "Reminding <@" + user.getId() + ">! You have something planned right now!";
     }
 
     // returns all reminders as a message
@@ -63,13 +51,31 @@ public class ReminderManager {
     // returns the message channel for the reminder
     public MessageChannel getChannel(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
-        MessageChannel channel = event.getChannel();
-        return channel;
+        return event.getChannel();
+    }
+
+    // checks for duplicates and adds reminder to reminders
+    public void addReminder(MessageReceivedEvent event)
+            throws DuplicateReminderException, InvalidReminderException {
+        LocalDateTime reminder = parseEventToLocalDateTime(event);
+        reminder = reminder.withSecond(0).withNano(0);
+        User user = event.getAuthor();
+
+        if (containsDateTimeAndUser(reminder, user)) {
+            throw new DuplicateReminderException();
+        }
+
+        reminders.put(reminder, event);
+    }
+
+    // removes the reminder from reminders
+    public void removeReminder(LocalDateTime reminder) {
+        reminders.remove(reminder);
     }
 
     // parses an event to a LocalDateTime
     private LocalDateTime parseEventToLocalDateTime(MessageReceivedEvent event)
-            throws InvalidReminderFormatException {
+            throws InvalidReminderException {
         String eventMessageRaw = event.getMessage().getContentRaw();
         LocalDateTime localDateTime = null;
 
@@ -78,8 +84,12 @@ public class ReminderManager {
             localDateTime = parseStringDateAndTimeToLocalDateTime(eventMessageRaw);
         } else if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}.*")) {
             localDateTime = parseStringDateToLocalDateTime(eventMessageRaw);
+        } else if (eventMessageRaw.matches("!reminder\\s+\\d+min.*")) {
+            localDateTime = parseStringTimeInMinutesToLocalDateTime(eventMessageRaw);
+        } else if (eventMessageRaw.matches("!reminder\\s+\\d+hr.*")) {
+            localDateTime = parseStringTimeInHoursToLocalDateTime(eventMessageRaw);
         } else {
-            throw new InvalidReminderFormatException();
+            throw new InvalidReminderException();
         }
 
         assert localDateTime != null;
@@ -87,9 +97,45 @@ public class ReminderManager {
         return localDateTime;
     }
 
+    // parses time in minutes from string
+    private LocalDateTime parseStringTimeInMinutesToLocalDateTime(String message)
+            throws InvalidTimeInMinutesException {
+        LocalDateTime localDateTime = LocalDateTime.now().withSecond(0).withNano(0);
+        int minutes = 0;
+
+        String[] messages = message.split("\\s+");
+        String minuteString = messages[1].split("min")[0];
+        try {
+            minutes = Integer.parseInt(minuteString);
+            localDateTime = localDateTime.plusMinutes(minutes);
+        } catch (NumberFormatException e) {
+            throw new InvalidTimeInMinutesException();
+        }
+
+        return localDateTime;
+    }
+
+    // parses time in hours from string
+    private LocalDateTime parseStringTimeInHoursToLocalDateTime(String message)
+            throws InvalidTimeInHoursException {
+        LocalDateTime localDateTime = LocalDateTime.now().withSecond(0).withNano(0);
+        int hours = 0;
+
+        String[] messages = message.split("\\s+");
+        String minuteString = messages[1].split("hr")[0];
+        try {
+            hours = Integer.parseInt(minuteString);
+            localDateTime = localDateTime.plusHours(hours);
+        } catch (NumberFormatException e) {
+            throw new InvalidTimeInHoursException();
+        }
+
+        return localDateTime;
+    }
+
     // parses date and time from string
     private LocalDateTime parseStringDateAndTimeToLocalDateTime(String message)
-            throws InvalidReminderFormatException {
+            throws InvalidReminderException {
         LocalDateTime localDateTime = null;
 
         // message format: "!reminder YYYY.MM.DD hh:mm"
@@ -100,7 +146,7 @@ public class ReminderManager {
         try {
             localDateTime = LocalDateTime.parse(dateAndTimeString, formatter);
         } catch (DateTimeParseException e) {
-            throw new InvalidReminderFormatException();
+            throw new InvalidReminderException();
         }
 
         assert localDateTime != null;
@@ -110,7 +156,7 @@ public class ReminderManager {
 
     // parses date from string
     private LocalDateTime parseStringDateToLocalDateTime(String message)
-            throws InvalidReminderFormatException {
+            throws InvalidReminderException {
         LocalDateTime localDateTime = null;
 
         // message format: "!reminder YYYY.MM.DD hh:mm"
@@ -120,7 +166,7 @@ public class ReminderManager {
         try {
             localDateTime = LocalDateTime.parse(dateString, formatter);
         } catch (DateTimeParseException e) {
-            throw new InvalidReminderFormatException();
+            throw new InvalidReminderException();
         }
 
         assert localDateTime != null;
@@ -131,6 +177,6 @@ public class ReminderManager {
     // checks if reminder for user contained in map
     private boolean containsDateTimeAndUser(LocalDateTime reminder, User user) {
         return reminders.containsKey(reminder)
-                && reminders.get(reminder).equals(user);
+                && reminders.get(reminder).getAuthor().equals(user);
     }
 }
