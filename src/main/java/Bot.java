@@ -3,17 +3,10 @@ import events.AboutEvent;
 import events.StudyTimeEvent;
 import events.TodoEvent.TodoEvent;
 import events.DoraListener;
-import events.PingEvent;
 import events.birthdayEvent.BirthdayEvent;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
 import java.util.EnumSet;
@@ -37,7 +30,6 @@ public class Bot {
                 GatewayIntent.GUILD_MESSAGES // for message received event
         );
         JDABuilder.createDefault(args[0], intents)
-                .addEventListeners(new Bot())
                 .addEventListeners(new AboutEvent())
                 .addEventListeners(new BirthdayEvent())
                 .addEventListeners(new TodoEvent())

@@ -1,5 +1,6 @@
 package events;
 
+import java.io.FileNotFoundException;
 import java.time.Instant;
 import java.time.Duration;
 import java.util.HashMap;
@@ -13,11 +14,12 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.json.JSONObject;
 import persistence.JSONReader;
 import persistence.JSONWriter;
 
 public class StudyTimeEvent extends ListenerAdapter {
-    private Map<String, Instant> membersInVC = new HashMap<>();
+    private final Map<String, Instant> membersInVC = new HashMap<>();
 
     TextChannel textChannel;
     Instant finish;
@@ -46,8 +48,19 @@ public class StudyTimeEvent extends ListenerAdapter {
     private void storeElapsedTime(String memberID, long timeElapsed) {
         JSONReader reader = new JSONReader("./times.json");
         JSONWriter writer = new JSONWriter("./times.json");
+        JSONObject jobj = reader.getStoredTimes();
 
-
+        long timeAcc = timeElapsed / 1000 / 60;
+        if (jobj.has(memberID)) {
+            timeAcc += jobj.getLong(memberID);
+            jobj.remove(memberID);
+        }
+        jobj.put(memberID, timeAcc);
+        try {
+            writer.saveString(jobj.toString(4));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendTimeElapsedMessage(long timeElapsed) {

@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class BirthdayLog implements Writable {
     public static final String SAVE_KEY = "bdayLog";
-    public static final String BDAYLOG_LOCATION = ".idea/data/birthdays.json";
+    public static final String BDAYLOG_LOCATION = "./birthdays.json";
 
     private final Map<String, Date> bdays;
 

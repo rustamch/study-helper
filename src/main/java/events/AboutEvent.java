@@ -24,7 +24,7 @@ public class AboutEvent extends ListenerAdapter {
                     "**Remove a specific todo**: !todo rm <todo #>\n" +
                     "**Remove all todo**: !todo rm all\n" +
                     "**Check existing todo**: !todo check\n" +
-                    "**Mark todo as finished**: !tod
+                    "**Mark todo as finished**: !todo done <todo number> \n" +
                     "**Post todo to 'todos' channel**: !todo post\n", false);
             about.setColor(0x9CD08F);
 

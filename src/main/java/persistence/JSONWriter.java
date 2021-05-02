@@ -22,4 +22,10 @@ public class JSONWriter {
         writer.print(writable.toJSON().toString(4));
         writer.close();
     }
+
+    public void saveString(String str) throws FileNotFoundException {
+        PrintWriter writer = new PrintWriter(new File(fileLocation));
+        writer.print(str);
+        writer.close();
+    }
 }

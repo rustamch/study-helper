@@ -105,4 +105,9 @@ public class JSONReader {
             e.printStackTrace();
         }
     }
+
+    public JSONObject getStoredTimes() {
+        loadObject();
+        return jsonObject;
+    }
 }
