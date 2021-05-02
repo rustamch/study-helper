@@ -1,4 +1,4 @@
 package exception;
 
-public class InvalidTimeInHoursException extends InvalidReminderFormatException {
+public class InvalidTimeInHoursException extends InvalidReminderException {
 }

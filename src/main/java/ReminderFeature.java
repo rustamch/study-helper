@@ -1,5 +1,5 @@
 import exception.DuplicateReminderException;
-import exception.InvalidReminderFormatException;
+import exception.InvalidReminderException;
 import exception.InvalidTimeInHoursException;
 import exception.InvalidTimeInMinutesException;
 import model.ReminderManager;
@@ -44,7 +44,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
             } catch (InvalidTimeInHoursException e) {
                 channel.sendMessage("Invalid reminder format. " +
                         "Please try again with a valid format e.g. **!reminder 3hr**").queue();
-            } catch (InvalidReminderFormatException e) {
+            } catch (InvalidReminderException e) {
                 channel.sendMessage("Invalid reminder format. Please try **!reminder YYYY.MM.DD**").queue();
             }
         } else if (Pattern.matches("!reminders\\s*", messageStringRaw)) {
@@ -64,6 +64,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
             String message = reminderManager.getMessage(dateAndTimeNow);
 
             channel.sendMessage(message).queue();
+            reminderManager.removeReminder(dateAndTimeNow);
         }
     }
 }
