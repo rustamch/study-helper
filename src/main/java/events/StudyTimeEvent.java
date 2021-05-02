@@ -24,25 +24,27 @@ public class StudyTimeEvent extends ListenerAdapter {
     TextChannel textChannel;
     Instant finish;
     String memberID;
-    long timeStudied;
-
 
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
-        Member m = event.getMember();
-        Instant start = Instant.now();
-        textChannel = event.getGuild().getTextChannelsByName("general", true).get(0);
-        membersInVC.put(m.getId(), start);
-        textChannel.sendMessage(m.getEffectiveName() + " has started studying!").queue();
+        if (event.getChannelJoined().getName().equalsIgnoreCase("silent study")) {
+            Member m = event.getMember();
+            Instant start = Instant.now();
+            textChannel = event.getGuild().getTextChannelsByName("general", true).get(0);
+            membersInVC.put(m.getId(), start);
+            textChannel.sendMessage(m.getEffectiveName() + " has started studying!").queue();
+        }
     }
 
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
-        finish = Instant.now();
-        memberID = event.getMember().getId();
-        Instant start = membersInVC.get(memberID);
-        long timeElapsed = Duration.between(start, finish).toMillis();
+        if (event.getChannelJoined().getName().equalsIgnoreCase("silent study")) {
+            finish = Instant.now();
+            memberID = event.getMember().getId();
+            Instant start = membersInVC.get(memberID);
+            long timeElapsed = Duration.between(start, finish).toMillis();
 
-        sendTimeElapsedMessage(timeElapsed);
-        storeElapsedTime(memberID, timeElapsed);
+            sendTimeElapsedMessage(timeElapsed);
+            storeElapsedTime(memberID, timeElapsed);
+        }
     }
 
     private void storeElapsedTime(String memberID, long timeElapsed) {
