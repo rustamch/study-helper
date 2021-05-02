@@ -38,6 +38,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
                 System.out.println("This should not be printed if exception thrown!"); //todo
                 channel.sendMessage("Reminder was added!").queue();
             } catch (DuplicateReminderException e) {
+                System.out.println("This prints only when duplicated.");     //todo
                 channel.sendMessage("Duplicated reminder.").queue();
             } catch (InvalidReminderFormatException e) {
                 System.out.println("This is printed if error with object!");  //todo
