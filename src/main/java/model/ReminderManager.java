@@ -8,15 +8,13 @@ import java.util.Map;
 
 import exception.DuplicateReminderException;
 import exception.InvalidReminderFormatException;
-import net.dv8tion.jda.api.entities.Invite;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 
 public class ReminderManager {
-    private Map<LocalDateTime, MessageReceivedEvent> reminders;
+    private final Map<LocalDateTime, MessageReceivedEvent> reminders;
     private final String DEFAULT_TIME = "9:00";
 
     // constructs ReminderManager object
@@ -31,7 +29,7 @@ public class ReminderManager {
         reminder = reminder.withSecond(0).withNano(0);
         User user = event.getAuthor();
 
-        if (contains(reminder, user)) {
+        if (containsDateTimeAndUser(reminder, user)) {
             throw new DuplicateReminderException();
         }
 
@@ -46,7 +44,7 @@ public class ReminderManager {
     public String getMessage(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
         User user = event.getAuthor();
-        String message = "Reminding " + user.getName() + "!";
+        String message = "Reminding " + user.getName() + "! You have something planned right now!";
         return message;
     }
 
@@ -80,6 +78,8 @@ public class ReminderManager {
         } else if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}.*")) {
             System.out.println("Message 1"); //todo
             localDateTime = parseStringDateToLocalDateTime(eventMessageRaw);
+        } else {
+            throw new InvalidReminderFormatException();
         }
 
         assert localDateTime != null;
@@ -129,7 +129,8 @@ public class ReminderManager {
     }
 
     // checks if reminder for user contained in map
-    private boolean contains(LocalDateTime reminder, User user) {
-        return reminders.containsKey(reminder) && reminders.containsValue(user);
+    private boolean containsDateTimeAndUser(LocalDateTime reminder, User user) {
+        return reminders.containsKey(reminder)
+                && reminders.get(reminder).equals(user);
     }
 }

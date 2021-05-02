@@ -42,7 +42,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
                 channel.sendMessage("Duplicated reminder.").queue();
             } catch (InvalidReminderFormatException e) {
                 System.out.println("This is printed if error with object!");  //todo
-                channel.sendMessage("Invalid reminder format.").queue();
+                channel.sendMessage("Invalid reminder format. Please try **!reminder YYYY-MM-DD**").queue();
             }
         } else if (Pattern.matches("!reminders.*", messageStringRaw)) {
             channel.sendMessage(reminderManager.getAllReminders()).queue();
