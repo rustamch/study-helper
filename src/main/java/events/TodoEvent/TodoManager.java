@@ -41,7 +41,7 @@ public class TodoManager {
 
     public String getTodoMessage() {
         return "<@" +
-                owner.getId() + ">!\n" +
+                owner.getId() + ">\n" +
                 todos;
     }
 
