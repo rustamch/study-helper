@@ -35,14 +35,11 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
         if (Pattern.matches("!reminder\\s.*", messageStringRaw)) {
             try {
                 reminderManager.addReminder(event);
-                System.out.println("No exception thrown!"); //todo
                 channel.sendMessage("Reminder was added!").queue();
             } catch (DuplicateReminderException e) {
-                System.out.println("This prints only when duplicated.");     //todo
                 channel.sendMessage("Duplicated reminder.").queue();
             } catch (InvalidReminderFormatException e) {
-                System.out.println("This is printed if error with object!");  //todo
-                channel.sendMessage("Invalid reminder format. Please try **!reminder YYYY-MM-DD**").queue();
+                channel.sendMessage("Invalid reminder format. Please try **!reminder YYYY.MM.DD**").queue();
             }
         } else if (Pattern.matches("!reminders.*", messageStringRaw)) {
             channel.sendMessage(reminderManager.getAllReminders()).queue();
@@ -51,7 +48,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        LocalDateTime dateAndTimeNow = LocalDateTime.now(ZoneId.of("Canada/Pacific"));
+        LocalDateTime dateAndTimeNow = LocalDateTime.now();
         dateAndTimeNow = dateAndTimeNow.withSecond(0).withNano(0);
 
         if (reminderManager.containsReminder(dateAndTimeNow)) {

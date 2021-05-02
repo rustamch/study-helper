@@ -73,10 +73,8 @@ public class ReminderManager {
 
         // message format: "!reminder YYYY.MM.DD HH:MM" or "!reminder YYYY.MM.DD"
         if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}\\s+\\d{2}:\\d{2}.*")) {
-            System.out.println("Message 1"); //todo
             localDateTime = parseStringDateAndTimeToLocalDateTime(eventMessageRaw);
         } else if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}.*")) {
-            System.out.println("Message 1"); //todo
             localDateTime = parseStringDateToLocalDateTime(eventMessageRaw);
         } else {
             throw new InvalidReminderFormatException();
