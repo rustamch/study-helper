@@ -3,11 +3,13 @@ package model;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import exception.DuplicateReminderException;
 import exception.InvalidReminderFormatException;
+import exception.InvalidTimeInHoursException;
+import exception.InvalidTimeInMinutesException;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -19,7 +21,7 @@ public class ReminderManager {
 
     // constructs ReminderManager object
     public ReminderManager() {
-        reminders = new HashMap<>();
+        reminders = new TreeMap<>();
     }
 
     // checks for duplicates and adds reminder to reminders
@@ -45,8 +47,8 @@ public class ReminderManager {
     public String getMessage(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
         User user = event.getAuthor();
-        String message = "Reminding <@" + user.getId() + ">! You have something planned right now!";
-        return message;
+        // returns the message for the user with a ping
+        return "Reminding <@" + user.getId() + ">! You have something planned right now!";
     }
 
     // returns all reminders as a message
@@ -63,8 +65,7 @@ public class ReminderManager {
     // returns the message channel for the reminder
     public MessageChannel getChannel(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
-        MessageChannel channel = event.getChannel();
-        return channel;
+        return event.getChannel();
     }
 
     // parses an event to a LocalDateTime
@@ -78,11 +79,51 @@ public class ReminderManager {
             localDateTime = parseStringDateAndTimeToLocalDateTime(eventMessageRaw);
         } else if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}.*")) {
             localDateTime = parseStringDateToLocalDateTime(eventMessageRaw);
+        } else if (eventMessageRaw.matches("!reminder\\s+\\d+min.*")) {
+            localDateTime = parseStringTimeInMinutesToLocalDateTime(eventMessageRaw);
+        } else if (eventMessageRaw.matches("!reminder\\s+\\d+hr.*")) {
+            localDateTime = parseStringTimeInHoursToLocalDateTime(eventMessageRaw);
         } else {
             throw new InvalidReminderFormatException();
         }
 
         assert localDateTime != null;
+
+        return localDateTime;
+    }
+
+    // parses time in minutes from string
+    private LocalDateTime parseStringTimeInMinutesToLocalDateTime(String message)
+            throws InvalidTimeInMinutesException {
+        LocalDateTime localDateTime = LocalDateTime.now().withSecond(0).withNano(0);
+        int minutes = 0;
+
+        String[] messages = message.split("\\s+");
+        String minuteString = messages[1].split("min")[0];
+        try {
+            minutes = Integer.parseInt(minuteString);
+            localDateTime = localDateTime.plusMinutes(minutes);
+        } catch (NumberFormatException e) {
+            throw new InvalidTimeInMinutesException();
+        }
+
+        return localDateTime;
+    }
+
+    // parses time in hours from string
+    private LocalDateTime parseStringTimeInHoursToLocalDateTime(String message)
+            throws InvalidTimeInHoursException {
+        LocalDateTime localDateTime = LocalDateTime.now().withSecond(0).withNano(0);
+        int hours = 0;
+
+        String[] messages = message.split("\\s+");
+        String minuteString = messages[1].split("hr")[0];
+        try {
+            hours = Integer.parseInt(minuteString);
+            localDateTime = localDateTime.plusHours(hours);
+        } catch (NumberFormatException e) {
+            throw new InvalidTimeInHoursException();
+        }
 
         return localDateTime;
     }
@@ -131,6 +172,6 @@ public class ReminderManager {
     // checks if reminder for user contained in map
     private boolean containsDateTimeAndUser(LocalDateTime reminder, User user) {
         return reminders.containsKey(reminder)
-                && reminders.get(reminder).equals(user);
+                && reminders.get(reminder).getAuthor().equals(user);
     }
 }

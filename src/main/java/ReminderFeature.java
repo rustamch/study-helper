@@ -1,6 +1,7 @@
-import com.sun.media.sound.InvalidFormatException;
 import exception.DuplicateReminderException;
 import exception.InvalidReminderFormatException;
+import exception.InvalidTimeInHoursException;
+import exception.InvalidTimeInMinutesException;
 import model.ReminderManager;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -14,8 +15,8 @@ import java.time.LocalDateTime;
 import java.util.regex.Pattern;
 
 public class ReminderFeature extends ListenerAdapter implements ActionListener {
-    private ReminderManager reminderManager;
-    private Timer timer;
+    private final ReminderManager reminderManager;
+    private final Timer timer;
 
     public ReminderFeature() {
         reminderManager = new ReminderManager();
@@ -37,11 +38,19 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
                 channel.sendMessage("Reminder was added!").queue();
             } catch (DuplicateReminderException e) {
                 channel.sendMessage("Duplicated reminder.").queue();
+            } catch (InvalidTimeInMinutesException e) {
+                channel.sendMessage("Invalid reminder format. " +
+                        "Please try again with a valid format e.g. **!reminder 15min**").queue();
+            } catch (InvalidTimeInHoursException e) {
+                channel.sendMessage("Invalid reminder format. " +
+                        "Please try again with a valid format e.g. **!reminder 3hr**").queue();
             } catch (InvalidReminderFormatException e) {
                 channel.sendMessage("Invalid reminder format. Please try **!reminder YYYY.MM.DD**").queue();
             }
-        } else if (Pattern.matches("!reminders.*", messageStringRaw)) {
+        } else if (Pattern.matches("!reminders\\s*", messageStringRaw)) {
             channel.sendMessage(reminderManager.getAllReminders()).queue();
+        } else if (Pattern.matches("!reminders.*", messageStringRaw)) {
+            channel.sendMessage("Did you mean **!reminders**?").queue();
         }
     }
 

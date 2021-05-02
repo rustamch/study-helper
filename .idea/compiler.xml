@@ -10,5 +10,8 @@
         <module name="2021 RU Hacks" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="StudyHallBot" target="8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
