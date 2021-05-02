@@ -15,7 +15,7 @@ public class AboutEvent extends ListenerAdapter {
             about.setDescription("A bot to help YOU study better :D");
             about.addField("Creators", "A couple UBC 1st year students in *RUHacks 2021!*\n\n**__Commands List:__**", false);
             about.addField("___Birthday Commands___", "**Set birthday**: !bday setbday year/month/date\n" +
-                    "**Look up birthday**: !bday lookup <user nickname>", false);
+                    "**Look up birthday**: !bday check <user nickname>", false);
             about.addField("___Reminder Commands___", "**Set reminder date**: !reminder YYYY.MM.DD\n" +
                     "**Set reminder date & time**: !reminder YYYY.MM.DDTHH:MM\n" +
                     "**Check reminders**: !reminders", false);
