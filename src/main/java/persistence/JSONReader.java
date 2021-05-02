@@ -5,7 +5,6 @@ import events.TodoEvent.TodoList;
 import events.birthdayEvent.BirthdayEvent;
 import exception.IllegalDateException;
 import exception.InvalidDateFormatException;
-import exception.ObjectMismatchException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,16 +30,12 @@ public class JSONReader {
     public Map<String, Date> getBDayLog() {
         loadObject();
         Map<String, Date> map = new HashMap<>();
-        if (jsonObject.has("no data")) {
-            return map;
-        }
-        if (! jsonObject.has("bdayLog")) {
-            throw new ObjectMismatchException();
-        }
-        JSONArray entries = jsonObject.getJSONArray("bdayLog");
-        for (Object obj : entries) {
-            JSONObject entry = (JSONObject) obj;
-            map.put(entry.getString("name"), parseDate(entry.getString("date")));
+        if (jsonObject.has("bdayLog")) {
+            JSONArray entries = jsonObject.getJSONArray("bdayLog");
+            for (Object obj : entries) {
+                JSONObject entry = (JSONObject) obj;
+                map.put(entry.getString("name"), parseDate(entry.getString("date")));
+            }
         }
         return map;
     }
@@ -85,13 +80,15 @@ public class JSONReader {
     }
 
     private String readFile() throws IOException {
+        StringBuilder builder = new StringBuilder();
         File save = new File(fileLocation);
         if (save.createNewFile()) {
             PrintWriter writer = new PrintWriter(save);
-            writer.println("{}");
+            writer.write("{}");
+            writer.close();
         }
         Scanner scanner = new Scanner(save);
-        StringBuilder builder = new StringBuilder();
+
         while (scanner.hasNextLine()) {
             builder.append(scanner.nextLine());
         }
