@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy JAR app to Azure Web App - StudyHallBot
+name: Build and deploy JAR app to Azure Web App - studyHallBot
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: java-app
-        path: '${{ github.workspace }}/target/*.jar'
+        path: '${{ github.workspace }}/target/study*.jar'
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,7 +47,7 @@ jobs:
       id: deploy-to-webapp
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'StudyHallBot'
+        app-name: 'studyHallBot'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_1ea3805c23e94c79a9cefc622761cfcd }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_470045fbc49f42d69f367027cdd96c31 }}
         package: '*.jar'

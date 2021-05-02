@@ -1,0 +1,29 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="StudyHallBot:jar">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="root">
+      <element id="archive" name="StudyHallBot.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/src/main/java/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="StudyHallBot" />
+      </element>
+      <element id="library" level="project" name="Maven: org.json:json:20200518" />
+      <element id="library" level="project" name="Maven: org.apache.commons:commons-collections4:4.1" />
+      <element id="library" level="project" name="Maven: club.minnced:opus-java-api:1.1.0" />
+      <element id="library" level="project" name="Maven: com.squareup.okhttp3:okhttp:3.13.0" />
+      <element id="library" level="project" name="Maven: com.squareup.okio:okio:1.17.2" />
+      <element id="library" level="project" name="Maven: com.neovisionaries:nv-websocket-client:2.14" />
+      <element id="library" level="project" name="Maven: org.jetbrains:annotations:16.0.1" />
+      <element id="library" level="project" name="Maven: net.java.dev.jna:jna:4.4.0" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.10.1" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.10.1" />
+      <element id="library" level="project" name="Maven: net.dv8tion:JDA:4.2.1_262" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.10.1" />
+      <element id="library" level="project" name="Maven: net.sf.trove4j:trove4j:3.0.3" />
+      <element id="library" level="project" name="Maven: com.google.code.findbugs:jsr305:3.0.2" />
+      <element id="library" level="project" name="Maven: club.minnced:opus-java-natives:1.1.0" />
+      <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.25" />
+    </root>
+  </artifact>
+</component>

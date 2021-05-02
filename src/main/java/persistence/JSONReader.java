@@ -1,14 +1,19 @@
 package persistence;
 
+import events.TodoEvent.Todo;
+import events.TodoEvent.TodoList;
 import events.birthdayEvent.BirthdayEvent;
 import exception.IllegalDateException;
 import exception.InvalidDateFormatException;
 import exception.ObjectMismatchException;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,16 +28,8 @@ public class JSONReader {
         this.fileLocation = fileLocation;
     }
 
-    public void loadObject() {
-        try {
-            String jsonData = readFile();
-            jsonObject = new JSONObject(jsonData);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
     public Map<String, Date> getBDayLog() {
+        loadObject();
         Map<String, Date> map = new HashMap<>();
         if (jsonObject.has("no data")) {
             return map;
@@ -56,8 +53,43 @@ public class JSONReader {
         }
     }
 
-    private String readFile() throws FileNotFoundException {
+    public TodoList getTodos() {
+        loadObject();
+        TodoList todos = new TodoList();
+        if (! jsonObject.has("todos")) {
+            return todos;
+        }
+        JSONArray array = (JSONArray) jsonObject.get("todos");
+        for (Object obj : array) {
+            todos.addTodo(getTodo((JSONObject) obj));
+        }
+        return todos;
+    }
+
+    private Todo getTodo(JSONObject obj) {
+        String[] dateStr = obj.getString("dueDate").split("-");
+        LocalDate date =
+                LocalDate.of(Integer.parseInt(dateStr[0]), Integer.parseInt(dateStr[1]), Integer.parseInt(dateStr[2]));
+        String course = obj.getString("course").equals("null") ? null : obj.getString("course");
+        Todo todo = new Todo(course, obj.getString("description"), date);
+        if (!obj.getBoolean("incomplete")) {
+            todo.setComplete();
+        }
+        return todo;
+    }
+
+    @NotNull
+    private LocalDate locDateFromStr(String dateStr) {
+        String[] datelst = dateStr.split("-");
+        return LocalDate.of(Integer.parseInt(datelst[0]), Integer.parseInt(datelst[1]), Integer.parseInt(datelst[2]));
+    }
+
+    private String readFile() throws IOException {
         File save = new File(fileLocation);
+        if (save.createNewFile()) {
+            PrintWriter writer = new PrintWriter(save);
+            writer.println("{}");
+        }
         Scanner scanner = new Scanner(save);
         StringBuilder builder = new StringBuilder();
         while (scanner.hasNextLine()) {
@@ -66,5 +98,14 @@ public class JSONReader {
         scanner.close();
 
         return builder.toString();
+    }
+
+    private void loadObject() {
+        try {
+            String jsonData = readFile();
+            jsonObject = new JSONObject(jsonData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
