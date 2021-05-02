@@ -1,20 +1,25 @@
 
 import events.AboutEvent;
 import events.StudyTimeEvent;
+import events.TodoEvent.TodoEvent;
+import events.DoraListener;
+import events.PingEvent;
 import events.birthdayEvent.BirthdayEvent;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
 import java.util.EnumSet;
 
 
-public class Bot extends ListenerAdapter {
+public class Bot {
 
     public static void main(String[] args) throws LoginException {
         args = new String[1];
@@ -35,24 +40,12 @@ public class Bot extends ListenerAdapter {
                 .addEventListeners(new Bot())
                 .addEventListeners(new AboutEvent())
                 .addEventListeners(new BirthdayEvent())
+                .addEventListeners(new TodoEvent())
                 .addEventListeners(new ReminderFeature())
                 .addEventListeners(new StudyTimeEvent())
+                .addEventListeners(new DoraListener())
                 .setActivity(Activity.playing("Type !ping"))
                 .build();
-    }
-
-    @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        MessageChannel channel = event.getChannel();
-        Message msg = event.getMessage();
-        String rawMsg = msg.getContentRaw();
-        if (rawMsg.equals("!ping")) {
-            long time = System.currentTimeMillis();
-            channel.sendMessage("Pong!") /* => RestAction<Message> */
-                    .queue(response /* => Message */ -> {
-                        response.editMessageFormat("Pong: %d ms", System.currentTimeMillis() - time).queue();
-                    });
-        }
     }
 }
 
