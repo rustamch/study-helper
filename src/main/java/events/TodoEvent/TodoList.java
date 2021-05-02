@@ -36,4 +36,25 @@ public class TodoList implements Writable {
         }
         return msgBuilder.toString();
     }
+
+    public void removeTodo(int n) {
+        todoList.remove(n);
+    }
+
+    public void clear() {
+        todoList.clear();
+    }
+
+    public void setComplete(int n) {
+        todoList.get(n).setComplete();
+    }
+
+    public boolean allComplete() {
+        for (Todo todo : todoList) {
+            if (todo.isIncomplete()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

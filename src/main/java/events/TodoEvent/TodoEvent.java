@@ -1,5 +1,6 @@
 package events.TodoEvent;
 
+import exceptions.IllegalDateException;
 import exceptions.MissingElementException;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -19,14 +20,48 @@ public class TodoEvent extends ListenerAdapter {
         String[] msgLst = rawMsg.split(" ");
         if (msgLst[0].equalsIgnoreCase("!todo")) {
             User m = event.getAuthor();
-            manager = new TodoManager(m.getName());
+            manager = new TodoManager(m);
             if (! (msgLst.length < 2)) {
                 if (msgLst[1].equalsIgnoreCase("add")) {
-                    addTodo(event, m, rawMsg, msgLst);
-                    messageTodoList(event);
+                    addTodo(event, rawMsg, msgLst);
                 } else if (msgLst[1].equalsIgnoreCase("check")) {
                     messageTodoList(event);
+                } else if (msgLst[1].equalsIgnoreCase("rm") && msgLst.length > 2) {
+                    if (msgLst[2].equalsIgnoreCase("all")) {
+                        manager.clearTodo();
+                        event.getChannel().sendMessage("Your todo list is cleared!").queue();
+                    } else {
+                        removeTodo(event, msgLst);
+                    }
+                } else if (msgLst[1].equalsIgnoreCase("done") && msgLst.length > 2) {
+                    if (msgLst[2].equalsIgnoreCase("all")) {
+                        manager.clearTodo();
+                        event.getChannel().sendMessage("List completed, hooray!").queue();
+                    } else {
+                        setComplete(event, msgLst);
+                    }
                 }
+            }
+        }
+    }
+
+    private void setComplete(MessageReceivedEvent event, String[] msgLst) {
+        StringBuilder builder = new StringBuilder();
+        int numCompleted = 0;
+        try {
+            for (int i = 2; i < msgLst.length; i++) {
+                manager.setTodoAsComplete(Integer.parseInt(msgLst[i]) - 1 - numCompleted);
+                builder.append(Integer.parseInt(msgLst[i])).append(" ");
+                numCompleted++;
+            }
+        } catch (NumberFormatException e) {
+
+        } finally {
+            if (manager.listIsCleared()) {
+                event.getChannel().sendMessage("List completed, hooray!").queue();
+            } else {
+                builder.append("completed!");
+                event.getChannel().sendMessage(builder.toString()).queue();
             }
         }
     }
@@ -35,30 +70,47 @@ public class TodoEvent extends ListenerAdapter {
         event.getChannel().sendMessage(manager.getTodoMessage()).queue();
     }
 
-    private void addTodo(@NotNull MessageReceivedEvent event, User m, String rawMsg, String[] msgLst) {
+    private void addTodo(@NotNull MessageReceivedEvent event, String rawMsg, String[] msgLst) {
         try {
             if (msgLst.length == 3) {
                 setTodayGoal(msgLst[2]);
             } else {
                 addLongTodo(rawMsg);
             }
-        } catch (MissingElementException e) {
+            messageTodoList(event);
+        } catch (MissingElementException | IllegalDateException e) {
             event.getChannel().sendMessage(e.getMessage()).queue();
         }
     }
 
-    private void addLongTodo(String rawMsg) throws MissingElementException {
+    private void removeTodo(MessageReceivedEvent event, String[] msgLst) {
+        StringBuilder builder = new StringBuilder();
+        int numRemoved = 0;
+        try {
+            for (int i = 2; i < msgLst.length; i++) {
+                manager.removeTodoByNumber(Integer.parseInt(msgLst[i]) - 1 - numRemoved);
+                builder.append(Integer.parseInt(msgLst[i])).append(" ");
+                numRemoved++;
+            }
+        } catch (NumberFormatException e) {
+
+        } finally {
+            builder.append("removed!");
+            event.getChannel().sendMessage(builder.toString()).queue();
+        }
+    }
+
+    private void addLongTodo(String rawMsg) throws MissingElementException, IllegalDateException {
         String course = findCourse(rawMsg);
         String description = findDescription(rawMsg);
         LocalDate due = findDue(rawMsg);
         manager.addTodo(course, description, due);
     }
 
-    private void setTodayGoal(String rawMsg) throws MissingElementException {
+    private void setTodayGoal(String rawMsg) throws MissingElementException, IllegalDateException {
         LocalDate due = LocalDate.now();
-        String course = findCourse(rawMsg);
         String description = findDescription(rawMsg);
-        manager.addTodo(course, description, due);
+        manager.addTodo(null, description, due);
     }
 
     private LocalDate findDue(String rawMsg) throws MissingElementException {

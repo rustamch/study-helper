@@ -94,6 +94,11 @@ public class JSONReader {
         String[] dateStr = obj.getString("dueDate").split("-");
         LocalDate date =
                 LocalDate.of(Integer.parseInt(dateStr[0]), Integer.parseInt(dateStr[1]), Integer.parseInt(dateStr[2]));
-        return new Todo(obj.getString("course"), obj.getString("description"), date);
+        String course = obj.getString("course").equals("null") ? null : obj.getString("course");
+        Todo todo = new Todo(course, obj.getString("description"), date);
+        if (!obj.getBoolean("incomplete")) {
+            todo.setComplete();
+        }
+        return todo;
     }
 }

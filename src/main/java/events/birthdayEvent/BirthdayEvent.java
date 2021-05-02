@@ -37,7 +37,7 @@ public class BirthdayEvent extends ListenerAdapter {
         String name = event.getAuthor().getName();
         if (msg[1].equalsIgnoreCase("setbday")) {
             setBDay(channel, msg[2], name);
-        } else if (msg[1].equalsIgnoreCase("lookup")) {
+        } else if (msg[1].equalsIgnoreCase("check")) {
             lookupBDay(channel, msg[2]);
         }
     }

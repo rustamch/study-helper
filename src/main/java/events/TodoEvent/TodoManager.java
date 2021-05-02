@@ -1,5 +1,8 @@
 package events.TodoEvent;
 
+import exceptions.IllegalDateException;
+import exceptions.InvalidInputException;
+import net.dv8tion.jda.api.entities.User;
 import persistence.JSONReader;
 import persistence.JSONWriter;
 
@@ -10,17 +13,24 @@ public class TodoManager {
     private static final String SAVE_FILE_PACKAGE = ".idea/data/todos";
 
     private TodoList todos;
-    private final String owner;
+    private final User owner;
     private final String fileLocation;
 
-    public TodoManager(String name) {
+    public TodoManager(User name) {
         owner = name;
-        fileLocation = SAVE_FILE_PACKAGE + "/" + owner + ".json";
-        loadTodosFor(owner);
+        fileLocation = SAVE_FILE_PACKAGE + "/" + owner.getName() + ".json";
+        loadTodosFor();
     }
 
-    public void addTodo(String course, String description, LocalDate date) {
+    public void addTodo(String course, String description, LocalDate date) throws IllegalDateException {
+        if (date.isBefore(LocalDate.now())) {
+            throw new IllegalDateException();
+        }
         todos.addTodo(new Todo(course, description, date));
+        save();
+    }
+
+    private void save() {
         JSONWriter writer = new JSONWriter(fileLocation);
         try {
             writer.saveObject(todos);
@@ -30,13 +40,32 @@ public class TodoManager {
     }
 
     public String getTodoMessage() {
-        return "**" +
-                owner.toUpperCase() + "**\n" +
+        return "<@" +
+                owner.getId() + ">!\n" +
                 todos;
     }
 
-    private void loadTodosFor(String owner) {
+    private void loadTodosFor() {
         JSONReader reader = new JSONReader(fileLocation);
         todos = reader.getTodos();
+    }
+
+    public void removeTodoByNumber(int n) {
+        todos.removeTodo(n);
+        save();
+    }
+
+    public void clearTodo() {
+        todos.clear();
+        save();
+    }
+
+    public void setTodoAsComplete(int n) {
+        todos.setComplete(n);
+        save();
+    }
+
+    public boolean listIsCleared() {
+        return todos.allComplete();
     }
 }
