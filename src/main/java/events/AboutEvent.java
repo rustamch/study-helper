@@ -14,6 +14,7 @@ public class AboutEvent extends ListenerAdapter {
             about.setTitle("Study Hall Bot Information");
             about.setDescription("A bot to help YOU study better :D");
             about.addField("Creators", "A couple UBC 1st year students!", false);
+            about.addField("Birthday Commands", "!bday setbday year/month/date\n!bday lookup @<user>", false);
             about.setColor(0xA9927D);
 
             event.getChannel().sendTyping().queue();
