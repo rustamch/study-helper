@@ -11,7 +11,6 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.regex.Pattern;
 
 public class ReminderFeature extends ListenerAdapter implements ActionListener {
@@ -20,7 +19,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
 
     public ReminderFeature() {
         reminderManager = new ReminderManager();
-        timer = new Timer(1000, this);
+        timer = new Timer(60000, this);
         timer.setRepeats(true);
         timer.start();
     }
@@ -35,14 +34,11 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
         if (Pattern.matches("!reminder\\s.*", messageStringRaw)) {
             try {
                 reminderManager.addReminder(event);
-                System.out.println("This should not be printed if exception thrown!"); //todo
                 channel.sendMessage("Reminder was added!").queue();
             } catch (DuplicateReminderException e) {
-                System.out.println("This prints only when duplicated.");     //todo
                 channel.sendMessage("Duplicated reminder.").queue();
             } catch (InvalidReminderFormatException e) {
-                System.out.println("This is printed if error with object!");  //todo
-                channel.sendMessage("Invalid reminder format.").queue();
+                channel.sendMessage("Invalid reminder format. Please try **!reminder YYYY.MM.DD**").queue();
             }
         } else if (Pattern.matches("!reminders.*", messageStringRaw)) {
             channel.sendMessage(reminderManager.getAllReminders()).queue();
@@ -51,7 +47,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        LocalDateTime dateAndTimeNow = LocalDateTime.now(ZoneId.of("Canada/Pacific"));
+        LocalDateTime dateAndTimeNow = LocalDateTime.now();
         dateAndTimeNow = dateAndTimeNow.withSecond(0).withNano(0);
 
         if (reminderManager.containsReminder(dateAndTimeNow)) {

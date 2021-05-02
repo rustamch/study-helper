@@ -8,15 +8,14 @@ import java.util.Map;
 
 import exception.DuplicateReminderException;
 import exception.InvalidReminderFormatException;
-import net.dv8tion.jda.api.entities.Invite;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 
 public class ReminderManager {
-    private Map<LocalDateTime, MessageReceivedEvent> reminders;
+    private final Map<LocalDateTime, MessageReceivedEvent> reminders;
+    private final String DEFAULT_TIME = "9:00";
 
     // constructs ReminderManager object
     public ReminderManager() {
@@ -30,7 +29,7 @@ public class ReminderManager {
         reminder = reminder.withSecond(0).withNano(0);
         User user = event.getAuthor();
 
-        if (contains(reminder, user)) {
+        if (containsDateTimeAndUser(reminder, user)) {
             throw new DuplicateReminderException();
         }
 
@@ -42,13 +41,15 @@ public class ReminderManager {
         return reminders.containsKey(reminder);
     }
 
+    // returns a message for the given reminder
     public String getMessage(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
         User user = event.getAuthor();
-        String message = "Reminding " + user.getName() + "!";
+        String message = "Reminding <@" + user.getId() + ">! You have something planned right now!";
         return message;
     }
 
+    // returns all reminders as a message
     public String getAllReminders() {
         String message = "Reminders:\n";
         for (Map.Entry<LocalDateTime, MessageReceivedEvent> entry : reminders.entrySet()) {
@@ -59,12 +60,12 @@ public class ReminderManager {
         return message;
     }
 
+    // returns the message channel for the reminder
     public MessageChannel getChannel(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
         MessageChannel channel = event.getChannel();
         return channel;
     }
-
 
     // parses an event to a LocalDateTime
     private LocalDateTime parseEventToLocalDateTime(MessageReceivedEvent event)
@@ -75,10 +76,13 @@ public class ReminderManager {
         // message format: "!reminder YYYY.MM.DD HH:MM" or "!reminder YYYY.MM.DD"
         if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}\\s+\\d{2}:\\d{2}.*")) {
             localDateTime = parseStringDateAndTimeToLocalDateTime(eventMessageRaw);
-        }
-        if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}.*")) {
+        } else if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}.*")) {
             localDateTime = parseStringDateToLocalDateTime(eventMessageRaw);
+        } else {
+            throw new InvalidReminderFormatException();
         }
+
+        assert localDateTime != null;
 
         return localDateTime;
     }
@@ -88,21 +92,18 @@ public class ReminderManager {
             throws InvalidReminderFormatException {
         LocalDateTime localDateTime = null;
 
-        // message format: "!reminder YYYY.MM.DD HH:MM"
+        // message format: "!reminder YYYY.MM.DD hh:mm"
         String[] messages = message.split("\\s+");
         String dateAndTimeString = messages[1] + " " + messages[2];
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("u.M.d H:m");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("u.M.d H:m");
 
         try {
-            localDateTime = LocalDateTime.parse(dateAndTimeString, format);
+            localDateTime = LocalDateTime.parse(dateAndTimeString, formatter);
         } catch (DateTimeParseException e) {
             throw new InvalidReminderFormatException();
         }
 
-        if (localDateTime == null) {
-            System.out.println("Date and Time Error"); //todo
-            throw new InvalidReminderFormatException();
-        }
+        assert localDateTime != null;
 
         return localDateTime;
     }
@@ -112,25 +113,24 @@ public class ReminderManager {
             throws InvalidReminderFormatException {
         LocalDateTime localDateTime = null;
 
-        // message format: "!reminder YYYY.MM.DD"
+        // message format: "!reminder YYYY.MM.DD hh:mm"
         String[] messages = message.split("\\s+");
-        String dateString = messages[1].replace('.', '-');
+        String dateString = messages[1] + " " + DEFAULT_TIME;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("u.M.d H:m");
         try {
-            localDateTime = LocalDateTime.parse(dateString);
+            localDateTime = LocalDateTime.parse(dateString, formatter);
         } catch (DateTimeParseException e) {
             throw new InvalidReminderFormatException();
         }
 
-        if (localDateTime == null) {
-            System.out.println("Date Only Error"); //todo
-            throw new InvalidReminderFormatException();
-        }
+        assert localDateTime != null;
 
         return localDateTime;
     }
 
     // checks if reminder for user contained in map
-    private boolean contains(LocalDateTime reminder, User user) {
-        return reminders.containsKey(reminder) && reminders.containsValue(user);
+    private boolean containsDateTimeAndUser(LocalDateTime reminder, User user) {
+        return reminders.containsKey(reminder)
+                && reminders.get(reminder).equals(user);
     }
 }
