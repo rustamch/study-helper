@@ -1,37 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
-    <artifactId>study_hall_bot</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
-    <dependencies>
-        <dependency>
-            <groupId>net.dv8tion</groupId>
-            <artifactId>JDA</artifactId>
-            <version>4.2.1_262</version>
-        </dependency>
-    </dependencies>
-
-    <repositories>
-        <repository>
-            <id>dv8tion</id>
-            <name>m2-dv8tion</name>
-            <url>https://m2.dv8tion.net/releases</url>
-        </repository>
-        <repository>
-            <id>central</id>
-            <name>bintray</name>
-            <url>http://jcenter.bintray.com</url>
-        </repository>
-    </repositories>
-
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+  <modelVersion>4.0.0</modelVersion>  
+  <groupId>org.example</groupId>  
+  <artifactId>study_hall_bot</artifactId>  
+  <version>1.0-SNAPSHOT</version>  
+  <dependencies> 
+    <!-- https://mvnrepository.com/artifact/org.json/json -->  
+    <dependency> 
+      <groupId>org.json</groupId>  
+      <artifactId>json</artifactId>  
+      <version>20200518</version> 
+    </dependency>  
+    <dependency> 
+      <groupId>net.dv8tion</groupId>  
+      <artifactId>JDA</artifactId>  
+      <version>4.2.1_262</version> 
+    </dependency> 
+  </dependencies>  
+  <repositories> 
+    <repository> 
+      <id>dv8tion</id>  
+      <name>m2-dv8tion</name>  
+      <url>https://m2.dv8tion.net/releases</url> 
+    </repository>  
+    <repository> 
+      <id>central</id>  
+      <name>bintray</name>  
+      <url>http://jcenter.bintray.com</url> 
+    </repository> 
+  </repositories>  
+  <properties> 
+    <maven.compiler.source>8</maven.compiler.source>  
+    <maven.compiler.target>8</maven.compiler.target> 
+  </properties>  
+  <build> 
+    <plugins> 
+      <plugin> 
+        <groupId>org.apache.maven.plugins</groupId>  
+        <artifactId>maven-jar-plugin</artifactId>  
+        <version>2.4</version>  
+        <configuration> 
+          <archive> 
+            <index>true</index>  
+            <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile> 
+          </archive> 
+        </configuration> 
+      </plugin>  
+      <plugin> 
+        <groupId>org.apache.maven.plugins</groupId>  
+        <artifactId>maven-shade-plugin</artifactId>  
+        <version>3.2.4</version>  
+        <executions> 
+          <execution> 
+            <phase>package</phase>  
+            <goals> 
+              <goal>shade</goal> 
+            </goals> 
+          </execution> 
+        </executions> 
+      </plugin>  
+      <plugin> 
+        <groupId>com.microsoft.azure</groupId>  
+        <artifactId>azure-webapp-maven-plugin</artifactId>  
+        <version>1.12.0</version>  
+        <configuration> 
+          <schemaVersion>v2</schemaVersion>  
+          <subscriptionId>19ab24e1-9fdd-486c-a9e4-43bc08e2dec2</subscriptionId>  
+          <resourceGroup>study_hall_bot-1619924475173-rg</resourceGroup>  
+          <appName>studyHallBot</appName>  
+          <pricingTier>B1</pricingTier>  
+          <region>westeurope</region>  
+          <runtime> 
+            <os>Linux</os>
+            <javaVersion>Java 8</javaVersion>
+            <webContainer>Java SE</webContainer>
+          </runtime>  
+          <deployment> 
+            <resources> 
+              <resource> 
+                <directory>${project.basedir}/target</directory>  
+                <includes> 
+                  <include>study_hall_*.jar</include> 
+                </includes> 
+              </resource> 
+            </resources> 
+          </deployment> 
+        </configuration> 
+      </plugin> 
+    </plugins> 
+  </build> 
 </project>

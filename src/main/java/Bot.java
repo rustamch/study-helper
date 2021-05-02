@@ -1,6 +1,8 @@
 
 import events.AboutEvent;
 import events.TodoEvent.TodoEvent;
+import events.DoraListener;
+import events.PingEvent;
 import events.birthdayEvent.BirthdayEvent;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -16,7 +18,7 @@ import javax.security.auth.login.LoginException;
 import java.util.EnumSet;
 
 
-public class Bot extends ListenerAdapter {
+public class Bot {
 
     public static void main(String[] args) throws LoginException {
         args = new String[1];
@@ -29,26 +31,14 @@ public class Bot extends ListenerAdapter {
         // We only need 2 intents in this bot. We only respond to messages in guilds and private channels.
         // All other events will be disabled.
         JDABuilder.createLight(args[0], GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
-                .addEventListeners(new Bot())
+                .addEventListeners(new PingEvent())
                 .addEventListeners(new AboutEvent())
                 .addEventListeners(new BirthdayEvent())
                 .addEventListeners(new TodoEvent())
+                .addEventListeners(new ReminderFeature())
+                .addEventListeners(new DoraListener())
                 .setActivity(Activity.playing("Type !ping"))
                 .build();
-    }
-
-    @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        MessageChannel channel = event.getChannel();
-        Message msg = event.getMessage();
-        String rawMsg = msg.getContentRaw();
-        if (rawMsg.equals("!ping")) {
-            long time = System.currentTimeMillis();
-            channel.sendMessage("Pong!") /* => RestAction<Message> */
-                    .queue(response /* => Message */ -> {
-                        response.editMessageFormat("Pong: %d ms", System.currentTimeMillis() - time).queue();
-                    });
-        }
     }
 }
 

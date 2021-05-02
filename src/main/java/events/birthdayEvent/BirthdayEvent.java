@@ -1,7 +1,7 @@
 package events.birthdayEvent;
 
-import exceptions.IllegalDateException;
-import exceptions.InvalidDateFormatException;
+import exception.IllegalDateException;
+import exception.InvalidDateFormatException;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
