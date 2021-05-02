@@ -29,7 +29,7 @@ public class StudyTimeEvent extends ListenerAdapter {
         if (event.getChannelJoined().getName().equalsIgnoreCase("silent study")) {
             Member m = event.getMember();
             Instant start = Instant.now();
-            textChannel = event.getGuild().getTextChannelsByName("general", true).get(0);
+            textChannel = event.getGuild().getTextChannelsByName("study-records", true).get(0);
             membersInVC.put(m.getId(), start);
             textChannel.sendMessage(m.getEffectiveName() + " has started studying!").queue();
         }
