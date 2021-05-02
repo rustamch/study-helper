@@ -14,7 +14,7 @@ public class BirthdayLog implements Writable {
     public static final String SAVE_KEY = "bdayLog";
     public static final String BDAYLOG_LOCATION = ".idea/data/birthdays.json";
 
-    private Map<String, Date> bdays;
+    private final Map<String, Date> bdays;
 
     public BirthdayLog(Map<String, Date> log) {
         bdays = log;

@@ -6,12 +6,13 @@ import events.birthdayEvent.BirthdayEvent;
 import exceptions.IllegalDateException;
 import exceptions.InvalidDateFormatException;
 import exceptions.ObjectMismatchException;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,15 +26,6 @@ public class JSONReader {
     public JSONReader(String fileLocation) {
         jsonObject = null;
         this.fileLocation = fileLocation;
-    }
-
-    private void loadObject() {
-        try {
-            String jsonData = readFile();
-            jsonObject = new JSONObject(jsonData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public Map<String, Date> getBDayLog() {
@@ -61,22 +53,6 @@ public class JSONReader {
         }
     }
 
-    private String readFile() throws IOException {
-        File save = new File(fileLocation);
-        if (save.createNewFile()) {
-            JSONWriter writer = new JSONWriter(fileLocation);
-            writer.saveObject(new TodoList());
-        }
-        Scanner scanner = new Scanner(save);
-        StringBuilder builder = new StringBuilder();
-        while (scanner.hasNextLine()) {
-            builder.append(scanner.nextLine());
-        }
-        scanner.close();
-
-        return builder.toString();
-    }
-
     public TodoList getTodos() {
         loadObject();
         TodoList todos = new TodoList();
@@ -100,5 +76,36 @@ public class JSONReader {
             todo.setComplete();
         }
         return todo;
+    }
+
+    @NotNull
+    private LocalDate locDateFromStr(String dateStr) {
+        String[] datelst = dateStr.split("-");
+        return LocalDate.of(Integer.parseInt(datelst[0]), Integer.parseInt(datelst[1]), Integer.parseInt(datelst[2]));
+    }
+
+    private String readFile() throws IOException {
+        File save = new File(fileLocation);
+        if (save.createNewFile()) {
+            PrintWriter writer = new PrintWriter(save);
+            writer.println("{}");
+        }
+        Scanner scanner = new Scanner(save);
+        StringBuilder builder = new StringBuilder();
+        while (scanner.hasNextLine()) {
+            builder.append(scanner.nextLine());
+        }
+        scanner.close();
+
+        return builder.toString();
+    }
+
+    private void loadObject() {
+        try {
+            String jsonData = readFile();
+            jsonObject = new JSONObject(jsonData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

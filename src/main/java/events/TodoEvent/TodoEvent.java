@@ -2,7 +2,7 @@ package events.TodoEvent;
 
 import exceptions.IllegalDateException;
 import exceptions.MissingElementException;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ public class TodoEvent extends ListenerAdapter {
                 if (msgLst[1].equalsIgnoreCase("add")) {
                     addTodo(event, rawMsg, msgLst);
                 } else if (msgLst[1].equalsIgnoreCase("check")) {
-                    messageTodoList(event);
+                    messageTodoList(event.getChannel());
                 } else if (msgLst[1].equalsIgnoreCase("rm") && msgLst.length > 2) {
                     if (msgLst[2].equalsIgnoreCase("all")) {
                         manager.clearTodo();
@@ -40,6 +40,10 @@ public class TodoEvent extends ListenerAdapter {
                     } else {
                         setComplete(event, msgLst);
                     }
+                } else if (msgLst[1].equalsIgnoreCase("post")) {
+                    TextChannel textChannel = event.getGuild()
+                            .getTextChannelsByName("todos", true).get(0);
+                    messageTodoList(textChannel);
                 }
             }
         }
@@ -66,8 +70,8 @@ public class TodoEvent extends ListenerAdapter {
         }
     }
 
-    private void messageTodoList(MessageReceivedEvent event) {
-        event.getChannel().sendMessage(manager.getTodoMessage()).queue();
+    private void messageTodoList(MessageChannel channel) {
+        channel.sendMessage(manager.getTodoMessage()).queue();
     }
 
     private void addTodo(@NotNull MessageReceivedEvent event, String rawMsg, String[] msgLst) {
@@ -77,7 +81,7 @@ public class TodoEvent extends ListenerAdapter {
             } else {
                 addLongTodo(rawMsg);
             }
-            messageTodoList(event);
+            messageTodoList(event.getChannel());
         } catch (MissingElementException | IllegalDateException e) {
             event.getChannel().sendMessage(e.getMessage()).queue();
         }
