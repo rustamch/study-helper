@@ -9,5 +9,8 @@
         <module name="study_hall_bot" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="StudyHallBot" target="8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

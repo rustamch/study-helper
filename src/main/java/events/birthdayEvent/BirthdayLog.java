@@ -1,4 +1,4 @@
-package birthdays;
+package events.birthdayEvent;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Represents a birthday manager that manages members' birthdays
+ * Represents a birthday manager that manages members' events.birthdays
  */
 public class BirthdayLog implements Writable {
     public static final String SAVE_KEY = "bdayLog";
@@ -31,7 +31,7 @@ public class BirthdayLog implements Writable {
         for (Map.Entry<String, Date> entry : bdays.entrySet()) {
             JSONObject entryJSON = new JSONObject();
             entryJSON.put("name", entry.getKey());
-            entryJSON.put("date", BirthdayManager.dateToStr(entry.getValue()));
+            entryJSON.put("date", BirthdayEvent.dateToStr(entry.getValue()));
             logArray.put(entryJSON);
         }
         json.put(SAVE_KEY, logArray);

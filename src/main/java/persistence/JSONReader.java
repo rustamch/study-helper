@@ -1,9 +1,9 @@
 package persistence;
 
-import birthdays.BirthdayManager;
-import exceptions.IllegalDateException;
-import exceptions.InvalidDateFormatException;
-import exceptions.ObjectMismatchException;
+import events.birthdayEvent.BirthdayEvent;
+import exception.IllegalDateException;
+import exception.InvalidDateFormatException;
+import exception.ObjectMismatchException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -50,7 +50,7 @@ public class JSONReader {
 
     private Date parseDate(String date) {
         try {
-            return BirthdayManager.getDateFromStr(date);
+            return BirthdayEvent.getDateFromStr(date);
         } catch (InvalidDateFormatException | IllegalDateException invalidDateFormatException) {
             throw new RuntimeException("Saved date data is wrong");
         }
