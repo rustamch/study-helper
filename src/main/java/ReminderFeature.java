@@ -20,7 +20,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
 
     public ReminderFeature() {
         reminderManager = new ReminderManager();
-        timer = new Timer(1000, this);
+        timer = new Timer(60000, this);
         timer.setRepeats(true);
         timer.start();
     }
@@ -35,7 +35,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
         if (Pattern.matches("!reminder\\s.*", messageStringRaw)) {
             try {
                 reminderManager.addReminder(event);
-                System.out.println("This should not be printed if exception thrown!"); //todo
+                System.out.println("No exception thrown!"); //todo
                 channel.sendMessage("Reminder was added!").queue();
             } catch (DuplicateReminderException e) {
                 System.out.println("This prints only when duplicated.");     //todo

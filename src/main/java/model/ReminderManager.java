@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class ReminderManager {
     private Map<LocalDateTime, MessageReceivedEvent> reminders;
+    private final String DEFAULT_TIME = "9:00";
 
     // constructs ReminderManager object
     public ReminderManager() {
@@ -74,11 +75,14 @@ public class ReminderManager {
 
         // message format: "!reminder YYYY.MM.DD HH:MM" or "!reminder YYYY.MM.DD"
         if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}\\s+\\d{2}:\\d{2}.*")) {
+            System.out.println("Message 1"); //todo
             localDateTime = parseStringDateAndTimeToLocalDateTime(eventMessageRaw);
-        }
-        if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}.*")) {
+        } else if (eventMessageRaw.matches("!reminder\\s\\d{4}\\.\\d{2}.\\d{2}.*")) {
+            System.out.println("Message 1"); //todo
             localDateTime = parseStringDateToLocalDateTime(eventMessageRaw);
         }
+
+        assert localDateTime != null;
 
         return localDateTime;
     }
@@ -88,21 +92,18 @@ public class ReminderManager {
             throws InvalidReminderFormatException {
         LocalDateTime localDateTime = null;
 
-        // message format: "!reminder YYYY.MM.DD HH:MM"
+        // message format: "!reminder YYYY.MM.DD hh:mm"
         String[] messages = message.split("\\s+");
         String dateAndTimeString = messages[1] + " " + messages[2];
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("u.M.d H:m");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("u.M.d H:m");
 
         try {
-            localDateTime = LocalDateTime.parse(dateAndTimeString, format);
+            localDateTime = LocalDateTime.parse(dateAndTimeString, formatter);
         } catch (DateTimeParseException e) {
             throw new InvalidReminderFormatException();
         }
 
-        if (localDateTime == null) {
-            System.out.println("Date and Time Error"); //todo
-            throw new InvalidReminderFormatException();
-        }
+        assert localDateTime != null;
 
         return localDateTime;
     }
@@ -112,19 +113,17 @@ public class ReminderManager {
             throws InvalidReminderFormatException {
         LocalDateTime localDateTime = null;
 
-        // message format: "!reminder YYYY.MM.DD"
+        // message format: "!reminder YYYY.MM.DD hh:mm"
         String[] messages = message.split("\\s+");
-        String dateString = messages[1].replace('.', '-');
+        String dateString = messages[1] + " " + DEFAULT_TIME;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("u.M.d H:m");
         try {
-            localDateTime = LocalDateTime.parse(dateString);
+            localDateTime = LocalDateTime.parse(dateString, formatter);
         } catch (DateTimeParseException e) {
             throw new InvalidReminderFormatException();
         }
 
-        if (localDateTime == null) {
-            System.out.println("Date Only Error"); //todo
-            throw new InvalidReminderFormatException();
-        }
+        assert localDateTime != null;
 
         return localDateTime;
     }
