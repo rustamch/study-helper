@@ -36,7 +36,7 @@ public class StudyTimeEvent extends ListenerAdapter {
     }
 
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
-        if (event.getChannelJoined().getName().equalsIgnoreCase("silent study")) {
+        if (event.getChannelLeft().getName().equalsIgnoreCase("silent study")) {
             finish = Instant.now();
             memberID = event.getMember().getId();
             Instant start = membersInVC.get(memberID);
