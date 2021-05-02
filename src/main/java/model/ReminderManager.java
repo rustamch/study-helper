@@ -44,7 +44,7 @@ public class ReminderManager {
     public String getMessage(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
         User user = event.getAuthor();
-        String message = "Reminding " + user.getName() + "! You have something planned right now!";
+        String message = "Reminding <@" + user.getId() + ">! You have something planned right now!";
         return message;
     }
 
