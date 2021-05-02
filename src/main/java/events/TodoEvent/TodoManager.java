@@ -1,7 +1,6 @@
 package events.TodoEvent;
 
-import exceptions.IllegalDateException;
-import exceptions.InvalidInputException;
+import exception.IllegalDateException;
 import net.dv8tion.jda.api.entities.User;
 import persistence.JSONReader;
 import persistence.JSONWriter;

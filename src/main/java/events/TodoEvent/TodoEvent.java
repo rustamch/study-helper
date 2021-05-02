@@ -1,6 +1,6 @@
 package events.TodoEvent;
 
-import exceptions.IllegalDateException;
+import exception.IllegalDateException;
 import exceptions.MissingElementException;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
