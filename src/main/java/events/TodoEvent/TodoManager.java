@@ -17,7 +17,7 @@ public class TodoManager {
 
     public TodoManager(User name) {
         owner = name;
-        fileLocation = SAVE_FILE_PACKAGE + "/" + owner.getName() + ".json";
+        fileLocation = "./" + owner.getName() + ".json";
         loadTodosFor();
     }
 

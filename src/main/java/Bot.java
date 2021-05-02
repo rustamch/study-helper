@@ -10,13 +10,15 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import javax.security.auth.login.LoginException;
 import java.util.EnumSet;
+import java.util.Scanner;
 
 
 public class Bot {
 
     public static void main(String[] args) throws LoginException {
         args = new String[1];
-        args[0] = "ODM3OTIyMTc5MjkwNzU5MjA4.YIzl1w.zxiD1l_7_dH_c3WFQYojw-g4dk4";
+        Scanner scanner = new Scanner(System.in);
+        args[0] = scanner.nextLine();
         if (args.length < 1) {
             System.out.println("You have to provide a token as first argumenta!");
             System.exit(1);
