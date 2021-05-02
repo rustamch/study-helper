@@ -32,5 +32,5 @@ jobs:
         app-name: study-bot
         slot-name: Production
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_EF65FD3864624E4EBB8566627BF475C7 }}
-        package: ${{ github.workspace }}/target/*.jar
+        package: ${{ github.workspace }}/target/study*.jar
 
