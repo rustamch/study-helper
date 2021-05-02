@@ -41,6 +41,7 @@ public class ReminderManager {
         return reminders.containsKey(reminder);
     }
 
+    // returns a message for the given reminder
     public String getMessage(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
         User user = event.getAuthor();
@@ -48,6 +49,7 @@ public class ReminderManager {
         return message;
     }
 
+    // returns all reminders as a message
     public String getAllReminders() {
         String message = "Reminders:\n";
         for (Map.Entry<LocalDateTime, MessageReceivedEvent> entry : reminders.entrySet()) {
@@ -58,12 +60,12 @@ public class ReminderManager {
         return message;
     }
 
+    // returns the message channel for the reminder
     public MessageChannel getChannel(LocalDateTime reminder) {
         MessageReceivedEvent event = reminders.get(reminder);
         MessageChannel channel = event.getChannel();
         return channel;
     }
-
 
     // parses an event to a LocalDateTime
     private LocalDateTime parseEventToLocalDateTime(MessageReceivedEvent event)
