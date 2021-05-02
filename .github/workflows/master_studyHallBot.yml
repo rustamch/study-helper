@@ -28,7 +28,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: java-app
-        path: '${{ github.workspace }}/target/*.jar'
+        path: '${{ github.workspace }}/target/study*.jar'
 
   deploy:
     runs-on: ubuntu-latest
@@ -50,4 +50,4 @@ jobs:
         app-name: 'studyHallBot'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_a9db38ccb22c4d1ea7a43f67a6793a7c }}
-        package: '*.jar'
+        package: 'study*.jar'
