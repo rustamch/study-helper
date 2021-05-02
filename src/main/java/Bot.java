@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import javax.security.auth.login.LoginException;
+import java.util.EnumSet;
 
 
 public class Bot extends ListenerAdapter {
@@ -25,7 +26,12 @@ public class Bot extends ListenerAdapter {
         // args[0] should be the token
         // We only need 2 intents in this bot. We only respond to messages in guilds and private channels.
         // All other events will be disabled.
-        JDABuilder.createLight(args[0], GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
+        EnumSet<GatewayIntent> intents = EnumSet.of(
+                GatewayIntent.GUILD_EMOJIS, // for Guild#getEmotes (not very useful)
+                GatewayIntent.GUILD_VOICE_STATES, // for member voice states
+                GatewayIntent.GUILD_MESSAGES // for message received event
+        );
+        JDABuilder.createDefault(args[0], intents)
                 .addEventListeners(new Bot())
                 .addEventListeners(new AboutEvent())
                 .addEventListeners(new BirthdayEvent())
