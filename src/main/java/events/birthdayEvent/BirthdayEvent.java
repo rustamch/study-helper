@@ -53,11 +53,11 @@ public class BirthdayEvent extends ListenerAdapter {
      * @param name name or atMention of the member whose birthday is being looked up
      */
     private void lookupBDay(MessageReceivedEvent event, String name) {
-        Pattern p = Pattern.compile("<@\\d{18}>");
+        Pattern p = Pattern.compile("\\d{18}");
         Matcher matcher = p.matcher(name);
         String id;
         if (matcher.find()) {
-            id = matcher.group(0).substring(2, 20);
+            id = matcher.group(0);
         } else {
             id = event.getGuild().getMembersByEffectiveName(name, true).get(0).getId();
         }
