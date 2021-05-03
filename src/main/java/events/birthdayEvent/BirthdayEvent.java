@@ -1,5 +1,6 @@
 package events.birthdayEvent;
 
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import exception.IllegalDateException;
 import exception.InvalidDateFormatException;
 import net.dv8tion.jda.api.entities.Member;
@@ -12,6 +13,8 @@ import persistence.JSONWriter;
 
 import java.io.FileNotFoundException;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents a handler for !bday commands
@@ -47,13 +50,20 @@ public class BirthdayEvent extends ListenerAdapter {
      * Finds the birthday of member mentioned in the message, prints to channel birthday message if found, print
      * "birthday not found" otherwise
      * @param event message event
-     * @param name name of the member whose birthday is being looked up
+     * @param name name or atMention of the member whose birthday is being looked up
      */
     private void lookupBDay(MessageReceivedEvent event, String name) {
-        Member m = event.getGuild().getMembersByEffectiveName(name, true).get(0);
-        Date date = bdayLog.getDateById(m.getId());
+        Pattern p = Pattern.compile("<@\\d{18}>");
+        Matcher matcher = p.matcher(name);
+        String id;
+        if (matcher.find()) {
+            id = matcher.group(0).substring(2, 20);
+        } else {
+            id = event.getGuild().getMembersByEffectiveName(name, true).get(0).getId();
+        }
+        Date date = bdayLog.getDateById(id);
         if (date != null) {
-            sendBDayMsg(event, m.getId(), dateToStr(date));
+            sendBDayMsg(event, id, dateToStr(date));
         } else {
             event.getChannel().sendMessage("Birthday not found :(").queue();
         }
