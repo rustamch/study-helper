@@ -3,6 +3,7 @@ package persistence;
 import events.TodoEvent.Todo;
 import events.TodoEvent.TodoList;
 import events.birthdayEvent.BirthdayEvent;
+import exception.CompletedPastTodoException;
 import exception.IllegalDateException;
 import exception.InvalidDateFormatException;
 import org.jetbrains.annotations.NotNull;
@@ -56,18 +57,25 @@ public class JSONReader {
         }
         JSONArray array = (JSONArray) jsonObject.get("todos");
         for (Object obj : array) {
-            todos.addTodo(getTodo((JSONObject) obj));
+            try {
+                todos.addTodo(getTodo((JSONObject) obj));
+            } catch (CompletedPastTodoException e) {
+                continue;
+            }
         }
         return todos;
     }
 
-    private Todo getTodo(JSONObject obj) {
+    private Todo getTodo(JSONObject obj) throws CompletedPastTodoException {
         String[] dateStr = obj.getString("dueDate").split("-");
         LocalDate date =
                 LocalDate.of(Integer.parseInt(dateStr[0]), Integer.parseInt(dateStr[1]), Integer.parseInt(dateStr[2]));
         String course = obj.getString("course").equals("null") ? null : obj.getString("course");
         Todo todo = new Todo(course, obj.getString("description"), date);
         if (!obj.getBoolean("incomplete")) {
+            if (date.isBefore(LocalDate.now())) {
+                throw new CompletedPastTodoException();
+            }
             todo.setComplete();
         }
         return todo;

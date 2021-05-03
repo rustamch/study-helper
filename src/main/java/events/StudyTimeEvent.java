@@ -20,7 +20,6 @@ import persistence.JSONWriter;
 
 public class StudyTimeEvent extends ListenerAdapter {
     private final Map<String, Instant> membersInVC = new HashMap<>();
-
     TextChannel textChannel;
     Instant finish;
     String memberID;
