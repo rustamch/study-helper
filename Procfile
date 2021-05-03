@@ -1,0 +1,1 @@
+worker: java $JAVA_OPTS target/study_hall_bot-1.0-SNAPSHOT.jar$JAR_OPTSs
