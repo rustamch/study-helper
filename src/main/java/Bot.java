@@ -17,8 +17,7 @@ public class Bot {
 
     public static void main(String[] args) throws LoginException {
         args = new String[1];
-        Scanner scanner = new Scanner(System.in);
-        args[0] = scanner.nextLine();
+        args[0] = System.getenv("discord_token");
         if (args.length < 1) {
             System.out.println("You have to provide a token as first argumenta!");
             System.exit(1);
