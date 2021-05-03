@@ -23,6 +23,7 @@ import persistence.JSONReader;
 import persistence.JSONWriter;
 
 public class StudyTimeEvent extends ListenerAdapter {
+    public static final String STUDY_CHANNEL = "silent study";
     private final Map<String, Instant> membersInVC = new HashMap<>();
     TextChannel textChannel;
     Instant finish;
@@ -30,21 +31,21 @@ public class StudyTimeEvent extends ListenerAdapter {
 
     @Override
     public void onGuildVoiceMove(@NotNull GuildVoiceMoveEvent event) {
-        if (event.getChannelLeft().getName().equalsIgnoreCase("silent study")) {
+        if (event.getChannelLeft().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
             endAndRecord(event);
-        } else if (event.getChannelJoined().getName().equalsIgnoreCase("silent study")) {
+        } else if (event.getChannelJoined().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
             trackStartTime(event);
         }
     }
 
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
-        if (event.getChannelJoined().getName().equalsIgnoreCase("silent study")) {
+        if (event.getChannelJoined().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
             trackStartTime(event);
         }
     }
 
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
-        if (event.getChannelLeft().getName().equalsIgnoreCase("silent study")) {
+        if (event.getChannelLeft().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
             endAndRecord(event);
         }
     }
