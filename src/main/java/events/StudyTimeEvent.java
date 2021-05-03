@@ -32,16 +32,14 @@ public class StudyTimeEvent extends ListenerAdapter {
     public void onGuildVoiceMove(@NotNull GuildVoiceMoveEvent event) {
         if (event.getChannelLeft().getName().equalsIgnoreCase("silent study")) {
             endAndRecord(event);
+        } else if (event.getChannelJoined().getName().equalsIgnoreCase("silent study")) {
+            trackStartTime(event);
         }
     }
 
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
         if (event.getChannelJoined().getName().equalsIgnoreCase("silent study")) {
-            Member m = event.getMember();
-            Instant start = Instant.now();
-            textChannel = event.getGuild().getTextChannelsByName("study-records", true).get(0);
-            membersInVC.put(m.getId(), start);
-            textChannel.sendMessage(m.getEffectiveName() + " has started studying!").queue();
+            trackStartTime(event);
         }
     }
 
@@ -50,6 +48,15 @@ public class StudyTimeEvent extends ListenerAdapter {
             endAndRecord(event);
         }
     }
+
+    private void trackStartTime(GenericGuildVoiceEvent event) {
+        Member m = event.getMember();
+        Instant start = Instant.now();
+        textChannel = event.getGuild().getTextChannelsByName("study-records", true).get(0);
+        membersInVC.put(m.getId(), start);
+        textChannel.sendMessage(m.getEffectiveName() + " has started studying!").queue();
+    }
+
 
     private void endAndRecord(GenericGuildVoiceEvent event) {
         finish = Instant.now();
