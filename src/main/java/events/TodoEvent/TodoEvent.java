@@ -141,7 +141,7 @@ public class TodoEvent extends ListenerAdapter {
 
     private String findDescription(String rawMsg) throws MissingElementException {
         try {
-            return rawMsg.split("\"")[1];
+            return rawMsg.split("[\"“”]")[1];
         } catch (IndexOutOfBoundsException e) {
             throw new MissingElementException("Missing description!");
         }

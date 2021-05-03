@@ -19,7 +19,7 @@ public class Bot {
         args = new String[1];
         args[0] = System.getenv("discord_token");
         if (args.length < 1) {
-            System.out.println("You have to provide a token as first argumenta!");
+            System.out.println("You have to provide a token as first argument!");
             System.exit(1);
         }
         // args[0] should be the token
@@ -37,7 +37,7 @@ public class Bot {
                 .addEventListeners(new ReminderFeature())
                 .addEventListeners(new StudyTimeEvent())
                 .addEventListeners(new DoraListener())
-                .setActivity(Activity.playing("Type !ping"))
+                .setActivity(Activity.playing("On the watch!"))
                 .build();
     }
 }
