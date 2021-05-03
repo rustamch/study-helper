@@ -34,55 +34,55 @@ public class BirthdayEvent extends ListenerAdapter {
         if (msg.length < 3) {
             return;
         }
-        String name = event.getAuthor().getName();
+        String id = event.getAuthor().getId();
         if (msg[1].equalsIgnoreCase("setbday")) {
-            setBDay(channel, msg[2], name);
+            setBDay(event, msg[2], id);
         } else if (msg[1].equalsIgnoreCase("check")) {
-            lookupBDay(channel, msg[2]);
+            lookupBDay(event, msg[2]);
         }
     }
 
     /**
      * Finds the birthday of member mentioned in the message, prints to channel birthday message if found, print
      * "birthday not found" otherwise
-     * @param channel channel to which message should be sent
-     * @param name name of the member whose birthday is being looked up
+     * @param event message event
+     * @param id id of the member whose birthday is being looked up
      */
-    private void lookupBDay(MessageChannel channel, String name) {
-        Date date = bdayLog.getDateByName(name);
+    private void lookupBDay(MessageReceivedEvent event, String id) {
+        Date date = bdayLog.getDateById(id);
         if (date != null) {
-            sendBDayMsg(channel, name, dateToStr(date));
+            sendBDayMsg(event, id, dateToStr(date));
         } else {
-            channel.sendMessage("Birthday not found :(").queue();
+            event.getChannel().sendMessage("Birthday not found :(").queue();
         }
     }
 
     /**
      * Sets the bday of the member that sent the message according to the message if given date format is correct and
      * date is valid. Sends error message to the channel otherwise
-     * @param channel channel to which message should be sent
+     * @param event message event
      * @param date string representation of a date
-     * @param name name of the member
+     * @param id name of the member
      */
-    private void setBDay(MessageChannel channel, String date, String name) {
+    private void setBDay(MessageReceivedEvent event, String date, String id) {
         try {
-            recordBDay(name, date);
-            sendBDayMsg(channel, name, getMemberBday(name));
+            recordBDay(id, date);
+            sendBDayMsg(event, id, getMemberBday(id));
         } catch (InvalidDateFormatException e) {
-            channel.sendMessage("Sorry, birthday format illegal. Not recorded.").queue();
+            event.getChannel().sendMessage("Sorry, birthday format illegal. Not recorded.").queue();
         } catch (IllegalDateException e) {
-            channel.sendMessage("O.o Wha").queue();
+            event.getChannel().sendMessage("O.o Wha").queue();
         }
     }
 
     /**
      * Sends a birthday message
-     * @param channel channel to which message should be sent
-     * @param name name of the member
+     * @param event message event
+     * @param id name of the member
      * @param date string representation of a date
      */
-    private void sendBDayMsg(MessageChannel channel, String name, String date) {
-        channel.sendMessage(name + "'s birthday is " + date + "!").queue();
+    private void sendBDayMsg(MessageReceivedEvent event, String id, String date) {
+        event.getChannel().sendMessage( id + "'s birthday is " + date + "!").queue();
     }
 
     /**
@@ -122,8 +122,8 @@ public class BirthdayEvent extends ListenerAdapter {
                 Integer.parseInt(lst[1]) - 1, Integer.parseInt(lst[2]));
     }
 
-    public String getMemberBday(String nickname) {
-        return dateToStr(bdayLog.getDateByName(nickname));
+    public String getMemberBday(String id) {
+        return dateToStr(bdayLog.getDateById(id));
     }
 
     public static String dateToStr(Date d) {

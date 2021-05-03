@@ -35,7 +35,7 @@ public class JSONReader {
             JSONArray entries = jsonObject.getJSONArray("bdayLog");
             for (Object obj : entries) {
                 JSONObject entry = (JSONObject) obj;
-                map.put(entry.getString("name"), parseDate(entry.getString("date")));
+                map.put(entry.getString("id"), parseDate(entry.getString("date")));
             }
         }
         return map;

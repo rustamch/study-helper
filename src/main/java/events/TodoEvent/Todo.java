@@ -39,7 +39,7 @@ public class Todo implements Writable, Comparable<Todo> {
         builder.append("**" + description + "** -- due ");
         if (dueDate.isEqual(LocalDate.now())) {
             builder.append("TODAY");
-        } else if (dueDate.compareTo(LocalDate.now().plusWeeks(1)) < 0) {
+        } else if (LocalDate.now().isBefore(dueDate) && dueDate.compareTo(LocalDate.now().plusWeeks(1)) < 0) {
             builder.append(dueDate.getDayOfWeek());
         } else {
             builder.append(dueDate);

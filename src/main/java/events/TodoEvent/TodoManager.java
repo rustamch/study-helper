@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import java.time.LocalDate;
 
 public class TodoManager {
-    private static final String SAVE_FILE_PACKAGE = ".idea/data/todos";
+//    private static final String SAVE_FILE_PACKAGE = ".idea/data/todos";
 
     private TodoList todos;
     private final User owner;
@@ -17,7 +17,7 @@ public class TodoManager {
 
     public TodoManager(User name) {
         owner = name;
-        fileLocation = "./" + owner.getName() + ".json";
+        fileLocation = "./" + owner.getId() + ".json";
         loadTodosFor();
     }
 

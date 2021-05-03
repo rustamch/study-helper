@@ -10,10 +10,14 @@ import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.channel.voice.update.VoiceChannelUpdatePositionEvent;
+import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import persistence.JSONReader;
 import persistence.JSONWriter;
@@ -23,6 +27,13 @@ public class StudyTimeEvent extends ListenerAdapter {
     TextChannel textChannel;
     Instant finish;
     String memberID;
+
+    @Override
+    public void onGuildVoiceMove(@NotNull GuildVoiceMoveEvent event) {
+        if (event.getChannelLeft().getName().equalsIgnoreCase("silent study")) {
+            endAndRecord(event);
+        }
+    }
 
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
         if (event.getChannelJoined().getName().equalsIgnoreCase("silent study")) {
@@ -36,14 +47,18 @@ public class StudyTimeEvent extends ListenerAdapter {
 
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
         if (event.getChannelLeft().getName().equalsIgnoreCase("silent study")) {
-            finish = Instant.now();
-            memberID = event.getMember().getId();
-            Instant start = membersInVC.get(memberID);
-            long timeElapsed = Duration.between(start, finish).toMillis();
-
-            sendTimeElapsedMessage(timeElapsed);
-            storeElapsedTime(memberID, timeElapsed);
+            endAndRecord(event);
         }
+    }
+
+    private void endAndRecord(GenericGuildVoiceEvent event) {
+        finish = Instant.now();
+        memberID = event.getMember().getId();
+        Instant start = membersInVC.get(memberID);
+        long timeElapsed = Duration.between(start, finish).toMillis();
+
+        sendTimeElapsedMessage(timeElapsed);
+        storeElapsedTime(memberID, timeElapsed);
     }
 
     private void storeElapsedTime(String memberID, long timeElapsed) {

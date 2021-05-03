@@ -18,7 +18,7 @@ public class BirthdayLog implements Writable {
 
     public BirthdayLog(Map<String, Date> log) {
         bdays = log;
-    }
+    } // maps member's id to birthday
 
     public void addMemberBirthday(String name, Date date) {
         bdays.put(name, date);
@@ -30,7 +30,7 @@ public class BirthdayLog implements Writable {
         JSONArray logArray = new JSONArray();
         for (Map.Entry<String, Date> entry : bdays.entrySet()) {
             JSONObject entryJSON = new JSONObject();
-            entryJSON.put("name", entry.getKey());
+            entryJSON.put("id", entry.getKey());
             entryJSON.put("date", BirthdayEvent.dateToStr(entry.getValue()));
             logArray.put(entryJSON);
         }
@@ -45,7 +45,7 @@ public class BirthdayLog implements Writable {
                 '}';
     }
 
-    public Date getDateByName(String nickname) {
-        return bdays.get(nickname);
+    public Date getDateById(String id) {
+        return bdays.get(id);
     }
 }
