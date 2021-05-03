@@ -59,7 +59,12 @@
             </goals> 
           </execution> 
         </executions> 
-      </plugin>  
+      </plugin>
+      <plugin>
+        <groupId>com.heroku.sdk</groupId>
+        <artifactId>heroku-maven-plugin</artifactId>
+        <version>3.0.3</version>
+      </plugin>
       <plugin> 
         <groupId>com.microsoft.azure</groupId>  
         <artifactId>azure-webapp-maven-plugin</artifactId>  
@@ -70,11 +75,11 @@
           <resourceGroup>study_hall_bot-1619924475173-rg</resourceGroup>  
           <appName>studyHallBot</appName>  
           <pricingTier>B1</pricingTier>  
-          <region>westeurope</region>  
+          <region>canadacentral</region>  
           <runtime> 
-            <os>Linux</os>
-            <javaVersion>Java 8</javaVersion>
-            <webContainer>Java SE</webContainer>
+            <os>Linux</os>  
+            <javaVersion>Java 8</javaVersion>  
+            <webContainer>Java SE</webContainer> 
           </runtime>  
           <deployment> 
             <resources> 
