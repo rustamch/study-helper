@@ -2,6 +2,7 @@ package events.birthdayEvent;
 
 import exception.IllegalDateException;
 import exception.InvalidDateFormatException;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -46,12 +47,13 @@ public class BirthdayEvent extends ListenerAdapter {
      * Finds the birthday of member mentioned in the message, prints to channel birthday message if found, print
      * "birthday not found" otherwise
      * @param event message event
-     * @param id id of the member whose birthday is being looked up
+     * @param name name of the member whose birthday is being looked up
      */
-    private void lookupBDay(MessageReceivedEvent event, String id) {
-        Date date = bdayLog.getDateById(id);
+    private void lookupBDay(MessageReceivedEvent event, String name) {
+        Member m = event.getGuild().getMembersByEffectiveName(name, true).get(0);
+        Date date = bdayLog.getDateById(m.getId());
         if (date != null) {
-            sendBDayMsg(event, id, dateToStr(date));
+            sendBDayMsg(event, m.getId(), dateToStr(date));
         } else {
             event.getChannel().sendMessage("Birthday not found :(").queue();
         }
@@ -82,7 +84,7 @@ public class BirthdayEvent extends ListenerAdapter {
      * @param date string representation of a date
      */
     private void sendBDayMsg(MessageReceivedEvent event, String id, String date) {
-        event.getChannel().sendMessage( id + "'s birthday is " + date + "!").queue();
+        event.getChannel().sendMessage( event.getGuild().getMemberById(id).getEffectiveName() + "'s birthday is " + date + "!").queue();
     }
 
     /**
