@@ -49,5 +49,5 @@ jobs:
       with:
         app-name: 'studyHallBot'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_470045fbc49f42d69f367027cdd96c31 }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_8018f87df1d6428f9db1876d87fbb3ae }}
         package: '*.jar'
