@@ -59,7 +59,7 @@
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
                     <appName>${heroku.study-hall-bot-env}</appName>
-                    <includeTarget>false</includeTarget>
+                    <includeTarget>true</includeTarget>
                     <includes>
                         <include>target/study_hall_bot-1.0-SNAPSHOT.jar</include>
                     </includes>
