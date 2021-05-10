@@ -90,7 +90,7 @@ public class StudyTimeEvent extends ListenerAdapter {
     private void sendTimeElapsedMessage(long timeElapsed) {
         if(timeElapsed /1000 > 3600)
             textChannel.sendMessage("<@" + memberID + ">" +" has studied for **" + timeElapsed /1000/60/60 + "** hours" +
-                    "and " + timeElapsed /1000/60 % 3600 + "minutes!").queue();
+                    " and " + timeElapsed /1000/60 % 3600 + "minutes!").queue();
         else if(timeElapsed /1000 > 60)
             textChannel.sendMessage("<@" + memberID + ">" +" has studied for **" + timeElapsed /1000/60 + "** minutes!").queue();
         else
