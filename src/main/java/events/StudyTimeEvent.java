@@ -9,13 +9,10 @@ import java.util.Map;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.channel.voice.update.VoiceChannelUpdatePositionEvent;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -24,7 +21,9 @@ import persistence.JSONWriter;
 
 public class StudyTimeEvent extends ListenerAdapter {
     public static final String STUDY_CHANNEL = "silent study";
+    private static final String COLLECTION_NAME = "times";
     private final Map<String, Instant> membersInVC = new HashMap<>();
+    private String docName;
     TextChannel textChannel;
     Instant finish;
     String memberID;
@@ -70,9 +69,11 @@ public class StudyTimeEvent extends ListenerAdapter {
     }
 
     private void storeElapsedTime(String memberID, long timeElapsed) {
-        JSONReader reader = new JSONReader("./times.json");
-        JSONWriter writer = new JSONWriter("./times.json");
+        docName = memberID;
+        JSONReader reader = new JSONReader(COLLECTION_NAME,docName);
+        JSONWriter writer = new JSONWriter(COLLECTION_NAME,docName);
         JSONObject jobj = reader.getStoredTimes();
+        jobj.put("save_key","study_times");
 
         long timeAcc = timeElapsed / 1000 / 60;
         if (jobj.has(memberID)) {
