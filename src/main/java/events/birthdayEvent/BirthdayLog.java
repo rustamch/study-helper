@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class BirthdayLog implements Writable {
     public static final String SAVE_KEY = "bdayLog";
-    public static final String BDAYLOG_LOCATION = "./birthdays.json";
+    public static final String BDAYLOG_LOCATION = "birthdays_col";
 
     private final Map<String, Date> bdays;
 
@@ -34,6 +34,7 @@ public class BirthdayLog implements Writable {
             entryJSON.put("date", BirthdayEvent.dateToStr(entry.getValue()));
             logArray.put(entryJSON);
         }
+
         json.put(SAVE_KEY, logArray);
         return json;
     }
