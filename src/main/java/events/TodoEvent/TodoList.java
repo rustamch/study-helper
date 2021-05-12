@@ -10,10 +10,15 @@ import java.util.List;
 
 public class TodoList implements Writable {
     private List<Todo> todoList = new ArrayList<>();
+    private String userID;
 
     public void addTodo(Todo todo) {
         todoList.add(todo);
         Collections.sort(todoList);
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
     }
 
     @Override
@@ -23,6 +28,7 @@ public class TodoList implements Writable {
             array.put(todo.toJSON());
         }
         JSONObject jobject = new JSONObject();
+        jobject.put("userID",userID);
         jobject.put("todos", array);
         return jobject;
     }

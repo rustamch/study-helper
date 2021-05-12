@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
  */
 public class BirthdayEvent extends ListenerAdapter {
     private BirthdayLog bdayLog;
-    private JSONReader reader = new JSONReader(BirthdayLog.BDAYLOG_LOCATION);
-    private JSONWriter writer = new JSONWriter(BirthdayLog.BDAYLOG_LOCATION);
+    private JSONReader reader = new JSONReader(BirthdayLog.BDAYLOG_LOCATION,BirthdayLog.SAVE_KEY);
+    private JSONWriter writer = new JSONWriter(BirthdayLog.BDAYLOG_LOCATION,BirthdayLog.SAVE_KEY);
 
     public BirthdayEvent() {
         bdayLog = new BirthdayLog(reader.getBDayLog());
@@ -108,11 +108,7 @@ public class BirthdayEvent extends ListenerAdapter {
         bdayLog = new BirthdayLog(reader.getBDayLog());
         Date bday = getDateFromStr(date);
         bdayLog.addMemberBirthday(name, bday);
-        try {
-            writer.saveObject(bdayLog);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException();
-        }
+        writer.saveObject(bdayLog);
     }
 
     /**

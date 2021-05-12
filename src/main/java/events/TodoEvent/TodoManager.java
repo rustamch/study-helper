@@ -5,19 +5,15 @@ import net.dv8tion.jda.api.entities.User;
 import persistence.JSONReader;
 import persistence.JSONWriter;
 
-import java.io.FileNotFoundException;
 import java.time.LocalDate;
 
 public class TodoManager {
-//    private static final String SAVE_FILE_PACKAGE = ".idea/data/todos";
-
+    private static final String COLLECTION_NAME = "todo_collection";
     private TodoList todos;
     private final User owner;
-    private final String fileLocation;
 
     public TodoManager(User name) {
         owner = name;
-        fileLocation = "./" + owner.getId() + ".json";
         loadTodosFor();
     }
 
@@ -30,12 +26,9 @@ public class TodoManager {
     }
 
     private void save() {
-        JSONWriter writer = new JSONWriter(fileLocation);
-        try {
-            writer.saveObject(todos);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException();
-        }
+        todos.setUserID(owner.getId());
+        JSONWriter writer = new JSONWriter(COLLECTION_NAME,owner.getId());
+        writer.saveObject(todos);
     }
 
     public String getTodoMessage() {
@@ -45,7 +38,8 @@ public class TodoManager {
     }
 
     private void loadTodosFor() {
-        JSONReader reader = new JSONReader(fileLocation);
+        String userID = owner.getId();
+        JSONReader reader = new JSONReader(COLLECTION_NAME,userID);
         todos = reader.getTodos();
     }
 

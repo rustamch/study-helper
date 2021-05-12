@@ -1,15 +1,21 @@
 package persistence;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import events.TodoEvent.Todo;
 import events.TodoEvent.TodoList;
 import events.birthdayEvent.BirthdayEvent;
 import exception.CompletedPastTodoException;
 import exception.IllegalDateException;
 import exception.InvalidDateFormatException;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.swing.event.DocumentEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,12 +26,19 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class JSONReader {
-    private String fileLocation;
+    private String collectionName;
+    private String documentName;
     private JSONObject jsonObject;
+    MongoClient mongoClient = JSONWriter.mongoClient;
+    private MongoCollection<Document> collection;
 
-    public JSONReader(String fileLocation) {
+    public JSONReader(String collectionName, String documentName) {
         jsonObject = null;
-        this.fileLocation = fileLocation;
+        this.documentName = documentName;
+        MongoDatabase db;
+        this.collectionName = collectionName;
+        db = mongoClient.getDatabase("test");
+        collection = db.getCollection(collectionName);
     }
 
     public Map<String, Date> getBDayLog() {
@@ -88,21 +101,14 @@ public class JSONReader {
     }
 
     private String readFile() throws IOException {
-        StringBuilder builder = new StringBuilder();
-        File save = new File(fileLocation);
-        if (save.createNewFile()) {
-            PrintWriter writer = new PrintWriter(save);
-            writer.write("{}");
-            writer.close();
+        Document doc = collection.find(new Document("userID",documentName)).first();
+        String json;
+        if (doc == null) {
+            json = "{}";
+        }else {
+            json = doc.toJson();
         }
-        Scanner scanner = new Scanner(save);
-
-        while (scanner.hasNextLine()) {
-            builder.append(scanner.nextLine());
-        }
-        scanner.close();
-
-        return builder.toString();
+        return json;
     }
 
     private void loadObject() {
