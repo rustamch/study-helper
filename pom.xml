@@ -57,8 +57,7 @@
                 <artifactId>heroku-maven-plugin</artifactId>
                 <version>3.0.4</version>
                 <configuration>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <appName>${heroku.study-hall-bot-env}</appName>
+                    <appName>study-hall-bot</appName>
                     <includeTarget>true</includeTarget>
                     <includes>
                         <include>target/study_hall_bot-1.0-SNAPSHOT.jar</include>

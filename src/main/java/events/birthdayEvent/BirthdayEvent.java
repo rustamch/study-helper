@@ -1,9 +1,7 @@
 package events.birthdayEvent;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import exception.IllegalDateException;
 import exception.InvalidDateFormatException;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -11,7 +9,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import persistence.JSONReader;
 import persistence.JSONWriter;
 
-import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,8 +18,8 @@ import java.util.regex.Pattern;
  */
 public class BirthdayEvent extends ListenerAdapter {
     private BirthdayLog bdayLog;
-    private JSONReader reader = new JSONReader(BirthdayLog.BDAYLOG_LOCATION,BirthdayLog.SAVE_KEY);
-    private JSONWriter writer = new JSONWriter(BirthdayLog.BDAYLOG_LOCATION,BirthdayLog.SAVE_KEY);
+    private JSONReader reader = new JSONReader(BirthdayLog.BDAYLOG_LOCATION,BirthdayLog.SAVE_VAL);
+    private JSONWriter writer = new JSONWriter(BirthdayLog.BDAYLOG_LOCATION,BirthdayLog.SAVE_VAL);
 
     public BirthdayEvent() {
         bdayLog = new BirthdayLog(reader.getBDayLog());

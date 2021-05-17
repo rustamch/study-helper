@@ -6,7 +6,7 @@ import persistence.Writable;
 
 import java.time.LocalDate;
 
-public class Todo implements Writable, Comparable<Todo> {
+public class Todo extends Writable implements Comparable<Todo> {
     private String course;
     private String description;
     private LocalDate dueDate;

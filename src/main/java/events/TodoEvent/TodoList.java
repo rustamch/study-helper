@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TodoList implements Writable {
+public class TodoList extends Writable {
     private List<Todo> todoList = new ArrayList<>();
     private String userID;
 
@@ -28,7 +28,7 @@ public class TodoList implements Writable {
             array.put(todo.toJSON());
         }
         JSONObject jobject = new JSONObject();
-        jobject.put("userID",userID);
+        jobject.put(ACCESS_KEY,userID);
         jobject.put("todos", array);
         return jobject;
     }

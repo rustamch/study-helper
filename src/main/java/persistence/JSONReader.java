@@ -101,7 +101,7 @@ public class JSONReader {
     }
 
     private String readFile() throws IOException {
-        Document doc = collection.find(new Document("userID",documentName)).first();
+        Document doc = collection.find(new Document(Writable.ACCESS_KEY,documentName)).first();
         String json;
         if (doc == null) {
             json = "{}";
@@ -121,6 +121,11 @@ public class JSONReader {
     }
 
     public JSONObject getStoredTimes() {
+        loadObject();
+        return jsonObject;
+    }
+
+    public JSONObject getStudySeesion() {
         loadObject();
         return jsonObject;
     }

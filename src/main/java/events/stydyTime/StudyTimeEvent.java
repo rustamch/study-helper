@@ -1,31 +1,35 @@
-package events;
+package events.stydyTime;
 
 import java.io.FileNotFoundException;
 import java.time.Instant;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import events.TodoEvent.TodoManager;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import persistence.JSONReader;
 import persistence.JSONWriter;
+import persistence.Writable;
 
 public class StudyTimeEvent extends ListenerAdapter {
     public static final String STUDY_CHANNEL = "silent study";
     private static final String COLLECTION_NAME = "times";
-    private final Map<String, Instant> membersInVC = new HashMap<>();
-    private String docName;
+    private static final String DOC_NAME = "study_times";
     TextChannel textChannel;
-    Instant finish;
     String memberID;
 
     @Override
@@ -37,12 +41,40 @@ public class StudyTimeEvent extends ListenerAdapter {
         }
     }
 
+    @Override
+    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        String rawMsg = event.getMessage().getContentRaw();
+        String[] msgLst = rawMsg.split(" ");
+        if (msgLst[0].equalsIgnoreCase("!leaderboard")) {
+            JSONReader reader = new JSONReader(COLLECTION_NAME,DOC_NAME);
+            EmbedBuilder about = new EmbedBuilder();
+            about.setTitle("\uD83D\uDCD8 Grind Leaderboard");
+            about.setColor(0x9CD08F);
+            JSONObject jsonObject = reader.getStoredTimes();
+            JSONObject times = jsonObject.getJSONObject("times");
+            Set<String> timeKeys = times.keySet();
+            int line = 1;
+            for (String memberID : timeKeys) {
+                if (line > 10) {
+                     break;
+                }
+                long val = times.getLong(memberID);
+                about.addField(line +".","@"+memberID + " : " + val,true);
+                line++;
+            }
+            event.getChannel().sendMessage(about.build()).queue();
+            about.clear();
+        }
+    }
+
+    @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
         if (event.getChannelJoined().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
             trackStartTime(event);
         }
     }
 
+    @Override
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
         if (event.getChannelLeft().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
             endAndRecord(event);
@@ -51,41 +83,52 @@ public class StudyTimeEvent extends ListenerAdapter {
 
     private void trackStartTime(GenericGuildVoiceEvent event) {
         Member m = event.getMember();
+        memberID = m.getId();
         Instant start = Instant.now();
+        JSONWriter jsonWriter = new JSONWriter(COLLECTION_NAME,memberID);
+        JSONObject obj = new JSONObject();
+        obj.put(Writable.ACCESS_KEY, m.getId());
+        obj.put("epoch",start.getEpochSecond());
+        obj.put("nanos",start.getNano());
+        jsonWriter.saveString(obj.toString());
         textChannel = event.getGuild().getTextChannelsByName("study-records", true).get(0);
-        membersInVC.put(m.getId(), start);
         textChannel.sendMessage(m.getEffectiveName() + " has started studying!").queue();
     }
 
 
     private void endAndRecord(GenericGuildVoiceEvent event) {
-        finish = Instant.now();
-        memberID = event.getMember().getId();
-        Instant start = membersInVC.get(memberID);
+        Member m = event.getMember();
+        memberID = m.getId();
+        JSONReader jsonReader = new JSONReader(COLLECTION_NAME,memberID);
+        JSONObject jsonObject = jsonReader.getStudySeesion();
+        Instant start = Instant.ofEpochSecond(jsonObject.getLong("epoch"), jsonObject.getLong("nanos"));
+        Instant finish = Instant.now();
         long timeElapsed = Duration.between(start, finish).toMillis();
-
         sendTimeElapsedMessage(timeElapsed);
         storeElapsedTime(memberID, timeElapsed);
     }
 
     private void storeElapsedTime(String memberID, long timeElapsed) {
-        docName = memberID;
-        JSONReader reader = new JSONReader(COLLECTION_NAME,docName);
-        JSONWriter writer = new JSONWriter(COLLECTION_NAME,docName);
+        JSONReader reader = new JSONReader(COLLECTION_NAME,DOC_NAME);
+        JSONWriter writer = new JSONWriter(COLLECTION_NAME,DOC_NAME);
         JSONObject jobj = reader.getStoredTimes();
-        jobj.put("save_key","study_times");
-
+        jobj.put(Writable.ACCESS_KEY,"study_times");
         long timeAcc = timeElapsed / 1000 / 60;
-        if (jobj.has(memberID)) {
-            timeAcc += jobj.getLong(memberID);
-            jobj.remove(memberID);
+        if (jobj.has("times")) {
+            JSONObject times = jobj.getJSONObject("times");
+            if (times.has(memberID)) {
+                timeAcc += times.getLong(memberID);
+                times.remove(memberID);
+
+            }
+        } else {
+            JSONObject times = new JSONObject();
+            jobj.put("times",times);
         }
-        jobj.put(memberID, timeAcc);
-        try {
-            writer.saveString(jobj.toString(4));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        JSONObject times = jobj.getJSONObject("times");
+        times.put(memberID,timeAcc);
+        jobj.put("times", times);
+        writer.saveString(jobj.toString());
     }
 
     private void sendTimeElapsedMessage(long timeElapsed) {

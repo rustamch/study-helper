@@ -10,8 +10,8 @@ import java.util.Map;
 /**
  * Represents a birthday manager that manages members' events.birthdays
  */
-public class BirthdayLog implements Writable {
-    public static final String SAVE_KEY = "bdayLog";
+public class BirthdayLog extends Writable {
+    public static final String SAVE_VAL = "bdayLog";
     public static final String BDAYLOG_LOCATION = "birthdays_col";
 
     private final Map<String, Date> bdays;
@@ -34,8 +34,7 @@ public class BirthdayLog implements Writable {
             entryJSON.put("date", BirthdayEvent.dateToStr(entry.getValue()));
             logArray.put(entryJSON);
         }
-
-        json.put(SAVE_KEY, logArray);
+        json.put(ACCESS_KEY, SAVE_VAL);
         return json;
     }
 

@@ -1,6 +1,6 @@
 
 import events.AboutEvent;
-import events.StudyTimeEvent;
+import events.stydyTime.StudyTimeEvent;
 import events.TodoEvent.TodoEvent;
 import events.DoraListener;
 import events.birthdayEvent.BirthdayEvent;
@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import javax.security.auth.login.LoginException;
 import java.util.EnumSet;
-import java.util.Scanner;
 
 
 public class Bot {
