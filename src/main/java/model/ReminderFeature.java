@@ -1,3 +1,5 @@
+package model;
+
 import exception.DuplicateReminderException;
 import exception.InvalidReminderException;
 import exception.InvalidTimeInHoursException;
@@ -24,6 +26,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
         timer.setRepeats(true);
         timer.start();
     }
+
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
