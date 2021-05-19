@@ -7,7 +7,6 @@ import java.util.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
@@ -19,10 +18,6 @@ import org.json.JSONObject;
 import persistence.JSONReader;
 import persistence.JSONWriter;
 import persistence.Writable;
-import model.Bot;
-import sun.awt.image.ImageWatched;
-
-import javax.jws.soap.SOAPBinding;
 
 public class StudyTimeEvent extends ListenerAdapter {
   public static final String STUDY_CHANNEL = "silent study";
@@ -45,35 +40,71 @@ public class StudyTimeEvent extends ListenerAdapter {
     String rawMsg = event.getMessage().getContentRaw();
     String[] msgLst = rawMsg.split(" ");
     if (msgLst[0].equalsIgnoreCase("!leaderboard")) {
-      JSONReader reader = new JSONReader(COLLECTION_NAME, DOC_NAME);
-      EmbedBuilder about = new EmbedBuilder();
-      about.setTitle("\uD83D\uDCD8 Grind Leaderboard");
-      about.setColor(0x9CD08F);
-      JSONObject jsonObject = reader.getStoredTimes();
-      JSONObject times = jsonObject.getJSONObject("times");
-      Set<String> timeKeys = times.keySet();
-      Map<String, Long> map = new LinkedHashMap<>();
-      for (String keys : timeKeys) {
-        map.put(keys, times.getLong(keys));
-        List<Long> timeList = new ArrayList<>(map.values());
-        timeList.sort(Comparator.reverseOrder());
+      EmbedBuilder leaderBoard = createLeaderBoard(event);
+      event.getChannel().sendMessage(leaderBoard.build()).queue();
+      leaderBoard.clear();
+    } else if (msgLst[0].equalsIgnoreCase("!studytime")) {
+      Map<String, Long> times = getTimesMap();
+      Set<String> ids = times.keySet();
+      String userID = event.getAuthor().getId();
+      if (ids.contains(userID)) {
+        Long studyTime = times.get(userID);
+        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " has studied for "
+                + studyTime + " minutes").queue();
+      } else {
+        event.getChannel().sendMessage(event.getAuthor().getAsMention() + " you have not studied yet.").queue();
       }
-      int i = 1;
-      for (Map.Entry<String, Long> entry : map.entrySet()) {
-        if (i > 10) {
-          break;
-        }
-        String key = entry.getKey();
-        Long val = entry.getValue();
-        User user = Bot.jda.retrieveUserById(key).complete();
-        String name = user.getName();
-        about.addField(i + ". " + name, name + " has studied for " + val + " minutes so far.", false);
-        i++;
-      }
-      event.getChannel().sendMessage(about.build()).queue();
-      about.clear();
     }
   }
+
+  @NotNull
+  private EmbedBuilder createLeaderBoard(@NotNull MessageReceivedEvent event) {
+    EmbedBuilder about = new EmbedBuilder();
+    about.setTitle("\uD83D\uDCD8 Grind Leaderboard");
+    about.setColor(0x9CD08F);
+    LinkedHashMap<String, Long> map = getTimesMap();
+    sortMap(map);
+    int i = 1;
+    for (Map.Entry<String, Long> entry : map.entrySet()) {
+      if (i > 3) {
+        break;
+      }
+      String key = entry.getKey();
+      Long val = entry.getValue();
+      String name = event.getGuild().retrieveMemberById(key).complete().getEffectiveName();
+      about.addField(i + ". " + name, name + " has studied for " + val + " minutes so far.", false);
+      i++;
+    }
+    return about;
+  }
+
+  @NotNull
+  private LinkedHashMap<String, Long> getTimesMap() {
+    JSONReader reader = new JSONReader(COLLECTION_NAME, DOC_NAME);
+    JSONObject jsonObject = reader.getStoredTimes();
+    JSONObject times = jsonObject.getJSONObject("times");
+    Set<String> timeKeys = times.keySet();
+    LinkedHashMap<String, Long> map = new LinkedHashMap<>();
+    for (String keys : timeKeys) {
+      map.put(keys, times.getLong(keys));
+    }
+    return map;
+  }
+
+  private void sortMap(LinkedHashMap<String, Long> map) {
+    List<Map.Entry<String, Long>> entries = new ArrayList<>(map.entrySet());
+    entries.sort(new Comparator<Map.Entry<String, Long>>() {
+      @Override
+      public int compare(Map.Entry<String, Long> lhs, Map.Entry<String, Long> rhs) {
+        return rhs.getValue().compareTo(lhs.getValue());
+      }
+    });
+    map.clear();
+    for (Map.Entry<String, Long> entry : entries) {
+      map.put(entry.getKey(), entry.getValue());
+    }
+  }
+
 
   @Override
   public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
