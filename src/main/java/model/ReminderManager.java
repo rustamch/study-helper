@@ -6,10 +6,10 @@ import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.TreeMap;
 
-import exception.DuplicateReminderException;
-import exception.InvalidReminderException;
-import exception.InvalidTimeInHoursException;
-import exception.InvalidTimeInMinutesException;
+import exceptions.DuplicateReminderException;
+import exceptions.InvalidReminderException;
+import exceptions.InvalidTimeInHoursException;
+import exceptions.InvalidTimeInMinutesException;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

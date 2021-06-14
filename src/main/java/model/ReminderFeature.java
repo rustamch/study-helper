@@ -1,9 +1,5 @@
 package model;
 
-import exception.DuplicateReminderException;
-import exception.InvalidReminderException;
-import exception.InvalidTimeInHoursException;
-import exception.InvalidTimeInMinutesException;
 import model.ReminderManager;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -11,6 +7,12 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import javax.swing.*;
+
+import exceptions.DuplicateReminderException;
+import exceptions.InvalidReminderException;
+import exceptions.InvalidTimeInHoursException;
+import exceptions.InvalidTimeInMinutesException;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDateTime;

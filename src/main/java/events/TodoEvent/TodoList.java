@@ -1,12 +1,10 @@
 package events.TodoEvent;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 import persistence.Writable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.bson.Document;
 
 public class TodoList extends Writable {
     private List<Todo> todoList = new ArrayList<>();
@@ -22,15 +20,15 @@ public class TodoList extends Writable {
     }
 
     @Override
-    public JSONObject toJSON() {
-        JSONArray array = new JSONArray();
+    public Document toDoc() {
+        List<Document> array = new ArrayList<>();
         for (Todo todo : todoList) {
-            array.put(todo.toJSON());
+            array.add(todo.toDoc());
         }
-        JSONObject jobject = new JSONObject();
-        jobject.put(ACCESS_KEY,userID);
-        jobject.put("todos", array);
-        return jobject;
+        Document doc = new Document();
+        doc.put(ACCESS_KEY,userID);
+        doc.put("todos", array);
+        return doc;
     }
 
     @Override

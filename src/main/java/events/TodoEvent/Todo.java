@@ -1,5 +1,6 @@
 package events.TodoEvent;
 
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import persistence.Writable;
@@ -51,17 +52,17 @@ public class Todo extends Writable implements Comparable<Todo> {
     }
 
     @Override
-    public JSONObject toJSON() {
-        JSONObject json = new JSONObject();
+    public Document toDoc() {
+        Document doc = new Document();
         if (course == null) {
-            json.put("course", "null");
+            doc.put("course", "null");
         } else {
-            json.put("course", course);
+            doc.put("course", course);
         }
-        json.put("description", description);
-        json.put("dueDate", dueDate.toString());
-        json.put("incomplete", incomplete);
-        return json;
+        doc.put("description", description);
+        doc.put("dueDate", dueDate.toString());
+        doc.put("incomplete", incomplete);
+        return doc;
     }
 
     @Override

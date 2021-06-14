@@ -1,11 +1,10 @@
 package model;
 
-import events.AboutEvent;
-import events.stydyTime.StudyTimeEvent;
+import events.BirthdayEvent.BirthdayEvent;
+import events.SimpleEvents.AboutEvent;
+import events.SimpleEvents.DoraListener;
+import events.StudyTimeEvent.StudyTimeEvent;
 import events.TodoEvent.TodoEvent;
-import events.DoraListener;
-import events.birthdayEvent.BirthdayEvent;
-import model.ReminderFeature;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
