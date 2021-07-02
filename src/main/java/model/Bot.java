@@ -1,6 +1,7 @@
 package model;
 
 import events.BirthdayEvent.BirthdayEvent;
+import events.ReminderEvent.ReminderFeature;
 import events.SimpleEvents.AboutEvent;
 import events.SimpleEvents.DoraListener;
 import events.StudyTimeEvent.StudyTimeEvent;

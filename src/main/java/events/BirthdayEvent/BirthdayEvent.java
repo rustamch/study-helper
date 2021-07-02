@@ -1,7 +1,6 @@
 package events.BirthdayEvent;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import persistence.DBReader;
@@ -31,7 +30,6 @@ public class BirthdayEvent extends ListenerAdapter {
      * @param event message event that started with message "!bday"
      */
     public void handleBdayActions(MessageReceivedEvent event) {
-        MessageChannel channel = event.getChannel();
         String[] msg = event.getMessage().getContentRaw().split(" ");
         if (msg.length < 3) {
             return;

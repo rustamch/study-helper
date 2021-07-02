@@ -1,8 +1,6 @@
 package events.BirthdayEvent;
 
 import org.bson.Document;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import persistence.Writable;
 
 import java.util.ArrayList;
@@ -16,12 +14,12 @@ import java.util.Map;
 public class BirthdayLog extends Writable {
     public static final String SAVE_VAL = "bdayLog";
     public static final String BDAYLOG_LOCATION = "birthdays_col";
-
     private final Map<String, Date> bdays;
 
     public BirthdayLog(Map<String, Date> log) {
         bdays = log;
     } // maps member's id to birthday
+
 
     public void addMemberBirthday(String name, Date date) {
         bdays.put(name, date);
@@ -42,13 +40,11 @@ public class BirthdayLog extends Writable {
         return bdayLog;
     }
 
-    @Override
-    public String toString() {
-        return "BirthdayLog{" +
-                "bdays=" + bdays +
-                '}';
-    }
-
+    /** 
+     * Returns the the birthday of the user given user's id
+     * @param id user's id 
+     * @return a birthday of the user
+    */
     public Date getDateById(String id) {
         return bdays.get(id);
     }
