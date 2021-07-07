@@ -21,6 +21,7 @@ public class BirthdayLog extends Writable {
     } // maps member's id to birthday
 
 
+    
     public void addMemberBirthday(String name, Date date) {
         bdays.put(name, date);
     }

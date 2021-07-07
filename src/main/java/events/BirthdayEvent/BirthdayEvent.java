@@ -94,7 +94,7 @@ public class BirthdayEvent extends ListenerAdapter {
     }
 
     /**
-     * Records the birthday and save to JSON
+     * Records the birthday and save to DataBase
      * @param name name of the member
      * @param date string representation of birthday
      * @throws InvalidDateFormatException when given date format is unrecognized

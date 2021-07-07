@@ -1,34 +1,30 @@
 package events.StudyTimeEvent;
-
-import java.time.Instant;
-import java.time.Duration;
-import java.util.*;
-
-import model.Bot;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.StoreChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.guild.voice.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
-import persistence.DBReader;
-import persistence.DBWriter;
-import persistence.Writable;
 
+import exceptions.InvalidDocumentException;
+
+/**
+ * Represents a handler for !studytime commands
+ */
 public class StudyTimeEvent extends ListenerAdapter {
   public static final String STUDY_CHANNEL = "silent study";
-  private static final String COLLECTION_NAME = "times";
-  private static final String DOC_NAME = "study_times";
   TextChannel textChannel;
-  String memberID;
+
 
   @Override
   public void onGuildVoiceMove(@NotNull GuildVoiceMoveEvent event) {
     if (event.getChannelLeft().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
-      endAndRecord(event);
+      try {
+        endAndRecord(event);
+      } catch (InvalidDocumentException e) {
+        textChannel.sendMessage("Sigh... something went wrong.");
+      }
     } else if (event.getChannelJoined().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
       trackStartTime(event);
     }
@@ -39,87 +35,22 @@ public class StudyTimeEvent extends ListenerAdapter {
     String rawMsg = event.getMessage().getContentRaw();
     String[] msgLst = rawMsg.split(" ");
     if (msgLst[0].equalsIgnoreCase("!leaderboard")) {
-      EmbedBuilder leaderBoard = createLeaderBoard(event);
-      event.getChannel().sendMessage(leaderBoard.build()).queue();
-      leaderBoard.clear();
+      EmbedBuilder leaderBoard;
+      try {
+        leaderBoard = createLeaderBoard(event);
+        event.getChannel().sendMessage(leaderBoard.build()).queue();
+        leaderBoard.clear();
+      } catch (InvalidDocumentException e) {
+        event.getChannel().sendMessage("Something went wrong!");
+      }
     } else if (msgLst[0].equalsIgnoreCase("!studytime")) {
       if (msgLst[1].equalsIgnoreCase("check")) {
         msgStudyTimeForUser(event);
-      } else if (msgLst[1].equalsIgnoreCase("sub")) {
-        Map<String,Long> times = getTimesMap();
-        if (times.containsKey(event.getAuthor().getId())) {
-          long time = - Long.parseLong(msgLst[2]) * 60 * 1000;
-          storeElapsedTime(event.getAuthor().getId(), time);
-          event.getChannel().sendMessage("Successfully subtracted " + msgLst[2] + " minutes.").queue();
-        } else {
-          event.getChannel().sendMessage("You have not studied yet.").queue();
-        }
       }
     }
   }
 
-  private void msgStudyTimeForUser(@NotNull MessageReceivedEvent event) {
-    Map<String, Long> times = getTimesMap();
-    Set<String> ids = times.keySet();
-    String userID = event.getAuthor().getId();
-    if (ids.contains(userID)) {
-      Long studyTime = times.get(userID);
-      event.getChannel().sendMessage(event.getAuthor().getAsMention() + " has studied for "
-              + studyTime + " minutes").queue();
-    } else {
-      event.getChannel().sendMessage(event.getAuthor().getAsMention() + " you have not studied yet.").queue();
-    }
-  }
-
-  @NotNull
-  private EmbedBuilder createLeaderBoard(@NotNull MessageReceivedEvent event) {
-    EmbedBuilder about = new EmbedBuilder();
-    about.setTitle("\uD83D\uDCD8 Grind Leaderboard");
-    about.setColor(0x9CD08F);
-    LinkedHashMap<String, Long> map = getTimesMap();
-    sortMap(map);
-    int i = 1;
-    for (Map.Entry<String, Long> entry : map.entrySet()) {
-      if (i > 3) {
-        break;
-      }
-      String key = entry.getKey();
-      Long val = entry.getValue();
-      String name = event.getGuild().retrieveMemberById(key).complete().getEffectiveName();
-      about.addField(i + ". " + name, name + " has studied for " + val + " minutes so far.", false);
-      i++;
-    }
-    return about;
-  }
-
-  @NotNull
-  private LinkedHashMap<String, Long> getTimesMap() {
-    DBReader reader = new DBReader(COLLECTION_NAME, DOC_NAME);
-    JSONObject jsonObject = reader.getStoredTimes();
-    JSONObject times = jsonObject.getJSONObject("times");
-    Set<String> timeKeys = times.keySet();
-    LinkedHashMap<String, Long> map = new LinkedHashMap<>();
-    for (String keys : timeKeys) {
-      map.put(keys, times.getLong(keys));
-    }
-    return map;
-  }
-
-  private void sortMap(LinkedHashMap<String, Long> map) {
-    List<Map.Entry<String, Long>> entries = new ArrayList<>(map.entrySet());
-    entries.sort(new Comparator<Map.Entry<String, Long>>() {
-      @Override
-      public int compare(Map.Entry<String, Long> lhs, Map.Entry<String, Long> rhs) {
-        return rhs.getValue().compareTo(lhs.getValue());
-      }
-    });
-    map.clear();
-    for (Map.Entry<String, Long> entry : entries) {
-      map.put(entry.getKey(), entry.getValue());
-    }
-  }
-
-
+  
   @Override
   public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
     if (event.getChannelJoined().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
@@ -130,62 +61,94 @@ public class StudyTimeEvent extends ListenerAdapter {
   @Override
   public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
     if (event.getChannelLeft().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
-      endAndRecord(event);
+      try {
+        endAndRecord(event);
+      } catch (InvalidDocumentException e) {
+        textChannel.sendMessage("Sigh... something went wrong.");
+      }
     }
   }
 
+  /**
+   * Constructs and sends a message that tells user for how long has he studied already.
+   * @param event a JDA event
+   */
+  private void msgStudyTimeForUser(@NotNull MessageReceivedEvent event) {
+    StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
+    Long time = studyTimeLeaderboard.getUserTime(event.getAuthor().getId());
+    if (time > 0) {
+      event.getChannel().sendMessage(event.getAuthor().getAsMention() + " has studied for "
+              + time + " minutes").queue();
+    } else {
+      event.getChannel().sendMessage(event.getAuthor().getAsMention() + " you have not studied yet.").queue();
+    }
+  }
 
-
+  /**
+   * Creates a visual representation of the current top-3 places on the leaderboard
+   * @param event a JDA event
+   * @return EmbedBuilder that 
+   * @throws InvalidDocumentException
+   */
+  @NotNull
+  private EmbedBuilder createLeaderBoard(@NotNull MessageReceivedEvent event) throws InvalidDocumentException  {
+    EmbedBuilder about = new EmbedBuilder();
+    about.setTitle("\uD83D\uDCD8 Grind Leaderboard");
+    about.setColor(0x9CD08F);
+    int i = 1;
+    StudyTimeLeaderboard leaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
+    for (String memberID : leaderboard) {
+      if (i > 3) {
+        break;
+      }
+      Long val = leaderboard.getUserTime(memberID);
+      String name = event.getGuild().retrieveMemberById(memberID).complete().getEffectiveName();
+      about.addField(i + ". " + name, name + " has studied for " + val + " minutes so far.", false);
+      i++;
+    }
+    return about;
+  }
+  /**
+   * Creates a new a study session and saves it to the database
+   * @param event a JDA event that contains information about the server, user etc.
+   */
   private void trackStartTime(GenericGuildVoiceEvent event) {
     Member m = event.getMember();
-    memberID = m.getId();
-    Instant start = Instant.now();
-    DBWriter jsonWriter = new DBWriter(COLLECTION_NAME, memberID);
-    JSONObject obj = new JSONObject();
-    obj.put(Writable.ACCESS_KEY, m.getId());
-    obj.put("epoch", start.getEpochSecond());
-    obj.put("nanos", start.getNano());
-    jsonWriter.saveString(obj.toString());
+    StudyTimeSession session = new StudyTimeSession(m.getId());
+    session.trackSession();
     textChannel = event.getGuild().getTextChannelsByName("study-records", true).get(0);
     textChannel.sendMessage(m.getEffectiveName() + " has started studying!").queue();
   }
 
-
-  private void endAndRecord(GenericGuildVoiceEvent event) {
+  /**
+   * Calculates amount of time the given user has studied and saves it to the database
+   * @param event a JDA event that contains information about the server, user etc.
+   * @throws InvalidDocumentException thrown if the original study session cannot be obtained
+   */
+  private void endAndRecord(GenericGuildVoiceEvent event) throws InvalidDocumentException {
     Member m = event.getMember();
-    memberID = m.getId();
-    DBReader jsonReader = new DBReader(COLLECTION_NAME, memberID);
-    JSONObject jsonObject = jsonReader.getStudySeesion();
-    Instant start = Instant.ofEpochSecond(jsonObject.getLong("epoch"), jsonObject.getLong("nanos"));
-    Instant finish = Instant.now();
-    long timeElapsed = Duration.between(start, finish).toMillis();
-    sendTimeElapsedMessage(timeElapsed);
-    storeElapsedTime(memberID, timeElapsed);
+    StudyTimeSession session = StudyTimeSession.getStudySession(m.getId());
+    long timeElapsed = session.finishSession();
+    sendTimeElapsedMessage(m.getId(),timeElapsed);
+    storeElapsedTime(m.getId(), timeElapsed);
   }
 
+  /**
+   * Stores studytime of the given user to the database
+   * @param memberID id of the user who just finished his study session
+   * @param timeElapsed a number of miliseconds the given user has studied
+   */
   private void storeElapsedTime(String memberID, long timeElapsed) {
-    DBReader reader = new DBReader(COLLECTION_NAME, DOC_NAME);
-    DBWriter writer = new DBWriter(COLLECTION_NAME, DOC_NAME);
-    JSONObject jobj = reader.getStoredTimes();
-    jobj.put(Writable.ACCESS_KEY, "study_times");
-    long timeAcc = timeElapsed / 1000 / 60;
-    if (jobj.has("times")) {
-      JSONObject times = jobj.getJSONObject("times");
-      if (times.has(memberID)) {
-        timeAcc += times.getLong(memberID);
-        times.remove(memberID);
-      }
-    } else {
-      JSONObject times = new JSONObject();
-      jobj.put("times", times);
-    }
-    JSONObject times = jobj.getJSONObject("times");
-    times.put(memberID, timeAcc);
-    jobj.put("times", times);
-    writer.saveString(jobj.toString());
+    StudyTimeLeaderboard leaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
+    leaderboard.addUserTime(memberID,timeElapsed);
   }
 
-  private void sendTimeElapsedMessage(long timeElapsed) {
+  /**
+   * Sends a message that tells for how long the given user has studied.
+   * @param memberID id of the member who just finished their study session.
+   * @param timeElapsed amount of time in miliseconds.
+   */
+  private void sendTimeElapsedMessage(String memberID, long timeElapsed) {
     if (timeElapsed / 1000 > 3600)
       textChannel.sendMessage("<@" + memberID + ">" + " has studied for **" + timeElapsed / 1000 / 60 / 60 + "** hours" +
               " and " + timeElapsed / 1000 / 60 % 60 + " minutes!").queue();
@@ -194,4 +157,5 @@ public class StudyTimeEvent extends ListenerAdapter {
     else
       textChannel.sendMessage("<@" + memberID + ">" + " has studied for **" + timeElapsed / 1000 + "** seconds!").queue();
   }
+
 }

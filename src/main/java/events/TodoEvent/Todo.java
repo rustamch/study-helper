@@ -2,7 +2,6 @@ package events.TodoEvent;
 
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 import persistence.Writable;
 
 import java.time.LocalDate;
