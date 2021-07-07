@@ -1,11 +1,12 @@
 package events.TodoEvent;
 
-import exception.IllegalDateException;
 import net.dv8tion.jda.api.entities.User;
-import persistence.JSONReader;
-import persistence.JSONWriter;
+import persistence.DBReader;
+import persistence.DBWriter;
 
 import java.time.LocalDate;
+
+import exceptions.IllegalDateException;
 
 public class TodoManager {
     private static final String COLLECTION_NAME = "todo_collection";
@@ -27,7 +28,7 @@ public class TodoManager {
 
     private void save() {
         todos.setUserID(owner.getId());
-        JSONWriter writer = new JSONWriter(COLLECTION_NAME,owner.getId());
+        DBWriter writer = new DBWriter(COLLECTION_NAME,owner.getId());
         writer.saveObject(todos);
     }
 
@@ -39,7 +40,7 @@ public class TodoManager {
 
     private void loadTodosFor() {
         String userID = owner.getId();
-        JSONReader reader = new JSONReader(COLLECTION_NAME,userID);
+        DBReader reader = new DBReader(COLLECTION_NAME,userID);
         todos = reader.getTodos();
     }
 

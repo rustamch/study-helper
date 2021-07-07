@@ -1,0 +1,161 @@
+package events.StudyTimeEvent;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.guild.voice.*;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
+
+import exceptions.InvalidDocumentException;
+
+/**
+ * Represents a handler for !studytime commands
+ */
+public class StudyTimeEvent extends ListenerAdapter {
+  public static final String STUDY_CHANNEL = "silent study";
+  TextChannel textChannel;
+
+
+  @Override
+  public void onGuildVoiceMove(@NotNull GuildVoiceMoveEvent event) {
+    if (event.getChannelLeft().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
+      try {
+        endAndRecord(event);
+      } catch (InvalidDocumentException e) {
+        textChannel.sendMessage("Sigh... something went wrong.");
+      }
+    } else if (event.getChannelJoined().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
+      trackStartTime(event);
+    }
+  }
+
+  @Override
+  public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+    String rawMsg = event.getMessage().getContentRaw();
+    String[] msgLst = rawMsg.split(" ");
+    if (msgLst[0].equalsIgnoreCase("!leaderboard")) {
+      EmbedBuilder leaderBoard;
+      try {
+        leaderBoard = createLeaderBoard(event);
+        event.getChannel().sendMessage(leaderBoard.build()).queue();
+        leaderBoard.clear();
+      } catch (InvalidDocumentException e) {
+        event.getChannel().sendMessage("Something went wrong!");
+      }
+    } else if (msgLst[0].equalsIgnoreCase("!studytime")) {
+      if (msgLst[1].equalsIgnoreCase("check")) {
+        msgStudyTimeForUser(event);
+      }
+    }
+  }
+
+  
+  @Override
+  public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
+    if (event.getChannelJoined().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
+      trackStartTime(event);
+    }
+  }
+
+  @Override
+  public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
+    if (event.getChannelLeft().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
+      try {
+        endAndRecord(event);
+      } catch (InvalidDocumentException e) {
+        textChannel.sendMessage("Sigh... something went wrong.");
+      }
+    }
+  }
+
+  /**
+   * Constructs and sends a message that tells user for how long has he studied already.
+   * @param event a JDA event
+   */
+  private void msgStudyTimeForUser(@NotNull MessageReceivedEvent event) {
+    StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
+    Long time = studyTimeLeaderboard.getUserTime(event.getAuthor().getId());
+    if (time > 0) {
+      event.getChannel().sendMessage(event.getAuthor().getAsMention() + " has studied for "
+              + time + " minutes").queue();
+    } else {
+      event.getChannel().sendMessage(event.getAuthor().getAsMention() + " you have not studied yet.").queue();
+    }
+  }
+
+  /**
+   * Creates a visual representation of the current top-3 places on the leaderboard
+   * @param event a JDA event
+   * @return EmbedBuilder that 
+   * @throws InvalidDocumentException
+   */
+  @NotNull
+  private EmbedBuilder createLeaderBoard(@NotNull MessageReceivedEvent event) throws InvalidDocumentException  {
+    EmbedBuilder about = new EmbedBuilder();
+    about.setTitle("\uD83D\uDCD8 Grind Leaderboard");
+    about.setColor(0x9CD08F);
+    int i = 1;
+    StudyTimeLeaderboard leaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
+    for (String memberID : leaderboard) {
+      if (i > 3) {
+        break;
+      }
+      Long val = leaderboard.getUserTime(memberID);
+      String name = event.getGuild().retrieveMemberById(memberID).complete().getEffectiveName();
+      about.addField(i + ". " + name, name + " has studied for " + val + " minutes so far.", false);
+      i++;
+    }
+    return about;
+  }
+  /**
+   * Creates a new a study session and saves it to the database
+   * @param event a JDA event that contains information about the server, user etc.
+   */
+  private void trackStartTime(GenericGuildVoiceEvent event) {
+    Member m = event.getMember();
+    StudyTimeSession session = new StudyTimeSession(m.getId());
+    session.trackSession();
+    textChannel = event.getGuild().getTextChannelsByName("study-records", true).get(0);
+    textChannel.sendMessage(m.getEffectiveName() + " has started studying!").queue();
+  }
+
+  /**
+   * Calculates amount of time the given user has studied and saves it to the database
+   * @param event a JDA event that contains information about the server, user etc.
+   * @throws InvalidDocumentException thrown if the original study session cannot be obtained
+   */
+  private void endAndRecord(GenericGuildVoiceEvent event) throws InvalidDocumentException {
+    Member m = event.getMember();
+    StudyTimeSession session = StudyTimeSession.getStudySession(m.getId());
+    long timeElapsed = session.finishSession();
+    sendTimeElapsedMessage(m.getId(),timeElapsed);
+    storeElapsedTime(m.getId(), timeElapsed);
+  }
+
+  /**
+   * Stores studytime of the given user to the database
+   * @param memberID id of the user who just finished his study session
+   * @param timeElapsed a number of miliseconds the given user has studied
+   */
+  private void storeElapsedTime(String memberID, long timeElapsed) {
+    StudyTimeLeaderboard leaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
+    leaderboard.addUserTime(memberID,timeElapsed);
+  }
+
+  /**
+   * Sends a message that tells for how long the given user has studied.
+   * @param memberID id of the member who just finished their study session.
+   * @param timeElapsed amount of time in miliseconds.
+   */
+  private void sendTimeElapsedMessage(String memberID, long timeElapsed) {
+    if (timeElapsed / 1000 > 3600)
+      textChannel.sendMessage("<@" + memberID + ">" + " has studied for **" + timeElapsed / 1000 / 60 / 60 + "** hours" +
+              " and " + timeElapsed / 1000 / 60 % 60 + " minutes!").queue();
+    else if (timeElapsed / 1000 > 60)
+      textChannel.sendMessage("<@" + memberID + ">" + " has studied for **" + timeElapsed / 1000 / 60 + "** minutes!").queue();
+    else
+      textChannel.sendMessage("<@" + memberID + ">" + " has studied for **" + timeElapsed / 1000 + "** seconds!").queue();
+  }
+
+}
