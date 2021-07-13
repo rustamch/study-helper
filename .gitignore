@@ -1,4 +1,4 @@
-/.idea
+.idea
 /dataSources/
 /dataSources.local.xml
 /src/main/java/test.java
@@ -6,5 +6,7 @@
 /src/main/java/Test.java
 'src/main/java/Test.java'
 /out/
-/.vscode/
-/target/
+.vscode/
+target
+'target'
+'dependency-reduced-pom.xml'

@@ -6,7 +6,6 @@ import events.SimpleEvents.AboutEvent;
 import events.SimpleEvents.DoraListener;
 import events.StudyTimeEvent.StudyTimeEvent;
 import events.TodoEvent.TodoEvent;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -22,7 +21,7 @@ public class Bot {
                 GatewayIntent.GUILD_VOICE_STATES,
                 GatewayIntent.GUILD_MESSAGES
         );
-        JDA jda = JDABuilder.createDefault(System.getenv("discord_token"),intents)
+        JDABuilder.createDefault(System.getenv("discord_token"),intents)
                 .addEventListeners(new AboutEvent())
                 .addEventListeners(new BirthdayEvent())
                 .addEventListeners(new TodoEvent())
