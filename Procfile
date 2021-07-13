@@ -1,1 +1,1 @@
-worker: java -cp target/study_hall_bot-1.0-SNAPSHOT.jar model.Bot
+worker: java -cp target/study_hall_bot-1.0-SNAPSHOT-jar-with-dependencies.jar model.Bot
