@@ -7,6 +7,6 @@
 'src/main/java/Test.java'
 /out/
 .vscode/
-target
-'target'
+target/*
+!target/study_hall_bot-1.0-SNAPSHOT-jar-with-dependencies.jar
 'dependency-reduced-pom.xml'
