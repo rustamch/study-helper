@@ -58,7 +58,7 @@
                         <include>target/study_hall_bot-1.0-SNAPSHOT.jar</include>
                     </includes>
                     <processTypes>
-                        <worker>java -jar target/study_hall_bot-1.0-SNAPSHOT.jar</worker>
+                        <worker>java -cp target/study_hall_bot-1.0-SNAPSHOT.jar model.Bot</worker>
                     </processTypes>
                 </configuration>
             </plugin>
