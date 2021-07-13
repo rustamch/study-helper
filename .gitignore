@@ -1,13 +1,10 @@
-# Default ignored files
-/.idea/shelf/
-/.idea/workspace.xml
-# Datasource local storage ignored files
+/.idea
 /dataSources/
 /dataSources.local.xml
-# Editor-based HTTP Client requests
-/httpRequests/
-# test.java class in main
 /src/main/java/test.java
 'src/main/java/test.java' 
 /src/main/java/Test.java
 'src/main/java/Test.java'
+/out/
+/.vscode/
+/target/

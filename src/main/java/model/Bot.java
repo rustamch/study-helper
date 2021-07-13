@@ -16,18 +16,13 @@ import java.util.EnumSet;
 
 
 public class Bot {
-
-    public static JDA jda;
-
     public static void main(String[] args) throws LoginException {
-        args = new String[1];
-        args[0] = System.getenv("discord_token");
         EnumSet<GatewayIntent> intents = EnumSet.of(
-                GatewayIntent.GUILD_EMOJIS, // for Guild#getEmotes (not very useful)
-                GatewayIntent.GUILD_VOICE_STATES, // for member voice states
-                GatewayIntent.GUILD_MESSAGES // for message received event
+                GatewayIntent.GUILD_EMOJIS, 
+                GatewayIntent.GUILD_VOICE_STATES,
+                GatewayIntent.GUILD_MESSAGES
         );
-        jda = JDABuilder.createDefault(args[0],intents)
+        JDA jda = JDABuilder.createDefault(System.getenv("discord_token"),intents)
                 .addEventListeners(new AboutEvent())
                 .addEventListeners(new BirthdayEvent())
                 .addEventListeners(new TodoEvent())

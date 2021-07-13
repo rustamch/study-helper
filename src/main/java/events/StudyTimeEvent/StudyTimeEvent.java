@@ -117,7 +117,10 @@ public class StudyTimeEvent extends ListenerAdapter {
     StudyTimeSession session = new StudyTimeSession(m.getId());
     session.trackSession();
     textChannel = event.getGuild().getTextChannelsByName("study-records", true).get(0);
-    textChannel.sendMessage(m.getEffectiveName() + " has started studying!").queue();
+    event.getMember().getUser().openPrivateChannel().queue((channel) ->
+    {
+        channel.sendMessage("Have a productive study session!").queue();
+    });
   }
 
   /**
@@ -129,7 +132,7 @@ public class StudyTimeEvent extends ListenerAdapter {
     Member m = event.getMember();
     StudyTimeSession session = StudyTimeSession.getStudySession(m.getId());
     long timeElapsed = session.finishSession();
-    sendTimeElapsedMessage(m.getId(),timeElapsed);
+    sendTimeElapsedMessage(event,timeElapsed);
     storeElapsedTime(m.getId(), timeElapsed);
   }
 
@@ -148,14 +151,19 @@ public class StudyTimeEvent extends ListenerAdapter {
    * @param memberID id of the member who just finished their study session.
    * @param timeElapsed amount of time in miliseconds.
    */
-  private void sendTimeElapsedMessage(String memberID, long timeElapsed) {
+  private void sendTimeElapsedMessage(GenericGuildVoiceEvent event, long timeElapsed) {
+    String msg;
     if (timeElapsed / 1000 > 3600)
-      textChannel.sendMessage("<@" + memberID + ">" + " has studied for **" + timeElapsed / 1000 / 60 / 60 + "** hours" +
-              " and " + timeElapsed / 1000 / 60 % 60 + " minutes!").queue();
+      msg = "You just studied for **" + timeElapsed / 1000 / 60 / 60 + "** hours" +
+              " and " + timeElapsed / 1000 / 60 % 60 + " minutes!";
     else if (timeElapsed / 1000 > 60)
-      textChannel.sendMessage("<@" + memberID + ">" + " has studied for **" + timeElapsed / 1000 / 60 + "** minutes!").queue();
+      msg = "You just studied for **" + timeElapsed / 1000 / 60 + "** minutes!";
     else
-      textChannel.sendMessage("<@" + memberID + ">" + " has studied for **" + timeElapsed / 1000 + "** seconds!").queue();
+      msg = "You just studied for **" + timeElapsed / 1000 + "** seconds!";
+    event.getMember().getUser().openPrivateChannel().queue((channel) ->
+      {
+          channel.sendMessage(msg).queue();
+      });
   }
 
 }
