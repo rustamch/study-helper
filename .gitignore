@@ -5,8 +5,10 @@
 'src/main/java/test.java' 
 /src/main/java/Test.java
 'src/main/java/Test.java'
-/out/
-.vscode/
-target/*
-!target/study_hall_bot-1.0-SNAPSHOT-jar-with-dependencies.jar
-'dependency-reduced-pom.xml'
+target/
+.env
+.idea/
+*.iml
+.classpath
+.project
+.settings/
