@@ -52,7 +52,7 @@ public class StudyTimeEvent extends ListenerAdapter {
         if (studyLeaderboard.getUserTime(event.getAuthor().getId()) != null) {
           long time = Long.parseLong(msgLst[2]) * 60 * 1000;
           storeElapsedTime(event.getAuthor().getId(), -Math.abs(time));
-          event.getChannel().sendMessage("Successfully subtracted " + Long.toString(time) + " minutes!").queue();
+          event.getChannel().sendMessage("Successfully subtracted " + Long.toString(time / 60000) + " minutes!").queue();
         } else {
           event.getChannel().sendMessage("You haven't studied yet >:(").queue();
         }
