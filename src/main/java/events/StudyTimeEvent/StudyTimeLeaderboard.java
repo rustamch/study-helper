@@ -75,7 +75,7 @@ public class StudyTimeLeaderboard extends Writable implements Iterable<String> {
     }
 
     /**
-     * Constructs a nee StudyTimeLeaderBoard
+     * Constructs a new StudyTimeLeaderBoard
      * @param timesMap a map that contains id of the users and the amount of time they studied
      */
     public StudyTimeLeaderboard(Map<String, Long> timesMap) {
