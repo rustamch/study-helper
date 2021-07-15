@@ -46,7 +46,16 @@ public class StudyTimeEvent extends ListenerAdapter {
     } else if (msgLst[0].equalsIgnoreCase("!studytime")) {
       if (msgLst[1].equalsIgnoreCase("check")) {
         msgStudyTimeForUser(event);
-      }
+      } else if (msgLst[1].equalsIgnoreCase("sub")) { // IT'S BACK!!
+        Map<String,Long> times = getTimesMap();
+        
+        if (times.containsKey(event.getAuthor().getId())) {
+          long time = - Long.parseLong(msgLst[2]) * 60 * 1000;
+          storeElapsedTime(event.getAuthor().getId(), time.abs());
+          event.getChannel().sendMessage("Successfully subtracted " + msgLst[2] + " minutes!").queue();
+        } else {
+          event.getChannel().sendMessage("You haven't studied yet >:(").queue();
+        }
     }
   }
 
