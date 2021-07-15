@@ -50,9 +50,9 @@ public class StudyTimeEvent extends ListenerAdapter {
         StudyTimeLeaderboard studyLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
         
         if (studyLeaderboard.getUserTime(event.getAuthor().getId()) != null) {
-          long time = - Long.parseLong(msgLst[2]) * 60 * 1000;
-          storeElapsedTime(event.getAuthor().getId(), Math.abs(time));
-          event.getChannel().sendMessage("Successfully subtracted " + msgLst[2] + " minutes!").queue();
+          long time = Long.parseLong(msgLst[2]) * 60 * 1000;
+          storeElapsedTime(event.getAuthor().getId(), -Math.abs(time));
+          event.getChannel().sendMessage("Successfully subtracted " + Long.toString(time) + " minutes!").queue();
         } else {
           event.getChannel().sendMessage("You haven't studied yet >:(").queue();
         }
