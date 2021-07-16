@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'org.springframework.boot'
+version = '1.0-SNAPSHOT'
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+
+
+repositories {
+        
+     maven { url "https://m2.dv8tion.net/releases" }
+     maven { url "http://jcenter.bintray.com" }
+}
+dependencies {
+    compile group: 'org.mongodb', name: 'mongo-java-driver', version:'3.12.8'
+    compile group: 'net.dv8tion', name: 'JDA', version:'4.2.1_262'
+}
