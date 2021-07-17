@@ -11,7 +11,10 @@ import exceptions.InvalidTimeInHoursException;
 import exceptions.InvalidTimeInMinutesException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.regex.Pattern;
 
 public class ReminderFeature extends ListenerAdapter implements ActionListener {
@@ -30,9 +33,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
     public void onMessageReceived(MessageReceivedEvent event) {
         Message message = event.getMessage();
         MessageChannel channel = event.getChannel();
-
         String messageStringRaw = message.getContentRaw();
-
         if (Pattern.matches("!reminder\\s.*", messageStringRaw)) {
             try {
                 reminderManager.addReminder(event);
@@ -53,8 +54,7 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        LocalDateTime dateAndTimeNow = LocalDateTime.now();
-        dateAndTimeNow = dateAndTimeNow.withSecond(0).withNano(0);
-        reminderManager.notifyUsers(dateAndTimeNow);
+        Instant currMin = Instant.now().truncatedTo(ChronoUnit.MINUTES);
+        reminderManager.notifyUsers(currMin);
     }
 }
