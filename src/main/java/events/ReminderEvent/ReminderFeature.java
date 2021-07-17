@@ -48,10 +48,6 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
             } catch (InvalidReminderException e) {
                 channel.sendMessage("Invalid reminder format. Please try **!reminder YYYY.MM.DD**").queue();
             }
-        } else if (Pattern.matches("!reminders\\s*", messageStringRaw)) {
-            channel.sendMessage(reminderManager.getAllReminders()).queue();
-        } else if (Pattern.matches("!reminders.*", messageStringRaw)) {
-            channel.sendMessage("Did you mean **!reminders**?").queue();
         }
     }
 
@@ -59,13 +55,6 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         LocalDateTime dateAndTimeNow = LocalDateTime.now();
         dateAndTimeNow = dateAndTimeNow.withSecond(0).withNano(0);
-
-        if (reminderManager.containsReminder(dateAndTimeNow)) {
-            MessageChannel channel = reminderManager.getChannel(dateAndTimeNow);
-            String message = reminderManager.getMessage(dateAndTimeNow);
-
-            channel.sendMessage(message).queue();
-            reminderManager.removeReminder(dateAndTimeNow);
-        }
+        reminderManager.notifyUsers(dateAndTimeNow);
     }
 }

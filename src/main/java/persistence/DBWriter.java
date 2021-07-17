@@ -24,6 +24,22 @@ public class DBWriter {
         collection = db.getCollection(colName);
     }
 
+    public void saveObject(Writable writable, SaveOption option) {
+        Document doc = writable.toDoc();
+        switch (option) {
+            case REPLACE_DUPLICATES_ONLY:
+                collection.findOneAndReplace(doc,doc,replaceOptions);
+                break;
+            case DEFAULT:
+                collection.findOneAndReplace(Filters.eq(ACCESS_KEY, accessVal),doc,replaceOptions);
+                break;
+        }
+    }
+
+    public void removeDocuments(Document filter) {
+        collection.deleteMany(filter);
+    }
+
     public void saveObject(Writable writable) {
         Document doc = writable.toDoc();
         collection.findOneAndReplace(Filters.eq(ACCESS_KEY, accessVal),doc,replaceOptions);

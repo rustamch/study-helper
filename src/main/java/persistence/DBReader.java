@@ -1,6 +1,7 @@
 package persistence;
 
 import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
@@ -102,6 +103,11 @@ public class DBReader {
         return LocalDate.of(Integer.parseInt(datelst[0]), Integer.parseInt(datelst[1]), Integer.parseInt(datelst[2]));
     }
 
+    public FindIterable<Document> loadDocumentsWithFilter(Document filter) {
+        FindIterable<Document> docs = collection.find(filter);
+        return docs;
+    }
+
     /**
      * Loads an object from the database from the given collection
      * @return a document that has specified field
@@ -111,7 +117,6 @@ public class DBReader {
         Document document = collection.find(new Document(Writable.ACCESS_KEY,documentName)).first();
         if (document == null) {
             throw new InvalidDocumentException();
-
         }
         readDoc = document;
         return document;
