@@ -14,6 +14,7 @@ import exceptions.InvalidDocumentException;
  */
 public class StudyTimeEvent extends ListenerAdapter {
   public static final String STUDY_CHANNEL = "silent study";
+  public static final int NUMBER_OF_USERS_ON_LEADERBOARD = 5;
   TextChannel textChannel;
 
 
@@ -109,7 +110,7 @@ public class StudyTimeEvent extends ListenerAdapter {
     int i = 1;
     StudyTimeLeaderboard leaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
     for (String memberID : leaderboard) {
-      if (i > 3) {
+      if (i > NUMBER_OF_USERS_ON_LEADERBOARD) {
         break;
       }
       Long val = leaderboard.getUserTime(memberID);
