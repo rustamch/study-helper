@@ -7,6 +7,8 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.FindOneAndReplaceOptions;
+import org.bson.conversions.Bson;
+
 import static persistence.Writable.ACCESS_KEY;
 
 
@@ -36,7 +38,7 @@ public class DBWriter {
         }
     }
 
-    public void removeDocuments(Document filter) {
+    public void removeDocuments(Bson filter) {
         collection.deleteMany(filter);
     }
 

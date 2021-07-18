@@ -5,6 +5,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import com.mongodb.client.model.Filters;
 import events.BirthdayEvent.BirthdayEvent;
 import events.TodoEvent.Todo;
 import events.TodoEvent.TodoList;
@@ -14,6 +15,7 @@ import exceptions.InvalidDateFormatException;
 import exceptions.InvalidDocumentException;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 import java.time.LocalDate;
 import java.util.Date;
@@ -103,7 +105,7 @@ public class DBReader {
         return LocalDate.of(Integer.parseInt(datelst[0]), Integer.parseInt(datelst[1]), Integer.parseInt(datelst[2]));
     }
 
-    public FindIterable<Document> loadDocumentsWithFilter(Document filter) {
+    public FindIterable<Document> loadDocumentsWithFilter(Bson filter) {
         FindIterable<Document> docs = collection.find(filter);
         return docs;
     }

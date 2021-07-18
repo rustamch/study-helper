@@ -1,6 +1,7 @@
 package events.ReminderEvent;
 
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import persistence.DBReader;
 import persistence.DBWriter;
@@ -21,9 +22,7 @@ public class Reminder extends Writable {
      */
     public static List<Reminder> loadReminders(long epoch) {
         DBReader reader = new DBReader(COLLECTION_NAME,"reminder");
-        Document filter = new Document();
-        filter.put("epoch",epoch);
-        FindIterable<Document> docs = reader.loadDocumentsWithFilter(filter);
+        FindIterable<Document> docs = reader.loadDocumentsWithFilter(Filters.eq("epoch",epoch));
         List<Reminder> reminders = new ArrayList<>();
         for (Document doc : docs) {
             String userID = doc.getString(ACCESS_KEY);
@@ -31,7 +30,7 @@ public class Reminder extends Writable {
             reminders.add(rem);
         }
         DBWriter writer = new DBWriter(COLLECTION_NAME,"reminder");
-        writer.removeDocuments(filter);
+        writer.removeDocuments(Filters.eq("epoch",epoch));
         return reminders;
     }
 
