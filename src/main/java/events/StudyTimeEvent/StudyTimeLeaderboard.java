@@ -14,6 +14,7 @@ import org.bson.Document;
 import exceptions.InvalidDocumentException;
 import persistence.DBReader;
 import persistence.DBWriter;
+import persistence.SaveOption;
 import persistence.Writable;
 
 /**
@@ -102,7 +103,7 @@ public class StudyTimeLeaderboard extends Writable implements Iterable<String> {
         }
         this.timesMap.put(memberID, timeElapsed / 1000 / 60  + curr);
         DBWriter writer = new DBWriter(COLLECTION_NAME, "times_leaderboard");
-        writer.saveObject(this);
+        writer.saveObject(this, SaveOption.DEFAULT);
     }
 
     /**

@@ -7,6 +7,7 @@ import persistence.DBWriter;
 import java.time.LocalDate;
 
 import exceptions.IllegalDateException;
+import persistence.SaveOption;
 
 public class TodoManager {
     private static final String COLLECTION_NAME = "todo_collection";
@@ -29,7 +30,7 @@ public class TodoManager {
     private void save() {
         todos.setUserID(owner.getId());
         DBWriter writer = new DBWriter(COLLECTION_NAME,owner.getId());
-        writer.saveObject(todos);
+        writer.saveObject(todos, SaveOption.DEFAULT);
     }
 
     public String getTodoMessage() {
