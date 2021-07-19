@@ -68,14 +68,14 @@ public class StudyTimeEvent extends ListenerAdapter {
   
   @Override
   public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
-    if (event.getChannelJoined().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
+    if (event.getChannelJoined().getName().matches(STUDY_CHANNEL)) {
       trackStartTime(event);
     }
   }
 
   @Override
   public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
-    if (event.getChannelLeft().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
+    if (event.getChannelLeft().getName().matches(STUDY_CHANNEL)) {
       try {
         endAndRecord(event);
       } catch (InvalidDocumentException e) {
@@ -163,7 +163,6 @@ public class StudyTimeEvent extends ListenerAdapter {
 
   /**
    * Sends a message that tells for how long the given user has studied.
-   * @param memberID id of the member who just finished their study session.
    * @param timeElapsed amount of time in miliseconds.
    */
   private void sendTimeElapsedMessage(GenericGuildVoiceEvent event, long timeElapsed) {
