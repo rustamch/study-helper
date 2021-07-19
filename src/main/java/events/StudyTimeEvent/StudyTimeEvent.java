@@ -13,7 +13,7 @@ import exceptions.InvalidDocumentException;
  * Represents a handler for !studytime commands
  */
 public class StudyTimeEvent extends ListenerAdapter {
-  public static final String STUDY_CHANNEL = "silent study";
+  public static final String STUDY_CHANNEL = ".*study.*";
   public static final int NUMBER_OF_USERS_ON_LEADERBOARD = 5;
   TextChannel textChannel;
 
