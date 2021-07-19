@@ -6,6 +6,7 @@ import org.bson.Document;
 import exceptions.InvalidDocumentException;
 import persistence.DBReader;
 import persistence.DBWriter;
+import persistence.SaveOption;
 import persistence.Writable;
 
 
@@ -60,8 +61,7 @@ public class StudyTimeSession extends Writable{
     /**
      * Constructs a new StudySession
      * @param memberID id of the member to whom this session belongs to
-     * @param epoch 
-     * @param nano
+     * @param epoch an Epoch that points to a specific time
      */
     public StudyTimeSession(String memberID, long epoch, long nanos) {
         this.start = Instant.ofEpochSecond(epoch,nanos);
@@ -73,7 +73,7 @@ public class StudyTimeSession extends Writable{
      */
     public void trackSession() {
         DBWriter writer = new DBWriter(COLLECTION_NAME, memberID);
-        writer.saveObject(this);
+        writer.saveObject(this, SaveOption.DEFAULT);
     }
     
     /**

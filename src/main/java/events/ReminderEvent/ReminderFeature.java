@@ -21,13 +21,15 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
     private final ReminderManager reminderManager;
     private final Timer timer;
 
+    /**
+     * Constructs a new reminder and sets the timer to check time very minute.
+     */
     public ReminderFeature() {
         reminderManager = new ReminderManager();
         timer = new Timer(60000, this);
         timer.setRepeats(true);
         timer.start();
     }
-
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -38,8 +40,6 @@ public class ReminderFeature extends ListenerAdapter implements ActionListener {
             try {
                 reminderManager.addReminder(event);
                 channel.sendMessage("Reminder was added!").queue();
-            } catch (DuplicateReminderException e) {
-                channel.sendMessage("Duplicated reminder.").queue();
             } catch (InvalidTimeInMinutesException e) {
                 channel.sendMessage("Invalid reminder format. " +
                         "Please try again with a valid format e.g. **!reminder 15min**").queue();

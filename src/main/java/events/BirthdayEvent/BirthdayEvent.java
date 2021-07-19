@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import exceptions.IllegalDateException;
 import exceptions.InvalidDateFormatException;
+import persistence.SaveOption;
 
 /**
  * Represents a handler for !bday commands
@@ -104,7 +105,7 @@ public class BirthdayEvent extends ListenerAdapter {
         bdayLog = new BirthdayLog(reader.getBDayLog());
         Date bday = getDateFromStr(date);
         bdayLog.addMemberBirthday(name, bday);
-        writer.saveObject(bdayLog);
+        writer.saveObject(bdayLog, SaveOption.DEFAULT);
     }
 
     /**
