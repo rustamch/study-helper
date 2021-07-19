@@ -2,6 +2,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import javax.swing.*;
+
+import java.util.Set;
 import java.util.TimerTask;
 import persistence.*;
 import org.bson.Document;
@@ -11,23 +13,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import exceptions.InvalidDocumentException;
+import events.BirthdayEvent.BirthdayRecord.YEAR_KEY;
+import events.BirthdayEvent.BirthdayRecord.MONTH_KEY;
+import events.BirthdayEvent.BirthdayRecord.DAY_KEY;
 
 public class BirthdayReminder extends Writable implements ActionListener {
     private Timer timer;
+    private BirthdayEvent bdayEvent;
 
-    private final String COLLECTION_NAME = "bday_reminder";
+    private final String COLLECTION_NAME = "bdayReminder";
     public static final String DOCUMENT_NAME = "all";
-    public static final String YEAR_KEY = "year";
-    public static final String MONTH_KEY = "month";
-    public static final String DAY_KEY = "day";
     public static final String HOUR_KEY = "hour";
     public static final String MIN_KEY = "minute";
 
-    public BirthdayReminder() {
-        LocalDateTime lastTimeChecked = loadDate();
-        timer = new Timer((int) lastTimeChecked.until(lastTimeChecked.plusDays(1), ChronoUnit.MILLIS), this);
+    public BirthdayReminder(BirthdayEvent e) {
+        bdayEvent = e;
+        setNewTimer();
     }
 
+    @Override
     public Document toDoc() {
         Document saveFile = new Document();
         LocalDateTime now = LocalDateTime.now();
@@ -40,15 +44,22 @@ public class BirthdayReminder extends Writable implements ActionListener {
         return saveFile;
     }
 
-    private void checkBirthdays(LocalDate now) {
-            BirthdayLog bdayLog = new BirthdayLog(log);
+    private Set<String> findMembersWithBday(LocalDate date) {
+        DBReader reader = new DBReader(COLLECTION_NAME, "");
+        FindIterable<Document> docs = reader.loadDocumentsWithFilter(Filters.eq(MONTH_KEY, date.getMonthValue()), Filter.eq(DAY_KEY, date.getDayOfMonth()));
+        HashSet<String> set = new HashSet<>();
+        for (Document doc : docs) {
+            String userID = doc.getString(ID_KEY);
+            set.add(userID);
+        }
+        return set;
     }
 
     private LocalDateTime loadDate() {
         DBReader reader = new DBReader(COLLECTION_NAME, DOCUMENT_NAME);
         try {
             Document doc = reader.loadObject();
-            return LocalDateTime.of((int) doc.get(YEAR_KEY), (int) doc.get(DAY_KEY), (int) doc.get(HOUR_KEY), (int) doc.get(MIN_KEY), 0);
+            return LocalDateTime.of(doc.getInteger(YEAR_KEY), doc.getInteger(DAY_KEY), doc.getInteger(HOUR_KEY), doc.getInteger(MIN_KEY), 0);
         } catch (InvalidDocumentException e) {
             return LocalDateTime.now().minusDays(1);
         }
@@ -57,14 +68,24 @@ public class BirthdayReminder extends Writable implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent arg0) {
         checkBirthdays();
-        storeNewTime();
+        storeTime();
+        setNewTimer();
     }
 
     private void checkBirthdays() {
-        BirthdayLog log = new BirthdayLog();
+        Set<String> ids = findMembersWithBday(LocalDate.now());
+        if (!ids.isEmpty()) {
+            bdayEvent.congratulateBday(set);
+        }
     }
 
-    private void storeNewTime() {
+    private void storeTime() {
+        DBWriter writer = new DBWriter(COLLECTION_NAME, DOCUMENT_NAME);
+        writer.saveObject(this, SaveOption.DEFAULT);
+    }
 
+    private void setNewTimer() {
+        LocalDateTime lastTimeChecked = loadDate();
+        timer = new Timer((int) lastTimeChecked.until(lastTimeChecked.plusDays(1), ChronoUnit.MILLIS), this);
     }
 }

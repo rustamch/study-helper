@@ -6,13 +6,14 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import persistence.DBReader;
 import persistence.DBWriter;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import exceptions.IllegalDateException;
 import exceptions.InvalidDateFormatException;
 import persistence.SaveOption;
+import model.Bot;
 
 /**
  * Represents a handler for !bday commands
@@ -85,7 +86,7 @@ public class BirthdayEvent extends ListenerAdapter {
      * @param id name of the member
      * @param date string representation of a date
      */
-    private void sendBDayMsg(MessageReceivedEvent event, String id, String date) {
+    public void sendBDayMsg(MessageReceivedEvent event, String id, String date) {
         event.getChannel().sendMessage( event.getGuild().getMemberById(id).getEffectiveName() + "'s birthday is " + date + "!").queue();
     }
 
@@ -134,6 +135,22 @@ public class BirthdayEvent extends ListenerAdapter {
         b.append("/");
         b.append(d.getDate());
         return b.toString();
+    }
+
+    public void congratulateBday(Set<String> memberIDs) {
+        StringBuilder builder = new StringBuilder();
+        for (String id : memberIDs) {
+            builder.append("<@");
+            builder.append(id);
+            builder.append("> ");
+        }
+        Guild studyHall = Bot.BOT_JDA.getGuildsByName("Studium Praetorium").get(0);
+        for (GuildChannel channel : studeyHall.getChannels()) {
+            if (channel.getName().equals("general")) {
+                channel.sendMessage("Happy Birthday! " + builder.toString()).queue();
+                break;
+            }
+        }
     }
 
     @Override
