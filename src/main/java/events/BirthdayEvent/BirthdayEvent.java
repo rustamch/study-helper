@@ -17,28 +17,23 @@ import exceptions.InvalidDateFormatException;
  * Represents a handler for !bday commands
  */
 public class BirthdayEvent extends ListenerAdapter {
-    private BirthdayLog bdayLog;
     private DBReader reader = new DBReader(BirthdayLog.BDAYLOG_LOCATION,BirthdayLog.SAVE_VAL);
     private DBWriter writer = new DBWriter(BirthdayLog.BDAYLOG_LOCATION,BirthdayLog.SAVE_VAL);
-
-    public BirthdayEvent() {
-        bdayLog = new BirthdayLog(reader.getBDayLog());
-    }
 
     /**
      * Analyzes the given event to set birthday or lookup a member's birthday
      * @param event message event that started with message "!bday"
      */
-    public void handleBdayActions(MessageReceivedEvent event) {
+    public void handleBdayActions(BirthdayLog bdayLog, MessageReceivedEvent event) {
         String[] msg = event.getMessage().getContentRaw().split(" ");
         if (msg.length < 3) {
             return;
         }
         String id = event.getAuthor().getId();
         if (msg[1].equalsIgnoreCase("setbday")) {
-            setBDay(event, msg[2], id);
+            setBDay(bdayLog, event, msg[2], id);
         } else if (msg[1].equalsIgnoreCase("check")) {
-            lookupBDay(event, msg[2]);
+            lookupBDay(bdayLog, event, msg[2]);
         }
     }
 
@@ -48,7 +43,7 @@ public class BirthdayEvent extends ListenerAdapter {
      * @param event message event
      * @param name name or atMention of the member whose birthday is being looked up
      */
-    private void lookupBDay(MessageReceivedEvent event, String name) {
+    private void lookupBDay(BirthdayLog bdayLog, MessageReceivedEvent event, String name) {
         Pattern p = Pattern.compile("\\d{18}");
         Matcher matcher = p.matcher(name);
         String id;
@@ -72,10 +67,10 @@ public class BirthdayEvent extends ListenerAdapter {
      * @param date string representation of a date
      * @param id name of the member
      */
-    private void setBDay(MessageReceivedEvent event, String date, String id) {
+    private void setBDay(BirthdayLog bdayLog, MessageReceivedEvent event, String date, String id) {
         try {
-            recordBDay(id, date);
-            sendBDayMsg(event, id, getMemberBday(id));
+            recordBDay(bdayLog, id, date);
+            sendBDayMsg(event, id, getMemberBday(bdayLog, id));
         } catch (InvalidDateFormatException e) {
             event.getChannel().sendMessage("Sorry, birthday format illegal. Not recorded.").queue();
         } catch (IllegalDateException e) {
@@ -100,7 +95,7 @@ public class BirthdayEvent extends ListenerAdapter {
      * @throws InvalidDateFormatException when given date format is unrecognized
      * @throws IllegalDateException when given date has illegal year/month/day values
      */
-    public void recordBDay(String name, String date) throws InvalidDateFormatException, IllegalDateException {
+    public void recordBDay(BirthdayLog bdayLog, String name, String date) throws InvalidDateFormatException, IllegalDateException {
         bdayLog = new BirthdayLog(reader.getBDayLog());
         Date bday = getDateFromStr(date);
         bdayLog.addMemberBirthday(name, bday);
@@ -126,7 +121,7 @@ public class BirthdayEvent extends ListenerAdapter {
                 Integer.parseInt(lst[1]) - 1, Integer.parseInt(lst[2]));
     }
 
-    public String getMemberBday(String id) {
+    public String getMemberBday(BirthdayLog bdayLog, String id) {
         return dateToStr(bdayLog.getDateById(id));
     }
 
@@ -144,8 +139,9 @@ public class BirthdayEvent extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event) {
         Message msg = event.getMessage();
         String rawMsg = msg.getContentRaw();
+        BirthdayLog bdayLog = new BirthdayLog(reader.getBDayLog());
         if (rawMsg.length() > 5 && rawMsg.substring(0, 5).equalsIgnoreCase("!bday")) {
-            handleBdayActions(event);
+            handleBdayActions(bdayLog, event);
         }
     }
 }
