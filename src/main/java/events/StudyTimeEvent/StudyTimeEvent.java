@@ -9,6 +9,9 @@ import org.jetbrains.annotations.NotNull;
 
 import exceptions.InvalidDocumentException;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Represents a handler for !studytime commands
  */
@@ -20,13 +23,13 @@ public class StudyTimeEvent extends ListenerAdapter {
 
   @Override
   public void onGuildVoiceMove(@NotNull GuildVoiceMoveEvent event) {
-    if (event.getChannelLeft().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
+    if (event.getChannelLeft().getName().matches(STUDY_CHANNEL)) {
       try {
         endAndRecord(event);
       } catch (InvalidDocumentException e) {
         textChannel.sendMessage("Sigh... something went wrong.");
       }
-    } else if (event.getChannelJoined().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
+    } else if (event.getChannelJoined().getName().matches(STUDY_CHANNEL)) {
       trackStartTime(event);
     }
   }
