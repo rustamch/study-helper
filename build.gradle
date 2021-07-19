@@ -1,0 +1,40 @@
+apply plugin: 'java'
+group = 'org.springframework.boot'
+version = '1.0-SNAPSHOT'
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+task stage(dependsOn: ['build', 'clean'])
+build.mustRunAfter clean
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
+}
+dependencies {
+    implementation ("org.mongodb:mongodb-driver:3.6.3")
+    implementation("net.dv8tion:JDA:4.3.0_277")
+}
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.5.2"
+    }
+}
+
+apply plugin: "org.springframework.boot"

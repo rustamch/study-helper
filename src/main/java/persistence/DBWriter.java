@@ -7,6 +7,8 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.FindOneAndReplaceOptions;
+import org.bson.conversions.Bson;
+
 import static persistence.Writable.ACCESS_KEY;
 
 
@@ -24,8 +26,19 @@ public class DBWriter {
         collection = db.getCollection(colName);
     }
 
-    public void saveObject(Writable writable) {
+    public void removeDocuments(Bson filter) {
+        collection.deleteMany(filter);
+    }
+
+    public void saveObject(Writable writable, SaveOption saveOption) {
         Document doc = writable.toDoc();
-        collection.findOneAndReplace(Filters.eq(ACCESS_KEY, accessVal),doc,replaceOptions);
+        switch (saveOption) {
+            case REPLACE_DUPLICATES_ONLY:
+                collection.findOneAndReplace(doc, doc, replaceOptions);
+                break;
+            case DEFAULT:
+                collection.findOneAndReplace(Filters.eq(ACCESS_KEY, accessVal), doc, replaceOptions);
+                break;
+        }
     }
 }

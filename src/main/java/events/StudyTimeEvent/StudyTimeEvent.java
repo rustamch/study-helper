@@ -14,6 +14,7 @@ import exceptions.InvalidDocumentException;
  */
 public class StudyTimeEvent extends ListenerAdapter {
   public static final String STUDY_CHANNEL = "silent study";
+  public static final int NUMBER_OF_USERS_ON_LEADERBOARD = 5;
   TextChannel textChannel;
 
 
@@ -47,17 +48,19 @@ public class StudyTimeEvent extends ListenerAdapter {
       if (msgLst[1].equalsIgnoreCase("check")) {
         msgStudyTimeForUser(event);
       } else if (msgLst[1].equalsIgnoreCase("sub")) { // IT'S BACK!!
-        Map<String,Long> times = getTimesMap();
+        StudyTimeLeaderboard studyLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
         
-        if (times.containsKey(event.getAuthor().getId())) {
-          long time = - Long.parseLong(msgLst[2]) * 60 * 1000;
-          storeElapsedTime(event.getAuthor().getId(), time.abs());
-          event.getChannel().sendMessage("Successfully subtracted " + msgLst[2] + " minutes!").queue();
+        if (studyLeaderboard.getUserTime(event.getAuthor().getId()) != null) {
+          long time = Math.abs(Long.parseLong(msgLst[2]) * 60 * 1000);
+          storeElapsedTime(event.getAuthor().getId(), -time);
+          event.getChannel().sendMessage("Successfully subtracted " + Long.toString(time / 60000) + " minute(s)!").queue();
         } else {
           event.getChannel().sendMessage("You haven't studied yet >:(").queue();
         }
+      }
     }
   }
+  
 
   
   @Override
@@ -107,7 +110,7 @@ public class StudyTimeEvent extends ListenerAdapter {
     int i = 1;
     StudyTimeLeaderboard leaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
     for (String memberID : leaderboard) {
-      if (i > 3) {
+      if (i > NUMBER_OF_USERS_ON_LEADERBOARD) {
         break;
       }
       Long val = leaderboard.getUserTime(memberID);
