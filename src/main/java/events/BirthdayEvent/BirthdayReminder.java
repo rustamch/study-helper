@@ -26,6 +26,7 @@ public class BirthdayReminder extends Writable  {
      * Constructs a new BirthdayReminder.
      */
     public BirthdayReminder() {
+
         setNewTimer();
     }
 
@@ -33,7 +34,7 @@ public class BirthdayReminder extends Writable  {
     public Document toDoc() {
         Document saveFile = new Document();
         Instant now = Instant.now();
-        saveFile.put(ACCESS_KEY, now.plus(1, ChronoUnit.DAYS).getEpochSecond());
+        saveFile.put(ACCESS_KEY, now.getEpochSecond());
         return saveFile;
     }
 
@@ -47,9 +48,7 @@ public class BirthdayReminder extends Writable  {
             Document doc = reader.loadObject();
             return Instant.ofEpochSecond(doc.getLong(ACCESS_KEY));
         } catch (InvalidDocumentException e) {
-            DBWriter writer = new DBWriter(COLLECTION_NAME);
-            writer.saveObject(this, SaveOption.DEFAULT);
-            return Instant.now().plus(1, ChronoUnit.DAYS);
+            return Instant.now();
         }
     }
 
@@ -108,17 +107,22 @@ public class BirthdayReminder extends Writable  {
     }
 
     /**
-     * Sets a timer to the next birthday reminder.
+     * Sets a timer for the next birthday reminder. If the time record on the databse
+     * points to the point of time before now - execute the birthday reminder routine.
      */
     private void setNewTimer() {
         Instant nextTimer = loadNextTimer();
         Instant now = Instant.now();
         timer = new Timer();
+        if (now.until(nextTimer, ChronoUnit.MILLIS) <= 0) {
+            onTimer();
+        } else {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 onTimer();
             }
         }, now.until(nextTimer, ChronoUnit.MILLIS));
+        }
     }
 }
