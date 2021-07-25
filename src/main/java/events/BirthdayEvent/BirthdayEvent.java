@@ -31,6 +31,13 @@ public class BirthdayEvent extends ListenerAdapter {
     }
 
     /**
+     * Constructs a new BirthdayEvent and initializes BirthdayReminders.
+     */
+    public BirthdayEvent() {
+        new BirthdayReminder();
+    }
+    
+    /**
      * Finds the birthday of member mentioned in the message, prints to channel
      * birthday message if found, print "birthday not found" otherwise
      * 
