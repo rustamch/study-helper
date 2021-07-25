@@ -29,7 +29,7 @@ public class TodoManager {
 
     private void save() {
         todos.setUserID(owner.getId());
-        DBWriter writer = new DBWriter(COLLECTION_NAME,owner.getId());
+        DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.saveObject(todos, SaveOption.DEFAULT);
     }
 

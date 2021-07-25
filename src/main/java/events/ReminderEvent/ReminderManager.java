@@ -14,7 +14,6 @@ import persistence.SaveOption;
 
 // A manager for reminders
 public class ReminderManager {
-    private final String DEFAULT_TIME = "9:00";
     private final String COLLECTION_NAME = "reminders";
 
     // checks for duplicates and adds reminder to reminders
@@ -24,7 +23,7 @@ public class ReminderManager {
         long epoch = adjustedInstant.getEpochSecond();
         String memberID = event.getAuthor().getId();
         Reminder rem = new Reminder(epoch, memberID);
-        DBWriter writer = new DBWriter(COLLECTION_NAME, memberID);
+        DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.saveObject(rem, SaveOption.REPLACE_DUPLICATES_ONLY);
     }
 
