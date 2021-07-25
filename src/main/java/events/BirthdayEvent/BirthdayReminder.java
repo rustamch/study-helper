@@ -20,13 +20,14 @@ import persistence.Writable;
 
 public class BirthdayReminder extends Writable  {
     private Timer timer;
+    private final String EPOCH_KEY = "epoch";
     private final String COLLECTION_NAME = "bdayReminder";
 
     /**
      * Constructs a new BirthdayReminder.
      */
     public BirthdayReminder() {
-
+        this.timer = new Timer();
         setNewTimer();
     }
 
@@ -34,7 +35,8 @@ public class BirthdayReminder extends Writable  {
     public Document toDoc() {
         Document saveFile = new Document();
         Instant now = Instant.now();
-        saveFile.put(ACCESS_KEY, now.getEpochSecond());
+        saveFile.put(ACCESS_KEY,"reminder_time");
+        saveFile.put(EPOCH_KEY,now.getEpochSecond());
         return saveFile;
     }
 
@@ -46,7 +48,7 @@ public class BirthdayReminder extends Writable  {
         DBReader reader = new DBReader(COLLECTION_NAME);
         try {
             Document doc = reader.loadObject();
-            return Instant.ofEpochSecond(doc.getLong(ACCESS_KEY));
+            return Instant.ofEpochSecond(doc.getLong(EPOCH_KEY));
         } catch (InvalidDocumentException e) {
             return Instant.now();
         }
@@ -113,9 +115,15 @@ public class BirthdayReminder extends Writable  {
     private void setNewTimer() {
         Instant nextTimer = loadNextTimer();
         Instant now = Instant.now();
-        timer = new Timer();
         if (now.until(nextTimer, ChronoUnit.MILLIS) <= 0) {
-            onTimer();
+            checkBirthdays();
+            storeNextReminderTime();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    onTimer();
+                }
+            }, now.until(now.plus(1, ChronoUnit.DAYS), ChronoUnit.MILLIS));
         } else {
         timer.schedule(new TimerTask() {
             @Override
