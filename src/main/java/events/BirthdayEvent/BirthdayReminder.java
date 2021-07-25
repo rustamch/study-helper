@@ -1,91 +1,122 @@
-import java.time.LocalDateTime;
+package events.BirthdayEvent;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-
-import javax.swing.*;
-
+import java.util.List;
 import java.util.Set;
+import java.util.Timer;
 import java.util.TimerTask;
-import persistence.*;
-import org.bson.Document;
-import org.elasticsearch.action.ActionListener;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import org.bson.Document;
 
 import exceptions.InvalidDocumentException;
-import events.BirthdayEvent.BirthdayRecord.YEAR_KEY;
-import events.BirthdayEvent.BirthdayRecord.MONTH_KEY;
-import events.BirthdayEvent.BirthdayRecord.DAY_KEY;
+import model.Bot;
+import net.dv8tion.jda.api.entities.Guild;
+import persistence.DBReader;
+import persistence.DBWriter;
+import persistence.SaveOption;
+import persistence.Writable;
 
-public class BirthdayReminder extends Writable implements ActionListener {
+
+public class BirthdayReminder extends Writable  {
     private Timer timer;
-    private BirthdayEvent bdayEvent;
-
     private final String COLLECTION_NAME = "bdayReminder";
-    public static final String DOCUMENT_NAME = "all";
-    public static final String HOUR_KEY = "hour";
-    public static final String MIN_KEY = "minute";
 
-    public BirthdayReminder(BirthdayEvent e) {
-        bdayEvent = e;
+    /**
+     * Constructs a new BirthdayReminder.
+     */
+    public BirthdayReminder() {
         setNewTimer();
     }
 
     @Override
     public Document toDoc() {
         Document saveFile = new Document();
-        LocalDateTime now = LocalDateTime.now();
-        saveFile.put(YEAR_KEY, now.getYear());
-        saveFile.put(MONTH_KEY, now.getMonth());
-        saveFile.put(DAY_KEY, now.getDayOfMonth());
-        saveFile.put(HOUR_KEY, now.getHour());
-        saveFile.put(MIN_KEY, now.getMinute());
-        saveFile.put(Writable.ACCESS_KEY, DOCUMENT_NAME);
+        Instant now = Instant.now();
+        saveFile.put(ACCESS_KEY, now.plus(1, ChronoUnit.DAYS).getEpochSecond());
         return saveFile;
     }
 
-    private Set<String> findMembersWithBday(LocalDate date) {
-        DBReader reader = new DBReader(COLLECTION_NAME, "");
-        FindIterable<Document> docs = reader.loadDocumentsWithFilter(Filters.eq(MONTH_KEY, date.getMonthValue()), Filter.eq(DAY_KEY, date.getDayOfMonth()));
-        HashSet<String> set = new HashSet<>();
-        for (Document doc : docs) {
-            String userID = doc.getString(ID_KEY);
-            set.add(userID);
-        }
-        return set;
-    }
-
-    private LocalDateTime loadDate() {
-        DBReader reader = new DBReader(COLLECTION_NAME, DOCUMENT_NAME);
+    /**
+     * Loads the time of the next birthday reminder.
+     * @return The time of the next birthday reminder.
+     */
+    private Instant loadNextTimer() {
+        DBReader reader = new DBReader(COLLECTION_NAME);
         try {
             Document doc = reader.loadObject();
-            return LocalDateTime.of(doc.getInteger(YEAR_KEY), doc.getInteger(DAY_KEY), doc.getInteger(HOUR_KEY), doc.getInteger(MIN_KEY), 0);
+            return Instant.ofEpochSecond(doc.getLong(ACCESS_KEY));
         } catch (InvalidDocumentException e) {
-            return LocalDateTime.now().minusDays(1);
+            return Instant.now().plus(1, ChronoUnit.DAYS);
         }
     }
 
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
+    /**
+     * Checks if the users have a birthday today. Stores the time of the next birthday reminder to the database.
+     * Sets a timer to the next birthday reminder.
+     */
+    public void onTimer() {
         checkBirthdays();
-        storeTime();
+        storeNextReminderTime();
         setNewTimer();
     }
 
+    /**
+     * Checks if the users have a birthday today.
+     */
     private void checkBirthdays() {
-        Set<String> ids = findMembersWithBday(LocalDate.now());
+        Set<String> ids = BirthdayRecord.findMembersWithBdayOnGivenDay(LocalDate.now());
         if (!ids.isEmpty()) {
-            bdayEvent.congratulateBday(set);
+            congratulateBday(ids);
         }
     }
 
-    private void storeTime() {
-        DBWriter writer = new DBWriter(COLLECTION_NAME, DOCUMENT_NAME);
+    /**
+     * Sends a congradulations message to the users with a birthday today.
+     * @param memberIDs ids of the users with a birthday today.
+     */
+    public void congratulateBday(Set<String> memberIDs) {
+        for (String id : memberIDs) {
+            List<Guild> guilds = Bot.BOT_JDA.retrieveUserById(id).complete().getMutualGuilds();
+            for (Guild g : guilds) {
+                g.getTextChannelsByName("general", true).get(0).sendMessage("Happy birthday " + g.getMemberById(id).getEffectiveName() + "!").queue();
+            }
+        }
+        // StringBuilder builder = new StringBuilder();
+        // for (String id : memberIDs) {
+        //     builder.append("<@");
+        //     builder.append(id);
+        //     builder.append("> ");
+        // }
+        // Bot.BOT_JDA.retrieveUserById(id)
+        // for (GuildChannel channel : studeyHall.getChannels()) {
+        //     if (channel.getName().equals("general")) {
+        //         channel.sendMessage("Happy Birthday! " + builder.toString()).queue();
+        //         break;
+        //     }
+        // }
+    }
+
+    /** 
+     * Store the time of the next birthday reminder to the database.
+     */
+    private void storeNextReminderTime() {
+        DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.saveObject(this, SaveOption.DEFAULT);
     }
 
+    /**
+     * Sets a timer to the next birthday reminder.
+     */
     private void setNewTimer() {
-        LocalDateTime lastTimeChecked = loadDate();
-        timer = new Timer((int) lastTimeChecked.until(lastTimeChecked.plusDays(1), ChronoUnit.MILLIS), this);
+        Instant nextTimer = loadNextTimer();
+        Instant now = Instant.now();
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                onTimer();
+            }
+        }, now.until(nextTimer, ChronoUnit.MILLIS));
     }
 }
