@@ -47,6 +47,8 @@ public class BirthdayReminder extends Writable  {
             Document doc = reader.loadObject();
             return Instant.ofEpochSecond(doc.getLong(ACCESS_KEY));
         } catch (InvalidDocumentException e) {
+            DBWriter writer = new DBWriter(COLLECTION_NAME);
+            writer.saveObject(this, SaveOption.DEFAULT);
             return Instant.now().plus(1, ChronoUnit.DAYS);
         }
     }
