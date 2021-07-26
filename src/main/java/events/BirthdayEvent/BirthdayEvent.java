@@ -23,7 +23,7 @@ public class BirthdayEvent extends ListenerAdapter {
         if (msg.length < 3) {
             return;
         }
-        if (msg[1].equalsIgnoreCase("setbday")) {
+        if (msg[1].equalsIgnoreCase("set")) {
             setBDay (event, msg[2]);
         } else if (msg[1].equalsIgnoreCase("check")) {
             lookupBDay(event, msg[2]);
@@ -76,7 +76,7 @@ public class BirthdayEvent extends ListenerAdapter {
             String userId = event.getAuthor().getId();
             BirthdayRecord.recordBDay(userId, bdayDate);
             event.getChannel()
-            .sendMessage(event.getGuild().getMemberById(userId).getEffectiveName()+ "'(s) birthday set to " + bdayDate.toString())
+            .sendMessage(event.getGuild().getMemberById(userId).getEffectiveName()+ "'s birthday set to " + bdayDate.toString())
             .queue();
         } catch (InvalidDateFormatException e) {
             event.getChannel().sendMessage("Sorry, birthday format illegal. Not recorded.").queue();

@@ -36,22 +36,20 @@ public class BirthdayReminder extends Writable  {
         Document saveFile = new Document();
         Instant now = Instant.now();
         saveFile.put(ACCESS_KEY,"reminder_time");
-        saveFile.put(EPOCH_KEY,now.getEpochSecond());
+        saveFile.put(EPOCH_KEY,now.plus(1, ChronoUnit.DAYS).getEpochSecond());
         return saveFile;
     }
 
     /**
      * Loads the time of the next birthday reminder.
      * @return The time of the next birthday reminder.
+     * @throws InvalidDocumentException
      */
-    private Instant loadNextTimer() {
+    private Instant loadNextTimer() throws InvalidDocumentException {
         DBReader reader = new DBReader(COLLECTION_NAME);
-        try {
-            Document doc = reader.loadObject();
-            return Instant.ofEpochSecond(doc.getLong(EPOCH_KEY));
-        } catch (InvalidDocumentException e) {
-            return Instant.now();
-        }
+         Document doc = reader.loadObject();
+         return Instant.ofEpochSecond(doc.getLong(EPOCH_KEY));
+
     }
 
     /**
@@ -119,9 +117,17 @@ public class BirthdayReminder extends Writable  {
      * points to the point of time before now - execute the birthday reminder routine.
      */
     private void setNewTimer() {
-        Instant nextTimer = loadNextTimer();
         Instant now = Instant.now();
-        if (now.until(nextTimer, ChronoUnit.MILLIS) <= 0) {
+        Instant nextTimer;
+        try {
+            nextTimer = loadNextTimer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    onTimer();
+                }
+            }, now.until(nextTimer, ChronoUnit.MILLIS));
+        } catch (InvalidDocumentException e) {
             checkBirthdays();
             storeNextReminderTime();
             timer.schedule(new TimerTask() {
@@ -130,13 +136,6 @@ public class BirthdayReminder extends Writable  {
                     onTimer();
                 }
             }, now.until(now.plus(1, ChronoUnit.DAYS), ChronoUnit.MILLIS));
-        } else {
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                onTimer();
-            }
-        }, now.until(nextTimer, ChronoUnit.MILLIS));
         }
     }
 }
