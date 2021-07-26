@@ -86,7 +86,7 @@ public class BirthdayReminder extends Writable  {
             }
             List<Guild> guilds = Bot.BOT_JDA.retrieveUserById(id).complete().getMutualGuilds();
             for (Guild g : guilds) {
-                g.getTextChannelsByName("general", true).get(0).sendMessage("Happy birthday " + g.getMemberById(id).getEffectiveName() + "!").queue();
+                g.getTextChannelsByName("general", true).get(0).sendMessage("Happy birthday <@" + g.getMemberById(id) + ">!").queue();
             }
         }
         // StringBuilder builder = new StringBuilder();
