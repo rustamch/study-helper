@@ -12,6 +12,7 @@ import org.bson.Document;
 import exceptions.InvalidDocumentException;
 import model.Bot;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
 import persistence.DBReader;
 import persistence.DBWriter;
 import persistence.SaveOption;
@@ -80,7 +81,9 @@ public class BirthdayReminder extends Writable  {
      */
     public void congratulateBday(Set<String> memberIDs) {
         for (String id : memberIDs) {
-            List<Guild> guilds = Bot.BOT_JDA.retrieveUserById(id).complete().getMutualGuilds();
+            User user = Bot.BOT_JDA.retrieveUserById(id).complete();
+            user.openPrivateChannel().queue(chan -> chan.sendMessage("Congratulations! Today is your birthday! :birthday:").queue());
+            List<Guild> guilds = user.getMutualGuilds();
             for (Guild g : guilds) {
                 g.getTextChannelsByName("general", true).get(0).sendMessage("Happy birthday " + g.getMemberById(id).getEffectiveName() + "!").queue();
             }
