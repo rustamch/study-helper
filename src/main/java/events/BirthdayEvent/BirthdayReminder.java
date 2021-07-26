@@ -47,8 +47,8 @@ public class BirthdayReminder extends Writable  {
      */
     private Instant loadNextTimer() throws InvalidDocumentException {
         DBReader reader = new DBReader(COLLECTION_NAME);
-         Document doc = reader.loadObject();
-         return Instant.ofEpochSecond(doc.getLong(EPOCH_KEY));
+        Document doc = reader.loadObject();
+        return Instant.ofEpochSecond(doc.getLong(EPOCH_KEY));
 
     }
 

@@ -23,14 +23,14 @@ public class Bot {
                 GatewayIntent.GUILD_VOICE_STATES,
                 GatewayIntent.GUILD_MESSAGES
         );
-        BOT_JDA = JDABuilder.createDefault(System.getenv("discord_token"),intents).build();
-        BOT_JDA.addEventListeners(new AboutEvent())
-                .addEventListeners(new BirthdayEvent())
-                .addEventListeners(new TodoEvent())
-                .addEventListeners(new ReminderFeature())
-                .addEventListeners(new StudyTimeEvent())
-                .addEventListeners(new DoraListener())
-                .setActivity(Activity.playing("On the watch!"));
+        BOT_JDA = JDABuilder.createDefault(System.getenv("discord_token"),intents)
+                            .setActivity(Activity.playing("On the watch! >:(")).build();
+        BOT_JDA.addEventListener(new AboutEvent(),
+                                new BirthdayEvent(),
+                                new TodoEvent(),
+                                new ReminderFeature(),
+                                new StudyTimeEvent(),
+                                new DoraListener());
     }
 }
 
