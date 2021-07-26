@@ -32,6 +32,7 @@ public class BirthdayEvent implements BotEvent{
      *              up
      */
     private void lookupBDay(MessageReceivedEvent event, String name) {
+        event.getChannel().sendMessage(name).queue();
         Pattern p = Pattern.compile("\\d{18}");
         Matcher matcher = p.matcher(name);
         String id;
