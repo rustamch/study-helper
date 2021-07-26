@@ -46,7 +46,7 @@ public class BirthdayEvent implements BotEvent{
                 event.getChannel().sendMessage("I found multiple members with given name, please be more specific.").queue();
                 return;
             }
-            id = membersWithName.get(0).getUser().getId();
+            id = membersWithName.get(0).getId();
         }
 
         LocalDate date = BirthdayRecord.getDateById(id);
