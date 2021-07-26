@@ -29,7 +29,6 @@ public class Bot {
                                     new TodoEvent(),
                                     new StudyTimeEvent(),
                                     new BirthdayEvent(),
-                                    new ReminderFeature(),
                                     new ReminderFeature());
     }
 }
