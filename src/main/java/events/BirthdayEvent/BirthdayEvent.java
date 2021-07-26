@@ -37,7 +37,6 @@ public class BirthdayEvent implements BotEvent{
         String id;
         if (matcher.find()) {
             id = matcher.group(0);
-            LocalDate date = BirthdayRecord.getDateById(id);
         } else {
             List<Member> membersWithName = event.getGuild().getMembersByEffectiveName(name, true);
             if (membersWithName.isEmpty()) {
@@ -114,13 +113,18 @@ public class BirthdayEvent implements BotEvent{
      */
     @Override
     public void invoke(MessageReceivedEvent event, String[] content) {
-        if (content.length < 2) {
+        if (content.length == 0) {
             return;
         }
-        if (content[0].equalsIgnoreCase("set")) {
+        if (content.length > 1 && content[0].equalsIgnoreCase("set")) {
             setBDay(event, content[1]);
         } else if (content[0].equalsIgnoreCase("check")) {
-            lookupBDay(event, content[1]);
+            if (content.length > 1) {
+                lookupBDay(event, content[1]);
+            } else {
+                lookupBDay(event, event.getMember().getEffectiveName());
+            }
+
         }
     }
 }
