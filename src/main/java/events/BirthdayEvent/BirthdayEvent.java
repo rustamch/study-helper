@@ -32,31 +32,44 @@ public class BirthdayEvent implements BotEvent{
      *              up
      */
     private void lookupBDay(MessageReceivedEvent event, String name) {
-        event.getChannel().sendMessage(name).queue();
-        Pattern p = Pattern.compile("\\d{18}");
-        Matcher matcher = p.matcher(name);
-        String id;
-        if (matcher.find()) {
-            id = matcher.group(0);
+        List<Member> membersWithName = event.getGuild().getMembersByEffectiveName(name, true);
+        if (membersWithName.isEmpty()) {
+            event.getChannel().sendMessage("I wasn't able to find any members with given name.").queue();
+        } else if (membersWithName.size() > 1) {
+            event.getChannel().sendMessage("I found multiple members with given name, please be more specific.").queue();
         } else {
-            List<Member> membersWithName = event.getGuild().getMembersByEffectiveName(name, true);
-            if (membersWithName.isEmpty()) {
-                event.getChannel().sendMessage("I wasn't able to find any members with given name.").queue();
-                return;
-            } else if (membersWithName.size() > 1) {
-                event.getChannel().sendMessage("I found multiple members with given name, please be more specific.").queue();
-                return;
+            String id = membersWithName.get(0).getUser().getId();
+            if (BirthdayRecord.getDateById(id) == null) {
+                event.getChannel().sendMessage("I couldn't find any birthday records for " + name + ".").queue();
+            } else {
+                event.getChannel().sendMessage("The birthday of " + name + " is " + BirthdayRecord.getDateById(id) + ".").queue();
             }
-            id = membersWithName.get(0).getId();
         }
+        // event.getChannel().sendMessage(name).queue();
+        // Pattern p = Pattern.compile("\\d{18}");
+        // Matcher matcher = p.matcher(name);
+        // String id;
+        // if (matcher.find()) {
+        //     id = matcher.group(0);
+        // } else {
+        //     List<Member> membersWithName = event.getGuild().getMembersByEffectiveName(name, true);
+        //     if (membersWithName.isEmpty()) {
+        //         event.getChannel().sendMessage("I wasn't able to find any members with given name.").queue();
+        //         return;
+        //     } else if (membersWithName.size() > 1) {
+        //         event.getChannel().sendMessage("I found multiple members with given name, please be more specific.").queue();
+        //         return;
+        //     }
+        //     id = membersWithName.get(0).getId();
+        // }
 
-        LocalDate date = BirthdayRecord.getDateById(id);
-        event.getChannel().sendMessage("id: " + id).queue();
-        if (date != null) {
-            event.getChannel().sendMessage("I couldn't find any birthday records for " + name + ".").queue();
-        } else {
-            event.getChannel().sendMessage("The birthday of " + name + " is " + BirthdayRecord.getDateById(id) + ".").queue();
-        }
+        // LocalDate date = BirthdayRecord.getDateById(id);
+        // event.getChannel().sendMessage("id: " + id).queue();
+        // if (date != null) {
+        //     event.getChannel().sendMessage("I couldn't find any birthday records for " + name + ".").queue();
+        // } else {
+        //     event.getChannel().sendMessage("The birthday of " + name + " is " + BirthdayRecord.getDateById(id) + ".").queue();
+        // }
     }
 
     /**
