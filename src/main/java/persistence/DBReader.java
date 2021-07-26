@@ -1,27 +1,20 @@
 package persistence;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-
-import com.mongodb.client.model.Filters;
-import events.BirthdayEvent.BirthdayEvent;
-import events.TodoEvent.Todo;
-import events.TodoEvent.TodoList;
-import exceptions.CompletedPastTodoException;
-import exceptions.IllegalDateException;
-import exceptions.InvalidDateFormatException;
-import exceptions.InvalidDocumentException;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import events.TodoEvent.Todo;
+import events.TodoEvent.TodoList;
+import exceptions.CompletedPastTodoException;
+import exceptions.InvalidDocumentException;
 
 
 public class DBReader {
@@ -30,36 +23,15 @@ public class DBReader {
     MongoClient mongoClient = DBWriter.mongoClient;
     private MongoCollection<Document> collection;
 
+    public DBReader(String collectionName) {
+        this.readDoc = null;
+        this.collection = mongoClient.getDatabase("test").getCollection(collectionName);
+    }
+
     public DBReader(String collectionName, String documentName) {
-        readDoc = null;
+        this.readDoc = null;
         this.documentName = documentName;
-        MongoDatabase db;
-        db = mongoClient.getDatabase("test");
-        collection = db.getCollection(collectionName);
-    }
-
-    public Map<String, Date> getBDayLog() {
-        try {
-            loadObject();
-            Map<String, Date> map = new HashMap<>();
-            if (readDoc.containsKey("bdayLog")) {
-                List<Document> entries = (List<Document>) readDoc.get("bdayLog");
-                for (Document entry : entries) {
-                    map.put(entry.getString("id"), parseDate(entry.getString("date")));
-                }
-            }
-            return map;
-        } catch (InvalidDocumentException e) {
-            return new HashMap<String, Date>();
-        }
-    }
-
-    private Date parseDate(String date) {
-        try {
-            return BirthdayEvent.getDateFromStr(date);
-        } catch (InvalidDateFormatException | IllegalDateException invalidDateFormatException) {
-            throw new RuntimeException("Saved date data is wrong");
-        }
+        this.collection = mongoClient.getDatabase("test").getCollection(collectionName);
     }
 
     public TodoList getTodos() {

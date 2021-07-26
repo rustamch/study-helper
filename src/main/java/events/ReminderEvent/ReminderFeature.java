@@ -1,21 +1,20 @@
 package events.ReminderEvent;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.regex.Pattern;
+
+import javax.swing.Timer;
+
+import exceptions.InvalidReminderException;
+import exceptions.InvalidTimeInHoursException;
+import exceptions.InvalidTimeInMinutesException;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import javax.swing.*;
-import exceptions.DuplicateReminderException;
-import exceptions.InvalidReminderException;
-import exceptions.InvalidTimeInHoursException;
-import exceptions.InvalidTimeInMinutesException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
-import java.util.regex.Pattern;
 
 public class ReminderFeature extends ListenerAdapter implements ActionListener {
     private final ReminderManager reminderManager;

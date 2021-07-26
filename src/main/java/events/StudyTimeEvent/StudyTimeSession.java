@@ -72,7 +72,7 @@ public class StudyTimeSession extends Writable{
      * Saves this session to the database
      */
     public void trackSession() {
-        DBWriter writer = new DBWriter(COLLECTION_NAME, memberID);
+        DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.saveObject(this, SaveOption.DEFAULT);
     }
     

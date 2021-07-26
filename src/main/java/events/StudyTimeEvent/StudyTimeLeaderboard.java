@@ -102,7 +102,7 @@ public class StudyTimeLeaderboard extends Writable implements Iterable<String> {
             curr += timesMap.get(memberID);
         }
         this.timesMap.put(memberID, timeElapsed / 1000 / 60  + curr);
-        DBWriter writer = new DBWriter(COLLECTION_NAME, "times_leaderboard");
+        DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.saveObject(this, SaveOption.DEFAULT);
     }
 

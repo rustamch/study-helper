@@ -29,7 +29,7 @@ public class Reminder extends Writable {
             Reminder rem = new Reminder(epoch,userID);
             reminders.add(rem);
         }
-        DBWriter writer = new DBWriter(COLLECTION_NAME,"reminder");
+        DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.removeDocuments(Filters.eq("epoch",epoch));
         return reminders;
     }
