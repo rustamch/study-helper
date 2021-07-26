@@ -51,6 +51,7 @@ public class BirthdayEvent implements BotEvent{
         }
 
         LocalDate date = BirthdayRecord.getDateById(id);
+        event.getChannel().sendMessage("id: " + id).queue();
         if (date != null) {
             event.getChannel().sendMessage("I couldn't find any birthday records for " + name + ".").queue();
         } else {
