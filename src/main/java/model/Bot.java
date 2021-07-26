@@ -23,14 +23,13 @@ public class Bot {
                 GatewayIntent.GUILD_MESSAGES
         );
         BOT_JDA = JDABuilder.createDefault(System.getenv("discord_token"),intents)
+                .addEventListeners(new AboutEvent())
+                .addEventListeners(new BirthdayEvent())
+                .addEventListeners(new TodoEvent())
+                .addEventListeners(new ReminderFeature())
+                .addEventListeners(new StudyTimeEvent())
+                .addEventListeners(new DoraListener())
                 .build();
-        BOT_JDA.addEventListener(new DoraListener(),
-                                    new AboutEvent(),
-                                    new TodoEvent(),
-                                    new StudyTimeEvent(),
-                                    new BirthdayEvent(),
-                                    new ReminderFeature(),
-                                    new ReminderFeature());
     }
 }
 
