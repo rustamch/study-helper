@@ -2,9 +2,9 @@ package events.TodoEvent;
 
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import events.BotEvent;
 import exceptions.IllegalDateException;
 import exceptions.MissingElementException;
 
@@ -12,40 +12,37 @@ import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TodoEvent extends ListenerAdapter {
+public class TodoEvent implements BotEvent {
     private TodoManager manager;
 
     @Override
-    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+    public void invoke(MessageReceivedEvent event, String[] content) {
         String rawMsg = event.getMessage().getContentRaw();
-        String[] msgLst = rawMsg.split(" ");
-        if (msgLst[0].equalsIgnoreCase("!todo")) {
-            User m = event.getAuthor();
-            manager = new TodoManager(m);
-            if (! (msgLst.length < 2)) {
-                if (msgLst[1].equalsIgnoreCase("add")) {
-                    addTodo(event, rawMsg, msgLst);
-                } else if (msgLst[1].equalsIgnoreCase("check")) {
-                    messageTodoList(event.getChannel());
-                } else if (msgLst[1].equalsIgnoreCase("rm") && msgLst.length > 2) {
-                    if (msgLst[2].equalsIgnoreCase("all")) {
-                        manager.clearTodo();
-                        event.getChannel().sendMessage("Your todo list is cleared!").queue();
-                    } else {
-                        removeTodo(event, msgLst);
-                    }
-                } else if (msgLst[1].equalsIgnoreCase("done") && msgLst.length > 2) {
-                    if (msgLst[2].equalsIgnoreCase("all")) {
-                        manager.clearTodo();
-                        event.getChannel().sendMessage("List completed, hooray!").queue();
-                    } else {
-                        setComplete(event, msgLst);
-                    }
-                } else if (msgLst[1].equalsIgnoreCase("post")) {
-                    TextChannel textChannel = event.getGuild()
-                            .getTextChannelsByName("todos", true).get(0);
-                    messageTodoList(textChannel);
+        User m = event.getAuthor();
+        manager = new TodoManager(m);
+        if (content.length != 0) {
+            if (content[0].equalsIgnoreCase("add")) {
+                addTodo(event, rawMsg, content);
+            } else if (content[0].equalsIgnoreCase("check")) {
+                messageTodoList(event.getChannel());
+            } else if (content[0].equalsIgnoreCase("rm") && content.length > 2) {
+                if (content[1].equalsIgnoreCase("all")) {
+                    manager.clearTodo();
+                    event.getChannel().sendMessage("Your todo list is cleared!").queue();
+                } else {
+                    removeTodo(event, content);
                 }
+            } else if (content[0].equalsIgnoreCase("done") && content.length > 2) {
+                if (content[1].equalsIgnoreCase("all")) {
+                    manager.clearTodo();
+                    event.getChannel().sendMessage("List completed, hooray!").queue();
+                } else {
+                    setComplete(event, content);
+                }
+            } else if (content[0].equalsIgnoreCase("post")) {
+                TextChannel textChannel = event.getGuild()
+                        .getTextChannelsByName("todos", true).get(0);
+                messageTodoList(textChannel);
             }
         }
     }

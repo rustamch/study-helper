@@ -1,24 +1,19 @@
 package events.SimpleEvents;
 
 
-import net.dv8tion.jda.api.entities.Message;
+import events.BotEvent;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-public class DoraListener extends ListenerAdapter {
+public class DoraListener implements BotEvent {
 
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
+    public void invoke(MessageReceivedEvent event, String[] content) {
         MessageChannel channel = event.getChannel();
-        Message msg = event.getMessage();
-        String rawMsg = msg.getContentRaw();
-        if (rawMsg.equals("o_O")) {
-            long time = System.currentTimeMillis();
-            channel.sendMessage("O_o") /* => RestAction<Message> */
-                    .queue(response /* => Message */ -> {
-                        response.editMessageFormat("O_o: %d ms", System.currentTimeMillis() - time).queue();
-                    });
-        }
+        long time = System.currentTimeMillis();
+        channel.sendMessage("O_o") /* => RestAction<Message> */
+                .queue(response /* => Message */ -> {
+                    response.editMessageFormat("O_o: %d ms", System.currentTimeMillis() - time).queue();
+                });
     }
 }

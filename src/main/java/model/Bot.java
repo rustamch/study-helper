@@ -1,9 +1,4 @@
 package model;
-import events.BirthdayEvent.BirthdayEvent;
-import events.ReminderEvent.ReminderFeature;
-import events.SimpleEvents.AboutEvent;
-import events.SimpleEvents.DoraListener;
-import events.TodoEvent.TodoEvent;
 import events.StudyTimeEvent.StudyTimeEvent;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
@@ -25,12 +20,8 @@ public class Bot {
         );
         BOT_JDA = JDABuilder.createDefault(System.getenv("discord_token"),intents)
                             .setActivity(Activity.playing("On the watch! >:(")).build();
-        BOT_JDA.addEventListener(new AboutEvent(),
-                                new BirthdayEvent(),
-                                new TodoEvent(),
-                                new ReminderFeature(),
-                                new StudyTimeEvent(),
-                                new DoraListener());
+        BOT_JDA.addEventListener(new MessageListener(),
+                                new StudyTimeEvent());
     }
 }
 
