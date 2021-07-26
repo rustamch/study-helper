@@ -3,32 +3,16 @@ package events.BirthdayEvent;
 import java.time.LocalDate;
 import java.util.List;
 
+import events.BotEvent;
 import exceptions.IllegalDateException;
 import exceptions.InvalidDateFormatException;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**
  * Represents a handler for !bday commands
  */
-public class BirthdayEvent extends ListenerAdapter {
-    /**
-     * Analyzes the given event to set birthday or lookup a member's birthday
-     * @param event message event that started with message "!bday"
-     */
-    public void handleBdayActions( MessageReceivedEvent event) {
-        String[] msg = event.getMessage().getContentRaw().split(" ");
-        if (msg.length < 3) {
-            return;
-        }
-        if (msg[1].equalsIgnoreCase("set")) {
-            setBDay (event, msg[2]);
-        } else if (msg[1].equalsIgnoreCase("check")) {
-            lookupBDay(event, msg[2]);
-        }
-    }
+public class BirthdayEvent implements BotEvent{
 
     /**
      * Constructs a new BirthdayEvent and initializes BirthdayReminders.
@@ -110,12 +94,20 @@ public class BirthdayEvent extends ListenerAdapter {
     }
 
 
+        /**
+     * Invoke the event: analyzes the given message to set birthday or lookup a member's birthday
+     * @param event message event that started with message "!bday"
+     * @param content content of the message
+     */
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        Message msg = event.getMessage();
-        String rawMsg = msg.getContentRaw();
-        if (rawMsg.length() > 5 && rawMsg.substring(0, 5).equalsIgnoreCase("!bday")) {
-            handleBdayActions (event);
+    public void invoke(MessageReceivedEvent event, String[] content) {
+        if (content.length < 2) {
+            return;
+        }
+        if (content[0].equalsIgnoreCase("set")) {
+            setBDay(event, content[1]);
+        } else if (content[0].equalsIgnoreCase("check")) {
+            lookupBDay(event, content[1]);
         }
     }
 }
