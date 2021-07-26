@@ -77,9 +77,15 @@ public class BirthdayReminder extends Writable  {
     /**
      * Sends a congradulations message to the users with a birthday today.
      * @param memberIDs ids of the users with a birthday today.
+     * @throws InterruptedException
      */
     public void congratulateBday(Set<String> memberIDs) {
         for (String id : memberIDs) {
+            try {
+                Bot.BOT_JDA.awaitReady();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             List<Guild> guilds = Bot.BOT_JDA.retrieveUserById(id).complete().getMutualGuilds();
             for (Guild g : guilds) {
                 g.getTextChannelsByName("general", true).get(0).sendMessage("Happy birthday " + g.getMemberById(id).getEffectiveName() + "!").queue();

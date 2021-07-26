@@ -6,6 +6,7 @@ import events.SimpleEvents.DoraListener;
 import events.TodoEvent.TodoEvent;
 import events.StudyTimeEvent.StudyTimeEvent;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import javax.security.auth.login.LoginException;
@@ -23,14 +24,14 @@ public class Bot {
                 GatewayIntent.GUILD_MESSAGES
         );
         BOT_JDA = JDABuilder.createDefault(System.getenv("discord_token"),intents)
+                .addEventListeners(new AboutEvent())
+                .addEventListeners(new BirthdayEvent())
+                .addEventListeners(new TodoEvent())
+                .addEventListeners(new ReminderFeature())
+                .addEventListeners(new StudyTimeEvent())
+                .addEventListeners(new DoraListener())
+                .setActivity(Activity.playing("On the watch!"))
                 .build();
-        BOT_JDA.addEventListener(new DoraListener(),
-                                    new AboutEvent(),
-                                    new TodoEvent(),
-                                    new StudyTimeEvent(),
-                                    new BirthdayEvent(),
-                                    new ReminderFeature(),
-                                    new ReminderFeature());
     }
 }
 
