@@ -34,7 +34,7 @@ public class StudyTimeEvent
       event.getChannel()
           .sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for " + time + " minutes");
     } else {
-      event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " you have not studied yet.");
+      event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " have not studied yet.");
     }
   }
 
@@ -44,18 +44,16 @@ public class StudyTimeEvent
    * @param memberID    id of the member who just finished their study session.
    * @param timeElapsed amount of time in miliseconds.
    */
-  private void sendTimeElapsedMessage(ServerVoiceChannelMemberLeaveEvent event, long timeElapsed) {
+  private void sendTimeElapsedMessage(TextChannel records, String name, long timeElapsed) {
     String msg;
     if (timeElapsed / 1000 > 3600)
-      msg = "You just studied for **" + timeElapsed / 60 / 60 + "** hours" + " and " + timeElapsed / 60 % 60
+      msg = name + " just studied for **" + timeElapsed / 60 / 60 + "** hours" + " and " + timeElapsed / 60 % 60
           + " minutes!";
     else if (timeElapsed > 60)
-      msg = "You just studied for **" + timeElapsed / 60 + "** minutes!";
+      msg = name + " just studied for **" + timeElapsed / 60 + "** minutes!";
     else
-      msg = "You just studied for **" + timeElapsed + "** seconds!";
-    event.getServer().getTextChannelsByName("study_records").forEach(textChannel -> {
-      textChannel.sendMessage(msg);
-    });
+      msg = name + " just studied for **" + timeElapsed + "** seconds!";
+    records.sendMessage(msg);
   }
 
   @Override
@@ -67,7 +65,7 @@ public class StudyTimeEvent
       try {
         record = StudyTimeRecord.getStudySession(user.getIdAsString());
         long timeElapsed = record.finishSession();
-        sendTimeElapsedMessage(event, timeElapsed);
+        sendTimeElapsedMessage(textChannel, user.getDisplayName(event.getServer()), timeElapsed);
       } catch (InvalidDocumentException e) {
         textChannel.sendMessage("Something went wrong!");
       }
