@@ -80,7 +80,7 @@ public class StudyTimeEvent
       StudyTimeRecord record;
       record = new StudyTimeRecord(user.getIdAsString());
       record.trackSession();
-      textChannel.sendMessage(user.getDisplayName(event.getServer()) + " you have just started a studying!");
+      textChannel.sendMessage(user.getDisplayName(event.getServer()) + " have just started a studying!");
     }
   }
 

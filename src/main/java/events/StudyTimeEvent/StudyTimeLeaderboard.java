@@ -54,8 +54,8 @@ public class StudyTimeLeaderboard {
             final int currPlace = place;
             msgServer.getMemberById(entry.getKey()).ifPresent(user -> {
                 String name = user.getDisplayName(msgServer);
-                String val = entry.getValue().toString();
-                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + val + " minutes so far.", false);
+                long minutes  = entry.getValue() / 60;
+                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + minutes + " minutes so far.", false);
             });
             place++;
         }
