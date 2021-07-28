@@ -34,7 +34,7 @@ public class StudyTimeEvent
       event.getChannel()
           .sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for " + time + " minutes");
     } else {
-      event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " have not studied yet.");
+      event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " has not studied yet.");
     }
   }
 
@@ -47,12 +47,12 @@ public class StudyTimeEvent
   private void sendTimeElapsedMessage(TextChannel records, String name, long timeElapsed) {
     String msg;
     if (timeElapsed / 1000 > 3600)
-      msg = name + " just studied for **" + timeElapsed / 60 / 60 + "** hours" + " and " + timeElapsed / 60 % 60
+      msg = name + " has studied for **" + timeElapsed / 60 / 60 + "** hours" + " and " + timeElapsed / 60 % 60
           + " minutes!";
     else if (timeElapsed > 60)
-      msg = name + " studied for **" + timeElapsed / 60 + "** minutes!";
+      msg = name + " has studied for **" + timeElapsed / 60 + "** minutes!";
     else
-      msg = name + " studied for **" + timeElapsed + "** seconds!";
+      msg = name + " has studied for **" + timeElapsed + "** seconds!";
     records.sendMessage(msg);
   }
 

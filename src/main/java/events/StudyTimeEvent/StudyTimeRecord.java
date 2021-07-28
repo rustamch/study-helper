@@ -16,9 +16,9 @@ import persistence.Writable;
  * a user ID.
  */
 public class StudyTimeRecord extends Writable  {
-    public static final String ACCESS_KEY = Writable.ACCESS_KEY;
     public static final String COLLECTION_NAME = "study_times";
     public static final String STUDY_TIME_KEY = "study_time";
+    public static final String EPOCH_KEY = "epoch";
     private static final DBReader reader = new DBReader(COLLECTION_NAME);
     private static final DBWriter writer = new DBWriter(COLLECTION_NAME);
     private Instant start;
@@ -33,7 +33,7 @@ public class StudyTimeRecord extends Writable  {
      */
     public static StudyTimeRecord getStudySession(String memberID) throws InvalidDocumentException {
         Document doc = reader.loadObject(memberID);
-        long epoch = doc.getLong("epoch");
+        long epoch = doc.getLong(EPOCH_KEY);
         long studyTime = doc.getLong(STUDY_TIME_KEY);
         StudyTimeRecord session = new StudyTimeRecord(memberID, epoch,studyTime);
         return session;
@@ -47,8 +47,8 @@ public class StudyTimeRecord extends Writable  {
     public Document toDoc() {
         Document doc = new Document();
         doc.put(ACCESS_KEY, memberID);
-        doc.put("epoch", start.getEpochSecond());
-        doc.put("study_time", studyTime);
+        doc.put(EPOCH_KEY, start.getEpochSecond());
+        doc.put(STUDY_TIME_KEY, studyTime);
         return doc;
     }
 
@@ -88,8 +88,8 @@ public class StudyTimeRecord extends Writable  {
      */
     public long finishSession() {
         Instant finish = Instant.now();
-        long timeElapsed =  start.until(finish, ChronoUnit.SECONDS);
-        this.studyTime += timeElapsed;
+        long timeElapsed =  this.start.until(finish, ChronoUnit.SECONDS);
+        this.studyTime = this.studyTime + timeElapsed;
         writer.saveObject(this, SaveOption.DEFAULT);
         return timeElapsed;
     }
