@@ -50,9 +50,9 @@ public class StudyTimeEvent
       msg = name + " just studied for **" + timeElapsed / 60 / 60 + "** hours" + " and " + timeElapsed / 60 % 60
           + " minutes!";
     else if (timeElapsed > 60)
-      msg = name + " just studied for **" + timeElapsed / 60 + "** minutes!";
+      msg = name + " studied for **" + timeElapsed / 60 + "** minutes!";
     else
-      msg = name + " just studied for **" + timeElapsed + "** seconds!";
+      msg = name + " studied for **" + timeElapsed + "** seconds!";
     records.sendMessage(msg);
   }
 
@@ -80,7 +80,7 @@ public class StudyTimeEvent
       StudyTimeRecord record;
       record = new StudyTimeRecord(user.getIdAsString());
       record.trackSession();
-      textChannel.sendMessage(user.getDisplayName(event.getServer()) + " have just started a studying!");
+      textChannel.sendMessage(user.getDisplayName(event.getServer()) + " has started studying!");
     }
   }
 

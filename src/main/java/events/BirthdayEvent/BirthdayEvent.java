@@ -46,10 +46,10 @@ public class BirthdayEvent implements BotEvent {
                 LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
                 if (bday == null) {
                     event.getChannel().sendMessage(
-                            "The user " + user.getDisplayName(actionServer) + " hasn't saved his birthday yet.");
+                            "The " + user.getDisplayName(actionServer) + " hasn't saved his birthday yet.");
                 } else {
                     event.getChannel().sendMessage(
-                            "The user " + user.getDisplayName(actionServer) + "'s birthday is " + bday.toString());
+                            "The " + user.getDisplayName(actionServer) + "'s birthday is " + bday.toString());
                 }
             });
         } else {
@@ -60,9 +60,9 @@ public class BirthdayEvent implements BotEvent {
                 user = usersWithName.get(0);
                 LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
                 if (bday == null) {
-                    event.getChannel().sendMessage("The user " + name + " hasn't saved his birthday yet.");
+                    event.getChannel().sendMessage("The " + name + " hasn't saved his birthday yet.");
                 } else {
-                    event.getChannel().sendMessage("The user " + name + "'s birthday is " + bday.toString());
+                    event.getChannel().sendMessage("The " + name + "'s birthday is " + bday.toString());
                 }
             } else {
                 event.getChannel()
