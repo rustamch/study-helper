@@ -78,7 +78,11 @@ public class StudyTimeEvent
       User user = event.getUser();
       TextChannel textChannel = event.getServer().getTextChannelsByName("study-records").get(0);
       StudyTimeRecord record;
-      record = new StudyTimeRecord(user.getIdAsString());
+      try {
+        record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
+      } catch (InvalidDocumentException e) {
+        record = new StudyTimeRecord(user.getIdAsString());
+      }
       record.trackSession();
       textChannel.sendMessage(user.getDisplayName(event.getServer()) + " has started studying!");
     }

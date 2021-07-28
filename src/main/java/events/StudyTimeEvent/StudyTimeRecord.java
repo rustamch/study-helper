@@ -58,7 +58,6 @@ public class StudyTimeRecord extends Writable  {
      * @param memberID the String that contains id of the user to whom this study seesion belongs too
      */
     public StudyTimeRecord(String memberID) {
-        this.start = Instant.now();
         this.memberID = memberID;
         this.studyTime = 0;
     }
@@ -78,6 +77,7 @@ public class StudyTimeRecord extends Writable  {
      * Saves this session to the database
      */
     public void trackSession() {
+        this.start = Instant.now();
         DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.saveObject(this, SaveOption.DEFAULT);
     }
