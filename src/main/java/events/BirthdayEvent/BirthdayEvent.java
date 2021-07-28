@@ -60,9 +60,9 @@ public class BirthdayEvent implements BotEvent {
                 user = usersWithName.get(0);
                 LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
                 if (bday == null) {
-                    event.getChannel().sendMessage("The " + name + " hasn't saved his birthday yet.");
+                    event.getChannel().sendMessage(name + " hasn't saved their birthday yet.");
                 } else {
-                    event.getChannel().sendMessage("The " + name + "'s birthday is " + bday.toString());
+                    event.getChannel().sendMessage(name + "'s birthday is " + bday.toString());
                 }
             } else {
                 event.getChannel()
