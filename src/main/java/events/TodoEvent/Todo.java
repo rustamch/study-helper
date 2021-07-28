@@ -1,7 +1,6 @@
 package events.TodoEvent;
 
 import org.bson.Document;
-import org.jetbrains.annotations.NotNull;
 import persistence.Writable;
 
 import java.time.LocalDate;
@@ -65,7 +64,7 @@ public class Todo extends Writable implements Comparable<Todo> {
     }
 
     @Override
-    public int compareTo(@NotNull Todo o) {
+    public int compareTo(Todo o) {
         if (this.incomplete == o.incomplete) {
             if (this.dueDate.isBefore(o.dueDate)) {
                 return -1;

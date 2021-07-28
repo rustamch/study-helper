@@ -4,11 +4,13 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+
+import org.javacord.api.event.message.MessageCreateEvent;
+
 import exceptions.InvalidReminderException;
 import exceptions.InvalidTimeInHoursException;
 import exceptions.InvalidTimeInMinutesException;
 import model.Bot;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import persistence.DBWriter;
 import persistence.SaveOption;
 
@@ -17,11 +19,11 @@ public class ReminderManager {
     private final String COLLECTION_NAME = "reminders";
 
     // checks for duplicates and adds reminder to reminders
-    public void addReminder(MessageReceivedEvent event)
+    public void addReminder(MessageCreateEvent event)
             throws InvalidReminderException {
         Instant adjustedInstant = parseEventToInstant(event);
         long epoch = adjustedInstant.getEpochSecond();
-        String memberID = event.getAuthor().getId();
+        long memberID = event.getMessageAuthor().getId();
         Reminder rem = new Reminder(epoch, memberID);
         DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.saveObject(rem, SaveOption.REPLACE_DUPLICATES_ONLY);
@@ -34,11 +36,10 @@ public class ReminderManager {
      * @return Instant of time that is offset by time specified in the message
      * @throws InvalidReminderException
      */
-    private Instant parseEventToInstant(MessageReceivedEvent event)
+    private Instant parseEventToInstant(MessageCreateEvent event)
             throws InvalidReminderException {
-        String eventMessageRaw = event.getMessage().getContentRaw();
+        String eventMessageRaw = event.getMessageContent();
         Instant truncatedInstant = null;
-
         if (eventMessageRaw.matches("!reminder\\s+\\d+\\s+min.*|minutes.*|minute.*")) {
             truncatedInstant = parseStringTimeInMinutesToLocalDateTime(eventMessageRaw);
         } else if (eventMessageRaw.matches("!reminder\\s+\\d+\\s+hr.*|hours.*|hour.*")) {
@@ -111,9 +112,9 @@ public class ReminderManager {
      * @param rm a reminder that contains the id of the user
      */
     private void notifyUser(Reminder rm) {
-        Bot.BOT_JDA.getUserById(rm.getUserID()).openPrivateChannel().queue((channel) ->
-        {
-            channel.sendMessage("Reminding you of something!").queue();
+        Bot.API.getUserById(rm.getUserID()).thenAccept(user -> {
+            String message = "You have been asked to be notified about something.";
+            user.getPrivateChannel().ifPresent(actionChannel -> actionChannel.sendMessage(message));
         });
     }
 }

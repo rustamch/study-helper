@@ -7,12 +7,13 @@ import java.time.temporal.ChronoUnit;
 
 import javax.swing.Timer;
 
+import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.event.message.MessageCreateEvent;
+
 import events.BotEvent;
 import exceptions.InvalidReminderException;
 import exceptions.InvalidTimeInHoursException;
 import exceptions.InvalidTimeInMinutesException;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class ReminderEvent implements ActionListener, BotEvent {
     private final ReminderManager reminderManager;
@@ -29,19 +30,19 @@ public class ReminderEvent implements ActionListener, BotEvent {
     }
 
     @Override
-    public void invoke(MessageReceivedEvent event, String[] content) {
-        MessageChannel channel = event.getChannel();
+    public void invoke(MessageCreateEvent event, String[] content) {
+        TextChannel channel = event.getChannel();
         try {
             reminderManager.addReminder(event);
-            channel.sendMessage("Reminder was added!").queue();
+            channel.sendMessage("Reminder was added!");
         } catch (InvalidTimeInMinutesException e) {
             channel.sendMessage("Invalid reminder format. " +
-                    "Please try again with a valid format e.g. **!reminder 15min**").queue();
+                    "Please try again with a valid format e.g. **!reminder 15 min**");
         } catch (InvalidTimeInHoursException e) {
             channel.sendMessage("Invalid reminder format. " +
-                    "Please try again with a valid format e.g. **!reminder 3hr**").queue();
+                    "Please try again with a valid format e.g. **!reminder 3 hr**");
         } catch (InvalidReminderException e) {
-            channel.sendMessage("Invalid reminder format. Please try **!reminder YYYY.MM.DD**").queue();
+            channel.sendMessage("Invalid reminder format. Please try **!reminder YYYY.MM.DD**");
         }
         
     }

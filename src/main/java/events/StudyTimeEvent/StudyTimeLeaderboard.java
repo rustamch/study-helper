@@ -1,20 +1,18 @@
 package events.StudyTimeEvent;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.awt.Color;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.FindIterable;
 
 import org.bson.Document;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.server.Server;
 
-import exceptions.InvalidDocumentException;
 import persistence.DBReader;
-import persistence.DBWriter;
-import persistence.SaveOption;
 import persistence.Writable;
 
 /**
@@ -22,62 +20,53 @@ import persistence.Writable;
  * respective studyTime. Outside classes can iterate through user ids in the
  * leaderboard and get studytime of the given user by calling getUserTime.
  */
-public class StudyTimeLeaderboard extends Writable implements Iterable<String> {
-
+public class StudyTimeLeaderboard {
     private static final String COLLECTION_NAME = "study_times";
+    private static final DBReader reader = new DBReader(COLLECTION_NAME);
     private Map<String, Long> timesMap;
 
-
     /**
-     * Either returns a leaderboard that was previously saved to the database or 
+     * Either returns a leaderboard that was previously saved to the database or
      * returns a new leaderboard if it is first time a leaderboard is requested
+     * 
      * @return a leaderboard that contains user ids and the time they studied
      */
     public static StudyTimeLeaderboard loadTimeLeaderboard() {
-        DBReader reader = new DBReader(COLLECTION_NAME, "times_leaderboard");
-        try {
-            Document doc = reader.loadObject();
-            Document userTimes = (Document) doc.get("times");
-            Set<String> userIDs = userTimes.keySet();
-            Map<String,Long> timesMap = new HashMap<>();
-            for (String userID : userIDs) {
-                timesMap.put(userID, userTimes.getLong(userID));
-            }
-            StudyTimeLeaderboard leaderboard = new StudyTimeLeaderboard(timesMap);
-            return leaderboard;
-        } catch (InvalidDocumentException e) {
-            return new StudyTimeLeaderboard();
+        FindIterable<Document> docs = reader.loadAllDocuments()
+                .sort(new BasicDBObject(StudyTimeRecord.STUDY_TIME_KEY, -1))
+                .limit(StudyTimeEvent.NUMBER_OF_USERS_ON_LEADERBOARD);
+        Map<String, Long> timesMap = new LinkedHashMap<>();
+        for (Document doc : docs) {
+            String userId = doc.getString(Writable.ACCESS_KEY);
+            Long time = doc.getLong(StudyTimeRecord.STUDY_TIME_KEY);
+            timesMap.put(userId, time);
         }
+        StudyTimeLeaderboard leaderboard = new StudyTimeLeaderboard(timesMap);
+        return leaderboard;
     }
 
-    /**
-     * Sorts the given map, and returns iterator of the keyset
-     */
-    @Override
-    public Iterator<String> iterator() {
-        sortMap();
-        return timesMap.keySet().iterator();
-    }
-
-    @Override
-    /**
-     * Returns a BSON document that contains information about 
-     * this StudyTimeLeaderboard
-     */
-    public Document toDoc() {
-        Document result = new Document();
-        result.put(ACCESS_KEY, "times_leaderboard");
-        Document times = new Document();
+    public EmbedBuilder getLeaderboardEmbed(Server msgServer) {
+        EmbedBuilder leaderboard = new EmbedBuilder();
+        leaderboard.setTitle("\uD83D\uDCD8 Grind Leaderboard");
+        leaderboard.setColor(new Color(0x9CD08F));
+        int place = 1;
         for (Map.Entry<String, Long> entry : timesMap.entrySet()) {
-            times.put(entry.getKey(), entry.getValue());
+            final int currPlace = place;
+            msgServer.getMemberById(entry.getKey()).ifPresent(user -> {
+                String name = user.getDisplayName(msgServer);
+                String val = entry.getValue().toString();
+                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + val + " minutes so far.", false);
+            });
+            place++;
         }
-        result.put("times", times);
-        return result;
+        return leaderboard;
     }
 
     /**
      * Constructs a new StudyTimeLeaderBoard
-     * @param timesMap a map that contains id of the users and the amount of time they studied
+     * 
+     * @param timesMap a map that contains id of the users and the amount of time
+     *                 they studied
      */
     public StudyTimeLeaderboard(Map<String, Long> timesMap) {
         this.timesMap = timesMap;
@@ -91,45 +80,13 @@ public class StudyTimeLeaderboard extends Writable implements Iterable<String> {
     }
 
     /**
-     * Adds the amount of time given to the user that holds id provided,
-     * after that saves the object to the database
-     * @param memberID String - id of a user
-     * @param timeElapsed  Long - amount of time added to the user
-     */
-    public void addUserTime(String memberID, long timeElapsed) {
-        long curr = 0;
-        if (timesMap.get(memberID) != null) {
-            curr += timesMap.get(memberID);
-        }
-        this.timesMap.put(memberID, timeElapsed / 1000 / 60  + curr);
-        DBWriter writer = new DBWriter(COLLECTION_NAME);
-        writer.saveObject(this, SaveOption.DEFAULT);
-    }
-
-    /**
-     * Returns amount of time user with provided id has studied 
+     * Returns amount of time user with provided id has studied
+     * 
      * @param memberID id of the user
      * @return the amount of time the user with the given id has studied
      */
     public Long getUserTime(String memberID) {
         return timesMap.get(memberID);
-    }
-
-    /**
-     * Sorts the map of based on the values of the map.
-     */
-    private void sortMap() {
-        List<Map.Entry<String, Long>> entries = new ArrayList<>(timesMap.entrySet());
-        entries.sort(new Comparator<Map.Entry<String, Long>>() {
-            @Override
-            public int compare(Map.Entry<String, Long> lhs, Map.Entry<String, Long> rhs) {
-                return rhs.getValue().compareTo(lhs.getValue());
-            }
-        });
-        timesMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Long> entry : entries) {
-            timesMap.put(entry.getKey(), entry.getValue());
-        }
     }
 
 }

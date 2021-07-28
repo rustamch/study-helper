@@ -1,10 +1,11 @@
 package events.TodoEvent;
 
-import net.dv8tion.jda.api.entities.User;
 import persistence.DBReader;
 import persistence.DBWriter;
 
 import java.time.LocalDate;
+
+import org.javacord.api.entity.user.User;
 
 import exceptions.IllegalDateException;
 import persistence.SaveOption;
@@ -40,7 +41,7 @@ public class TodoManager {
     }
 
     private void loadTodosFor() {
-        String userID = owner.getId();
+        String userID = owner.getIdAsString();
         DBReader reader = new DBReader(COLLECTION_NAME,userID);
         todos = reader.getTodos();
     }

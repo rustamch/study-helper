@@ -13,7 +13,7 @@ import java.util.List;
 public class Reminder extends Writable {
     private final static String COLLECTION_NAME = "reminders";
     private long epoch;
-    private String userID;
+    private long userID;
 
     /**
      * Load all the reminders for the given EPOCH
@@ -25,7 +25,7 @@ public class Reminder extends Writable {
         FindIterable<Document> docs = reader.loadDocumentsWithFilter(Filters.eq("epoch",epoch));
         List<Reminder> reminders = new ArrayList<>();
         for (Document doc : docs) {
-            String userID = doc.getString(ACCESS_KEY);
+            long userID = doc.getLong(ACCESS_KEY);
             Reminder rem = new Reminder(epoch,userID);
             reminders.add(rem);
         }
@@ -39,12 +39,12 @@ public class Reminder extends Writable {
      * @param epoch long
      * @param userID the Discord ID of the user to whom this reminder belongs to
      */
-    public Reminder(long epoch, String userID) {
+    public Reminder(long epoch, long userID) {
         this.epoch = epoch;
         this.userID = userID;
     }
 
-    public String getUserID() {
+    public long getUserID() {
         return userID;
     }
 

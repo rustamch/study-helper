@@ -8,15 +8,15 @@ import org.bson.Document;
 
 public class TodoList extends Writable {
     private List<Todo> todoList = new ArrayList<>();
-    private String userID;
+    private long userID;
 
     public void addTodo(Todo todo) {
         todoList.add(todo);
         Collections.sort(todoList);
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
+    public void setUserID(long l) {
+        this.userID = l;
     }
 
     @Override

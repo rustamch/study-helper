@@ -1,7 +1,7 @@
 package events;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.javacord.api.event.message.MessageCreateEvent;
 
 public interface BotEvent {
-    public void invoke(MessageReceivedEvent event, String[] content);
+    public void invoke(MessageCreateEvent event, String[] content);
 }

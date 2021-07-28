@@ -1,12 +1,15 @@
 package events.SimpleEvents;
 
+import java.awt.Color;
+
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.event.message.MessageCreateEvent;
+
 import events.BotEvent;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class AboutEvent implements BotEvent {
     @Override
-    public void invoke(MessageReceivedEvent event, String[] content) {
+    public void invoke(MessageCreateEvent event, String[] content) {
         EmbedBuilder about = new EmbedBuilder();
         about.setTitle("🌿 Study Hall Bot Information");
         about.setDescription("A bot to help YOU study better :D");
@@ -23,10 +26,7 @@ public class AboutEvent implements BotEvent {
                 "**Check existing todo**: !todo check\n" +
                 "**Mark todo as finished**: !todo done <todo number> \n" +
                 "**Post todo to 'todos' channel**: !todo post\n", false);
-        about.setColor(0x9CD08F);
-
-        event.getChannel().sendTyping().queue();
-        event.getChannel().sendMessage(about.build()).queue();
-        about.clear();
+        about.setColor(new Color(0x9CD08F));
+        event.getChannel().sendMessage(about);
     }
 }
