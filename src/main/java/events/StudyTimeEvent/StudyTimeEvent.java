@@ -21,7 +21,7 @@ public class StudyTimeEvent implements BotMessageEvent {
    */
   private void msgStudyTimeForUser(MessageCreateEvent event) {
     StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
-    Long time = studyTimeLeaderboard.getUserTime(event.getMessageAuthor().getIdAsString());
+    Long time = studyTimeLeaderboard.getUserTime(event.getMessageAuthor().getIdAsString()) / 60;
     if (time > 0) {
       event.getChannel()
           .sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for " + time + " minutes");

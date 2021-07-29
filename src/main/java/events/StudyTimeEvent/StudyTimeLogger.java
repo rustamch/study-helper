@@ -15,7 +15,7 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
 
     @Override
     public void onServerVoiceChannelMemberLeave(ServerVoiceChannelMemberLeaveEvent event) {
-        if (event.getChannel().getName().equalsIgnoreCase(STUDY_CHANNEL)) {
+        if (event.getChannel().getName().matches(STUDY_CHANNEL)) {
             User user = event.getUser();
             TextChannel textChannel = event.getServer().getTextChannelsByName("study-records").get(0);
             StudyTimeRecord record;
