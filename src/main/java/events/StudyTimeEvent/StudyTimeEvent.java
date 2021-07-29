@@ -41,6 +41,7 @@ public class StudyTimeEvent implements BotMessageEvent {
         StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
         EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(event.getServer().get());
         event.getChannel().sendMessage(eb);
+        break;
       case "sub":
         if (content.length > 1) {
           try {
