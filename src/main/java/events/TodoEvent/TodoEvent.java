@@ -5,7 +5,7 @@ import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 
-import events.BotEvent;
+import events.BotMessageEvent;
 import exceptions.IllegalDateException;
 import exceptions.MissingElementException;
 
@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TodoEvent implements BotEvent {
+public class TodoEvent implements BotMessageEvent {
     private TodoManager manager;
 
     @Override

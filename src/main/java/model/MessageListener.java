@@ -5,19 +5,21 @@ import java.util.Arrays;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
-import events.BotEvent;
+import events.BotMessageEvent;
 import events.BirthdayEvent.BirthdayEvent;
 import events.ReminderEvent.ReminderEvent;
 import events.SimpleEvents.AboutEvent;
 import events.SimpleEvents.DoraListener;
+import events.StudyTimeEvent.StudyTimeEvent;
 import events.TodoEvent.TodoEvent;
 
 public class MessageListener implements MessageCreateListener {
-    private BotEvent bdayEvent;
-    private BotEvent todoEvent;
-    private BotEvent reminderEvent;
-    private BotEvent oOEvent;
-    private BotEvent abtEvent;
+    private BotMessageEvent bdayEvent;
+    private BotMessageEvent todoEvent;
+    private BotMessageEvent reminderEvent;
+    private BotMessageEvent oOEvent;
+    private BotMessageEvent abtEvent;
+    private BotMessageEvent studyTimeEvent;
 
     public MessageListener() {
         bdayEvent = new BirthdayEvent();
@@ -25,14 +27,16 @@ public class MessageListener implements MessageCreateListener {
         reminderEvent = new ReminderEvent();
         oOEvent = new DoraListener();
         abtEvent = new AboutEvent();
+        studyTimeEvent = new StudyTimeEvent();
     }
 
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
-        String[] msgArr = event.getMessageContent().split("\\s");
-        String command = msgArr[0];
-        String[] content = Arrays.copyOfRange(msgArr, 1, msgArr.length);
-        if (command.charAt(0) == '!') {
+        String message = event.getMessageContent();
+        if (message.charAt(0) == '!') {
+            String[] msgArr = event.getMessageContent().split("\\s");
+            String command = msgArr[0];
+            String[] content = Arrays.copyOfRange(msgArr, 1, msgArr.length);
             switch (command) {
                 case "!bday":
                     bdayEvent.invoke(event, content);
@@ -48,6 +52,9 @@ public class MessageListener implements MessageCreateListener {
                     break;
                 case "!todo":
                     todoEvent.invoke(event, content);
+                    break;
+                case "!studytime":
+                    studyTimeEvent.invoke(event, content);
                     break;
             }
         }

@@ -22,7 +22,7 @@ public class Reminder extends Writable {
      */
     public static List<Reminder> loadReminders(long epoch) {
         DBReader reader = new DBReader(COLLECTION_NAME,"reminder");
-        FindIterable<Document> docs = reader.loadDocumentsWithFilter(Filters.eq("epoch",epoch));
+        FindIterable<Document> docs = reader.loadDocumentsWithFilter(Filters.lte("epoch",epoch));
         List<Reminder> reminders = new ArrayList<>();
         for (Document doc : docs) {
             long userID = doc.getLong(ACCESS_KEY);
@@ -30,7 +30,7 @@ public class Reminder extends Writable {
             reminders.add(rem);
         }
         DBWriter writer = new DBWriter(COLLECTION_NAME);
-        writer.removeDocuments(Filters.eq("epoch",epoch));
+        writer.removeDocuments(Filters.lte("epoch",epoch));
         return reminders;
     }
 

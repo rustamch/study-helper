@@ -10,14 +10,14 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 
-import events.BotEvent;
+import events.BotMessageEvent;
 import exceptions.IllegalDateException;
 import exceptions.InvalidDateFormatException;
 
 /**
  * Represents a handler for !bday commands
  */
-public class BirthdayEvent implements BotEvent {
+public class BirthdayEvent implements BotMessageEvent {
 
     /**
      * Constructs a new BirthdayEvent and initializes BirthdayReminders.

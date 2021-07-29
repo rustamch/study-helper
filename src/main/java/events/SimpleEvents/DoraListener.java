@@ -4,9 +4,9 @@ package events.SimpleEvents;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.event.message.MessageCreateEvent;
 
-import events.BotEvent;
+import events.BotMessageEvent;
 
-public class DoraListener implements BotEvent {
+public class DoraListener implements BotMessageEvent {
 
     @Override
     public void invoke(MessageCreateEvent event, String[] content) {

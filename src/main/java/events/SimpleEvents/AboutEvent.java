@@ -5,9 +5,9 @@ import java.awt.Color;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 
-import events.BotEvent;
+import events.BotMessageEvent;
 
-public class AboutEvent implements BotEvent {
+public class AboutEvent implements BotMessageEvent {
     @Override
     public void invoke(MessageCreateEvent event, String[] content) {
         EmbedBuilder about = new EmbedBuilder();

@@ -10,12 +10,12 @@ import javax.swing.Timer;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.event.message.MessageCreateEvent;
 
-import events.BotEvent;
+import events.BotMessageEvent;
 import exceptions.InvalidReminderException;
 import exceptions.InvalidTimeInHoursException;
 import exceptions.InvalidTimeInMinutesException;
 
-public class ReminderEvent implements ActionListener, BotEvent {
+public class ReminderEvent implements ActionListener, BotMessageEvent {
     private final ReminderManager reminderManager;
     private final Timer timer;
 
@@ -49,7 +49,7 @@ public class ReminderEvent implements ActionListener, BotEvent {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Instant currMin = Instant.now().truncatedTo(ChronoUnit.MINUTES);
-        reminderManager.notifyUsers(currMin);
+        Instant now = Instant.now();
+        reminderManager.notifyUsers(now);
     }
 }

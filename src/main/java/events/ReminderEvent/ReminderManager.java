@@ -60,7 +60,7 @@ public class ReminderManager {
      */
     private Instant parseStringTimeInMinutesToLocalDateTime(String message)
             throws InvalidTimeInMinutesException {
-        Instant curr = Instant.now().truncatedTo(ChronoUnit.MINUTES);
+        Instant curr = Instant.now();
         int minutes = 0;
         String[] messages = message.split("\\s+");
         String minuteString = messages[1].split("min|minute|minutes")[0];
@@ -82,9 +82,8 @@ public class ReminderManager {
      */
     private Instant parseStringTimeInHoursToInstance(String message)
             throws InvalidTimeInHoursException {
-        Instant curr = Instant.now().truncatedTo(ChronoUnit.MINUTES);
+        Instant curr = Instant.now();
         int hours = 0;
-
         String[] messages = message.split("\\s+");
         String minuteString = messages[1].split("hr|hours|hour")[0];
         try {

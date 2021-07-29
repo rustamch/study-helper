@@ -1,5 +1,7 @@
 package model;
 import events.StudyTimeEvent.StudyTimeEvent;
+import events.StudyTimeEvent.StudyTimeLogger;
+
 import javax.security.auth.login.LoginException;
 
 import org.javacord.api.DiscordApi;
@@ -16,7 +18,7 @@ public class Bot {
         .setAllIntentsExcept(Intent.GUILD_PRESENCES, Intent.GUILD_WEBHOOKS)
         .login().join();
         API.addMessageCreateListener(new MessageListener());
-        API.addListener(new StudyTimeEvent());
+        API.addListener(new StudyTimeLogger());
     }
 }
 
