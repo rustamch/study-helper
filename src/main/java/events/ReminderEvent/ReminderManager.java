@@ -111,9 +111,7 @@ public class ReminderManager {
      * @param rm a reminder that contains the id of the user
      */
     private void notifyUser(Reminder rm) {
-        Bot.API.getUserById(rm.getUserID()).thenAccept(user -> {
-            String message = "You have been asked to be notified about something.";
-            user.getPrivateChannel().ifPresent(actionChannel -> actionChannel.sendMessage(message));
-        });
+        Bot.API.getUserById(rm.getUserID()).thenAccept(user ->
+            user.sendMessage("You have been asked to be notified about something."));
     }
 }

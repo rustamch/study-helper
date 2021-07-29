@@ -3,7 +3,6 @@ package events.ReminderEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import javax.swing.Timer;
 
