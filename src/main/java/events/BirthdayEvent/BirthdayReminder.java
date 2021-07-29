@@ -2,16 +2,15 @@ package events.BirthdayEvent;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+
 
 import org.bson.Document;
 
 import exceptions.InvalidDocumentException;
 import model.Bot;
-import net.dv8tion.jda.api.entities.Guild;
 import persistence.DBReader;
 import persistence.DBWriter;
 import persistence.SaveOption;
@@ -79,24 +78,14 @@ public class BirthdayReminder extends Writable  {
      */
     public void congratulateBday(Set<String> memberIDs) {
         for (String id : memberIDs) {
-            List<Guild> guilds = Bot.BOT_JDA.retrieveUserById(id).complete().getMutualGuilds();
-            for (Guild g : guilds) {
-                g.getTextChannelsByName("general", true).get(0).sendMessage("Happy birthday <@" + g.getMemberById(id) + ">!").queue();
-            }
+            Bot.API.getUserById(id).thenAccept(user -> {
+                user.getMutualServers().forEach(server -> {
+                    server.getTextChannelsByName("general").forEach(channel -> {
+                        channel.sendMessage(user.getMentionTag() + " has a birthday today!");
+                    });
+                });
+            });
         }
-        // StringBuilder builder = new StringBuilder();
-        // for (String id : memberIDs) {
-        //     builder.append("<@");
-        //     builder.append(id);
-        //     builder.append("> ");
-        // }
-        // Bot.BOT_JDA.retrieveUserById(id)
-        // for (GuildChannel channel : studeyHall.getChannels()) {
-        //     if (channel.getName().equals("general")) {
-        //         channel.sendMessage("Happy Birthday! " + builder.toString()).queue();
-        //         break;
-        //     }
-        // }
     }
 
     /** 

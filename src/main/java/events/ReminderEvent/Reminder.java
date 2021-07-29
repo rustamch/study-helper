@@ -12,8 +12,11 @@ import java.util.List;
 
 public class Reminder extends Writable {
     private final static String COLLECTION_NAME = "reminders";
+    private final static String EPOCH_KEY = "epoch";
+    private final static DBReader reader = new DBReader(COLLECTION_NAME);
+    private final static DBWriter writer = new DBWriter(COLLECTION_NAME);
     private long epoch;
-    private String userID;
+    private long userID;
 
     /**
      * Load all the reminders for the given EPOCH
@@ -21,16 +24,14 @@ public class Reminder extends Writable {
      * @return list with all reminders that are scheduled for this epoch
      */
     public static List<Reminder> loadReminders(long epoch) {
-        DBReader reader = new DBReader(COLLECTION_NAME,"reminder");
-        FindIterable<Document> docs = reader.loadDocumentsWithFilter(Filters.eq("epoch",epoch));
+        FindIterable<Document> docs = reader.loadDocumentsWithFilter(Filters.lte(EPOCH_KEY,epoch));
         List<Reminder> reminders = new ArrayList<>();
         for (Document doc : docs) {
-            String userID = doc.getString(ACCESS_KEY);
+            long userID = doc.getLong(ACCESS_KEY);
             Reminder rem = new Reminder(epoch,userID);
             reminders.add(rem);
         }
-        DBWriter writer = new DBWriter(COLLECTION_NAME);
-        writer.removeDocuments(Filters.eq("epoch",epoch));
+        writer.removeDocuments(Filters.lte(EPOCH_KEY,epoch));
         return reminders;
     }
 
@@ -39,19 +40,19 @@ public class Reminder extends Writable {
      * @param epoch long
      * @param userID the Discord ID of the user to whom this reminder belongs to
      */
-    public Reminder(long epoch, String userID) {
+    public Reminder(long epoch, long userID) {
         this.epoch = epoch;
         this.userID = userID;
     }
 
-    public String getUserID() {
+    public long getUserID() {
         return userID;
     }
 
     @Override
     public Document toDoc() {
         Document retDoc = new Document();
-        retDoc.put("epoch",epoch);
+        retDoc.put(EPOCH_KEY,epoch);
         retDoc.put(ACCESS_KEY,userID);
         return retDoc;
     }

@@ -1,10 +1,11 @@
 package events.TodoEvent;
 
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.jetbrains.annotations.NotNull;
+import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.message.MessageAuthor;
+import org.javacord.api.entity.user.User;
+import org.javacord.api.event.message.MessageCreateEvent;
 
+import events.BotMessageEvent;
 import exceptions.IllegalDateException;
 import exceptions.MissingElementException;
 
@@ -12,45 +13,42 @@ import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TodoEvent extends ListenerAdapter {
+public class TodoEvent implements BotMessageEvent {
     private TodoManager manager;
 
     @Override
-    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        String rawMsg = event.getMessage().getContentRaw();
-        String[] msgLst = rawMsg.split(" ");
-        if (msgLst[0].equalsIgnoreCase("!todo")) {
-            User m = event.getAuthor();
-            manager = new TodoManager(m);
-            if (! (msgLst.length < 2)) {
-                if (msgLst[1].equalsIgnoreCase("add")) {
-                    addTodo(event, rawMsg, msgLst);
-                } else if (msgLst[1].equalsIgnoreCase("check")) {
-                    messageTodoList(event.getChannel());
-                } else if (msgLst[1].equalsIgnoreCase("rm") && msgLst.length > 2) {
-                    if (msgLst[2].equalsIgnoreCase("all")) {
-                        manager.clearTodo();
-                        event.getChannel().sendMessage("Your todo list is cleared!").queue();
-                    } else {
-                        removeTodo(event, msgLst);
-                    }
-                } else if (msgLst[1].equalsIgnoreCase("done") && msgLst.length > 2) {
-                    if (msgLst[2].equalsIgnoreCase("all")) {
-                        manager.clearTodo();
-                        event.getChannel().sendMessage("List completed, hooray!").queue();
-                    } else {
-                        setComplete(event, msgLst);
-                    }
-                } else if (msgLst[1].equalsIgnoreCase("post")) {
-                    TextChannel textChannel = event.getGuild()
-                            .getTextChannelsByName("todos", true).get(0);
-                    messageTodoList(textChannel);
+    public void invoke(MessageCreateEvent event, String[] content) {
+        String rawMsg = event.getMessageContent();
+        MessageAuthor author = event.getMessageAuthor();
+        User user = author.asUser().get();
+        manager = new TodoManager(user);
+        if (content.length != 0) {
+            if (content[0].equalsIgnoreCase("add")) {
+                addTodo(event, rawMsg, content);
+            } else if (content[0].equalsIgnoreCase("check")) {
+                messageTodoList(event.getChannel());
+            } else if (content[0].equalsIgnoreCase("rm") && content.length > 2) {
+                if (content[1].equalsIgnoreCase("all")) {
+                    manager.clearTodo();
+                    event.getChannel().sendMessage("Your todo list is cleared!");
+                } else {
+                    removeTodo(event, content);
                 }
+            } else if (content[0].equalsIgnoreCase("done") && content.length > 2) {
+                if (content[1].equalsIgnoreCase("all")) {
+                    manager.clearTodo();
+                    event.getChannel().sendMessage("List completed, hooray!");
+                } else {
+                    setComplete(event, content);
+                }
+            } else if (content[0].equalsIgnoreCase("post")) {
+                TextChannel textChannel = event.getServer().get().getTextChannelsByName("todos").get(0);
+                messageTodoList(textChannel);
             }
         }
     }
 
-    private void setComplete(MessageReceivedEvent event, String[] msgLst) {
+    private void setComplete(MessageCreateEvent event, String[] msgLst) {
         StringBuilder builder = new StringBuilder();
         int numCompleted = 0;
         try {
@@ -63,19 +61,19 @@ public class TodoEvent extends ListenerAdapter {
 
         } finally {
             if (manager.listIsCleared()) {
-                event.getChannel().sendMessage("List completed, hooray!").queue();
+                event.getChannel().sendMessage("List completed, hooray!");
             } else {
                 builder.append("completed!");
-                event.getChannel().sendMessage(builder.toString()).queue();
+                event.getChannel().sendMessage(builder.toString());
             }
         }
     }
 
-    private void messageTodoList(MessageChannel channel) {
-        channel.sendMessage(manager.getTodoMessage()).queue();
+    private void messageTodoList(TextChannel channel) {
+        channel.sendMessage(manager.getTodoMessage());
     }
 
-    private void addTodo(@NotNull MessageReceivedEvent event, String rawMsg, String[] msgLst) {
+    private void addTodo(MessageCreateEvent event, String rawMsg, String[] msgLst) {
         try {
             if (msgLst.length == 3) {
                 setTodayGoal(msgLst[2]);
@@ -84,11 +82,11 @@ public class TodoEvent extends ListenerAdapter {
             }
             messageTodoList(event.getChannel());
         } catch (MissingElementException | IllegalDateException e) {
-            event.getChannel().sendMessage(e.getMessage()).queue();
+            event.getChannel().sendMessage(e.getMessage());
         }
     }
 
-    private void removeTodo(MessageReceivedEvent event, String[] msgLst) {
+    private void removeTodo(MessageCreateEvent event, String[] msgLst) {
         StringBuilder builder = new StringBuilder();
         int numRemoved = 0;
         try {
@@ -101,7 +99,7 @@ public class TodoEvent extends ListenerAdapter {
 
         } finally {
             builder.append("removed!");
-            event.getChannel().sendMessage(builder.toString()).queue();
+            event.getChannel().sendMessage(builder.toString());
         }
     }
 

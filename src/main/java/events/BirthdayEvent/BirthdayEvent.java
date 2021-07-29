@@ -1,34 +1,23 @@
 package events.BirthdayEvent;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.javacord.api.entity.server.Server;
+import org.javacord.api.entity.user.User;
+import org.javacord.api.event.message.MessageCreateEvent;
+
+import events.BotMessageEvent;
 import exceptions.IllegalDateException;
 import exceptions.InvalidDateFormatException;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**
  * Represents a handler for !bday commands
  */
-public class BirthdayEvent extends ListenerAdapter {
-    /**
-     * Analyzes the given event to set birthday or lookup a member's birthday
-     * @param event message event that started with message "!bday"
-     */
-    public void handleBdayActions( MessageReceivedEvent event) {
-        String[] msg = event.getMessage().getContentRaw().split(" ");
-        if (msg.length < 3) {
-            return;
-        }
-        if (msg[1].equalsIgnoreCase("set")) {
-            setBDay (event, msg[2]);
-        } else if (msg[1].equalsIgnoreCase("check")) {
-            lookupBDay(event, msg[2]);
-        }
-    }
+public class BirthdayEvent implements BotMessageEvent {
 
     /**
      * Constructs a new BirthdayEvent and initializes BirthdayReminders.
@@ -36,7 +25,7 @@ public class BirthdayEvent extends ListenerAdapter {
     public BirthdayEvent() {
         new BirthdayReminder();
     }
-    
+
     /**
      * Finds the birthday of member mentioned in the message, prints to channel
      * birthday message if found, print "birthday not found" otherwise
@@ -45,18 +34,39 @@ public class BirthdayEvent extends ListenerAdapter {
      * @param name  name or atMention of the member whose birthday is being looked
      *              up
      */
-    private void lookupBDay(MessageReceivedEvent event, String name) {
-        List<Member> membersWithName = event.getGuild().getMembersByEffectiveName(name, true);
-        if (membersWithName.isEmpty()) {
-            event.getChannel().sendMessage("I wasn't able to find any members with given name.").queue();
-        } else if (membersWithName.size() > 1) {
-            event.getChannel().sendMessage("I found multiple members with given name, please be more specific.").queue();
+    private void lookupBDay(MessageCreateEvent event, String name) {
+        Server msgServer = event.getServer().orElseThrow(() -> new IllegalStateException("Server not found"));
+        Pattern p = Pattern.compile("\\d{18}");
+        Matcher matcher = p.matcher(name);
+        User user;
+        if (matcher.find()) {
+            user = msgServer.getMemberById(matcher.group(0))
+                    .orElse(event.getApi().getUserById(matcher.group(0)).join());
+            event.getServer().ifPresent(actionServer -> {
+                LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
+                if (bday == null) {
+                    event.getChannel().sendMessage(
+                            "The " + user.getDisplayName(actionServer) + " hasn't saved his birthday yet.");
+                } else {
+                    event.getChannel().sendMessage(
+                            "The " + user.getDisplayName(actionServer) + "'s birthday is " + bday.toString());
+                }
+            });
         } else {
-            String id = membersWithName.get(0).getUser().getId();
-            if (BirthdayRecord.getDateById(id) == null) {
-                event.getChannel().sendMessage("I couldn't find any birthday records for " + name + ".").queue();
+            List<User> usersWithName = new ArrayList<>(msgServer.getMembersByDisplayName(name));
+            if (usersWithName.isEmpty()) {
+                event.getChannel().sendMessage("There are no users with a given name on this server");
+            } else if (usersWithName.size() == 1) {
+                user = usersWithName.get(0);
+                LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
+                if (bday == null) {
+                    event.getChannel().sendMessage(name + " hasn't saved their birthday yet.");
+                } else {
+                    event.getChannel().sendMessage(name + "'s birthday is " + bday.toString());
+                }
             } else {
-                event.getChannel().sendMessage("The birthday of " + name + " is " + BirthdayRecord.getDateById(id) + ".").queue();
+                event.getChannel()
+                        .sendMessage("There are multiple users with the name " + name + ". Please be more specific.");
             }
         }
     }
@@ -70,21 +80,18 @@ public class BirthdayEvent extends ListenerAdapter {
      * @param date  string representation of a date
      * @param id    name of the member
      */
-    private void setBDay(MessageReceivedEvent event, String date) {
+    private void setBDay(MessageCreateEvent event, String date) {
         try {
             LocalDate bdayDate = getDateFromStr(date);
-            String userId = event.getAuthor().getId();
-            BirthdayRecord.recordBDay(userId, bdayDate);
-            event.getChannel()
-            .sendMessage(event.getGuild().getMemberById(userId).getEffectiveName()+ "'s birthday is set to " + bdayDate.toString())
-            .queue();
+            BirthdayRecord.recordBDay(event.getMessageAuthor().getIdAsString(), bdayDate);
+            event.getChannel().sendMessage(
+                    event.getMessageAuthor().getDisplayName() + "'s birthday is set to " + bdayDate.toString());
         } catch (InvalidDateFormatException e) {
-            event.getChannel().sendMessage("Sorry, birthday format illegal. Not recorded.").queue();
+            event.getChannel().sendMessage("Sorry, birthday format illegal. Not recorded.");
         } catch (IllegalDateException e) {
-            event.getChannel().sendMessage("O.o Wha").queue();
+            event.getChannel().sendMessage("O.o Wha");
         }
     }
-
 
     /**
      * Produce a date object specified by the given string
@@ -102,6 +109,7 @@ public class BirthdayEvent extends ListenerAdapter {
 
     /**
      * Returns the date of the birthday of the member specified by the given id
+     * 
      * @param id id of the member whose birthday is being looked up
      * @return a String representation of a date
      */
@@ -109,13 +117,28 @@ public class BirthdayEvent extends ListenerAdapter {
         return BirthdayRecord.getDateById(id).toString();
     }
 
-
+    /**
+     * Invoke the event: analyzes the given message to set birthday or lookup a
+     * member's birthday
+     * 
+     * @param event   message event that started with message "!bday"
+     * @param content content of the message
+     */
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        Message msg = event.getMessage();
-        String rawMsg = msg.getContentRaw();
-        if (rawMsg.length() > 5 && rawMsg.substring(0, 5).equalsIgnoreCase("!bday")) {
-            handleBdayActions (event);
+    public void invoke(MessageCreateEvent event, String[] content) {
+        if (content.length == 0) {
+            return;
+        }
+        if (content.length > 1 && content[0].equalsIgnoreCase("set")) {
+            setBDay(event, content[1]);
+        } else if (content[0].equalsIgnoreCase("check")) {
+            if (content.length > 1) {
+                lookupBDay(event, content[1]);
+            } else {
+                lookupBDay(event, event.getMessageAuthor().getDisplayName());
+            }
+
         }
     }
+
 }

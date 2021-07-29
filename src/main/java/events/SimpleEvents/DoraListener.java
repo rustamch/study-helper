@@ -1,24 +1,19 @@
 package events.SimpleEvents;
 
 
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.event.message.MessageCreateEvent;
 
-public class DoraListener extends ListenerAdapter {
+import events.BotMessageEvent;
+
+public class DoraListener implements BotMessageEvent {
 
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        MessageChannel channel = event.getChannel();
-        Message msg = event.getMessage();
-        String rawMsg = msg.getContentRaw();
-        if (rawMsg.equals("o_O")) {
-            long time = System.currentTimeMillis();
-            channel.sendMessage("O_o") /* => RestAction<Message> */
-                    .queue(response /* => Message */ -> {
-                        response.editMessageFormat("O_o: %d ms", System.currentTimeMillis() - time).queue();
-                    });
-        }
+    public void invoke(MessageCreateEvent event, String[] content) {
+        TextChannel channel = event.getChannel();
+        long time = System.currentTimeMillis();
+        channel.sendMessage("O_o").thenAccept(response /* => Message */ -> {
+                    response.edit("O_o: " + (System.currentTimeMillis() - time) + " ms");
+                });
     }
 }

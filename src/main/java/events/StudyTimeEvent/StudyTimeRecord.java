@@ -1,6 +1,7 @@
 package events.StudyTimeEvent;
-import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
 import org.bson.Document;
 
 import exceptions.InvalidDocumentException;
@@ -14,10 +15,14 @@ import persistence.Writable;
  * Represents an abstraction for a time instance that is mapped to 
  * a user ID.
  */
-public class StudyTimeSession extends Writable{
-
-    private static final String COLLECTION_NAME = "study_times";
+public class StudyTimeRecord extends Writable  {
+    public static final String COLLECTION_NAME = "study_times";
+    public static final String STUDY_TIME_KEY = "study_time";
+    public static final String EPOCH_KEY = "epoch";
+    private static final DBReader reader = new DBReader(COLLECTION_NAME);
+    private static final DBWriter writer = new DBWriter(COLLECTION_NAME);
     private Instant start;
+    private long studyTime;
     private String memberID;
 
     /**
@@ -26,12 +31,11 @@ public class StudyTimeSession extends Writable{
      * @return a StudyTimeSession which contatains the time when user started studying
      * @throws InvalidDocumentException thrown to signify that a study session for given user doesn't exist
      */
-    public static StudyTimeSession getStudySession(String memberID) throws InvalidDocumentException {
-        DBReader reader = new DBReader(COLLECTION_NAME, memberID);
-        Document doc = reader.loadObject();
-        long epoch = doc.getLong("epoch");
-        long nanos = doc.getInteger("nanos");
-        StudyTimeSession session = new StudyTimeSession(memberID, epoch, nanos);
+    public static StudyTimeRecord getStudySession(String memberID) throws InvalidDocumentException {
+        Document doc = reader.loadObject(memberID);
+        long epoch = doc.getLong(EPOCH_KEY);
+        long studyTime = doc.getLong(STUDY_TIME_KEY);
+        StudyTimeRecord session = new StudyTimeRecord(memberID, epoch,studyTime);
         return session;
     }
 
@@ -42,9 +46,9 @@ public class StudyTimeSession extends Writable{
      */
     public Document toDoc() {
         Document doc = new Document();
-        doc.put(Writable.ACCESS_KEY, memberID);
-        doc.put("epoch", start.getEpochSecond());
-        doc.put("nanos", start.getNano());
+        doc.put(ACCESS_KEY, memberID);
+        doc.put(EPOCH_KEY, start.getEpochSecond());
+        doc.put(STUDY_TIME_KEY, studyTime);
         return doc;
     }
 
@@ -53,9 +57,9 @@ public class StudyTimeSession extends Writable{
      * Constructs a new StudyTimeSession and saves it to database 
      * @param memberID the String that contains id of the user to whom this study seesion belongs too
      */
-    public StudyTimeSession(String memberID) {
-        this.start = Instant.now();
+    public StudyTimeRecord(String memberID) {
         this.memberID = memberID;
+        this.studyTime = 0;
     }
 
     /**
@@ -63,27 +67,36 @@ public class StudyTimeSession extends Writable{
      * @param memberID id of the member to whom this session belongs to
      * @param epoch an Epoch that points to a specific time
      */
-    public StudyTimeSession(String memberID, long epoch, long nanos) {
-        this.start = Instant.ofEpochSecond(epoch,nanos);
+    public StudyTimeRecord(String memberID, long epoch, long studyTime) {
+        this.start = Instant.ofEpochSecond(epoch);
         this.memberID = memberID;
+        this.studyTime = studyTime;
     }
 
     /**
      * Saves this session to the database
      */
     public void trackSession() {
+        this.start = Instant.now();
         DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.saveObject(this, SaveOption.DEFAULT);
     }
-    
+
     /**
      * Returns the time elapsed between the start of this session and the current time
      * @return time elapsed since between start of the session and the current moment
      */
     public long finishSession() {
         Instant finish = Instant.now();
-        long timeElapsed = Duration.between(start, finish).toMillis();
+        long timeElapsed =  this.start.until(finish, ChronoUnit.SECONDS);
+        this.studyTime = this.studyTime + timeElapsed;
+        writer.saveObject(this, SaveOption.DEFAULT);
         return timeElapsed;
     }
-    
+
+    public static void subtractStudyTime(String idAsString, long time) throws InvalidDocumentException {
+        StudyTimeRecord session = getStudySession(idAsString);
+        session.studyTime -= time;
+        writer.saveObject(session, SaveOption.DEFAULT);
+    }   
 }

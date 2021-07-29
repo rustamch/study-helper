@@ -16,14 +16,10 @@ tasks.withType(JavaCompile) {
 
 repositories {
     mavenCentral()
-    maven {
-        name 'm2-dv8tion'
-        url 'https://m2.dv8tion.net/releases'
-    }
 }
 dependencies {
     implementation ("org.mongodb:mongodb-driver:3.6.3")
-    implementation("net.dv8tion:JDA:4.3.0_277")
+    dependencies { implementation 'org.javacord:javacord:3.3.2' }
 }
 
 buildscript {

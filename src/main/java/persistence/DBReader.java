@@ -9,7 +9,6 @@ import com.mongodb.client.MongoCollection;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.jetbrains.annotations.NotNull;
 
 import events.TodoEvent.Todo;
 import events.TodoEvent.TodoList;
@@ -28,6 +27,7 @@ public class DBReader {
         this.collection = mongoClient.getDatabase("test").getCollection(collectionName);
     }
 
+    @Deprecated
     public DBReader(String collectionName, String documentName) {
         this.readDoc = null;
         this.documentName = documentName;
@@ -70,18 +70,18 @@ public class DBReader {
         }
         return todo;
     }
-
-    @NotNull
-    private LocalDate locDateFromStr(String dateStr) {
-        String[] datelst = dateStr.split("-");
-        return LocalDate.of(Integer.parseInt(datelst[0]), Integer.parseInt(datelst[1]), Integer.parseInt(datelst[2]));
-    }
-
+    
     public FindIterable<Document> loadDocumentsWithFilter(Bson filter) {
         FindIterable<Document> docs = collection.find(filter);
         return docs;
     }
 
+    public FindIterable<Document> loadAllDocuments() {
+        FindIterable<Document> docs = collection.find();
+        return docs;
+    }
+
+    @Deprecated
     /**
      * Loads an object from the database from the given collection
      * @return a document that has specified field
@@ -95,4 +95,19 @@ public class DBReader {
         readDoc = document;
         return document;
     }
+
+    /**
+     * Loads an object from the database from the given collection
+     * @return a document that has specified field
+     * @throws InvalidDocumentException
+     */
+    public Document loadObject(Object accessValue) throws InvalidDocumentException {
+        Document document = collection.find(new Document(Writable.ACCESS_KEY,accessValue)).first();
+        if (document == null) {
+            throw new InvalidDocumentException();
+        }
+        return document;
+    }
+
+
 }
