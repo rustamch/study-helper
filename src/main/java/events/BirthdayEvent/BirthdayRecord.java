@@ -72,8 +72,16 @@ public class BirthdayRecord extends Writable {
     }
 
     public static Set<String> findMembersWithBdayOnGivenDay(LocalDate date) {
-        Bson filter = Filters.and(Filters.eq(MONTH_KEY, date.getMonthValue()),
-                Filters.eq(DAY_KEY, date.getDayOfMonth()));
+        return findMemberWithGivenFilters(Filters.eq(MONTH_KEY, date.getMonthValue()),
+        Filters.eq(DAY_KEY, date.getDayOfMonth()));
+    }
+
+    public static Set<String> findMembersWithBdayOnGivenMonth(int monthVal) {
+        return findMemberWithGivenFilters(Filters.eq(MONTH_KEY, monthVal));
+    }
+
+    private static Set<String> findMemberWithGivenFilters(Bson ... f) {
+        Bson filter = Filters.and(f);
         FindIterable<Document> docs = READER.loadDocumentsWithFilter(filter);
         HashSet<String> set = new HashSet<>();
         for (Document doc : docs) {
