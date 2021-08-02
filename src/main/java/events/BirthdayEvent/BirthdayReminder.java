@@ -2,12 +2,16 @@ package events.BirthdayEvent;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
 import org.bson.Document;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.server.Server;
 
 import exceptions.InvalidDocumentException;
 import model.Bot;
@@ -56,9 +60,28 @@ public class BirthdayReminder extends Writable  {
      * Sets a timer to the next birthday reminder.
      */
     public void onTimer() {
+        if (LocalDate.now().getDayOfMonth() == 1) {
+            monthlyBDayUpdate();
+        }
         checkBirthdays();
         storeNextReminderTime();
         setNewTimer();
+    }
+
+    private void monthlyBDayUpdate() {
+        Set<String> ids = BirthdayRecord.findMembersWithBdayOnGivenMonth(LocalDate.now().getMonthValue());
+        String title = LocalDate.now().getMonth() + " Birthdays";
+        if (!ids.isEmpty()) {
+            Map<Server, EmbedBuilder> embeds = new HashMap<>();
+            ids.forEach(id -> {
+                Bot.API.getUserById(id).thenAccept(user -> {
+                    user.getMutualServers().forEach(server -> {
+                        EmbedBuilder builder = new EmbedBuilder().setTitle(title);
+                        embeds.putIfAbsent(server, builder);
+                })
+            }
+            });
+        }
     }
 
     /**
