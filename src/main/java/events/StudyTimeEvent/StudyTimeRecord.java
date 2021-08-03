@@ -15,7 +15,7 @@ import persistence.Writable;
  * Represents an abstraction for a time instance that is mapped to 
  * a user ID.
  */
-public class StudyTimeRecord extends Writable  {
+public class StudyTimeRecord implements Writable  {
     public static final String COLLECTION_NAME = "study_times";
     public static final String STUDY_TIME_KEY = "study_time";
     public static final String EPOCH_KEY = "epoch";

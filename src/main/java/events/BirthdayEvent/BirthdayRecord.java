@@ -19,7 +19,7 @@ import com.mongodb.client.model.Filters;
 /**
  * Represents a birthday manager that manages members' events.birthdays
  */
-public class BirthdayRecord extends Writable {
+public class BirthdayRecord implements Writable {
     public static final String COLLECTION_NAME = "bdayLog";
     public static final String YEAR_KEY = "year";
     public static final String MONTH_KEY = "month";

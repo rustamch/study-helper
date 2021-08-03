@@ -1,6 +1,8 @@
 package events.StudyTimeEvent;
 
 import java.awt.Color;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,7 +14,9 @@ import org.bson.Document;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 
+import model.DailyTask;
 import persistence.DBReader;
+import persistence.DBWriter;
 import persistence.Writable;
 
 /**
@@ -20,9 +24,10 @@ import persistence.Writable;
  * respective studyTime. Outside classes can iterate through user ids in the
  * leaderboard and get studytime of the given user by calling getUserTime.
  */
-public class StudyTimeLeaderboard {
+public class StudyTimeLeaderboard implements DailyTask {
     private static final String COLLECTION_NAME = "study_times";
     private static final DBReader reader = new DBReader(COLLECTION_NAME);
+    private static final DBWriter writer = new DBWriter(COLLECTION_NAME);
     private Map<String, Long> timesMap;
 
     /**
@@ -87,6 +92,30 @@ public class StudyTimeLeaderboard {
      */
     public Long getUserTime(String memberID) {
         return timesMap.get(memberID);
+    }
+
+    @Override
+    public void execute() {
+        if (needsToBeReset()) {
+            resetLeaderboard();
+        }
+    }
+
+    /**
+     * Deletes all the StudyTimeRecords from the database and consequently
+     * resets the leaderboard.
+     */
+    private void resetLeaderboard() {
+        writer.removeDocuments(new Document());
+    }
+
+    /**
+     * Returns whether leaderboard needs to be reset or not.
+     * @return a boolean value that indicates whether leaderboard needs to be reset or not 
+     */
+    private boolean needsToBeReset() {
+        LocalDate today = LocalDate.now();
+        return today.getDayOfWeek() == DayOfWeek.MONDAY;
     }
 
 }

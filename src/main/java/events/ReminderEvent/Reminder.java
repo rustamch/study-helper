@@ -10,7 +10,7 @@ import persistence.Writable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Reminder extends Writable {
+public class Reminder implements Writable {
     private final static String COLLECTION_NAME = "reminders";
     private final static String EPOCH_KEY = "epoch";
     private final static DBReader reader = new DBReader(COLLECTION_NAME);

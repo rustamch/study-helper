@@ -1,5 +1,4 @@
 package model;
-import events.StudyTimeEvent.StudyTimeEvent;
 import events.StudyTimeEvent.StudyTimeLogger;
 
 import javax.security.auth.login.LoginException;
@@ -19,6 +18,7 @@ public class Bot {
         .login().join();
         API.addMessageCreateListener(new MessageListener());
         API.addListener(new StudyTimeLogger());
+        new DailyExecutor();  
     }
 }
 
