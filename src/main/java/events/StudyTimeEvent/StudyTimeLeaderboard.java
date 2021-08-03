@@ -11,9 +11,11 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 
 import org.bson.Document;
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 
+import model.Bot;
 import model.DailyTask;
 import persistence.DBReader;
 import persistence.DBWriter;
@@ -106,6 +108,10 @@ public class StudyTimeLeaderboard implements DailyTask {
      * resets the leaderboard.
      */
     private void resetLeaderboard() {
+        Server msgServer = Bot.API.getServersByName("Studium Praetorium").iterator().next();    // TODO: Change this after each server is associated with a different database
+        TextChannel botSpam = msgServer.getTextChannelsByName("bot-spam").get(0);               // TODO: Change this after each server has a config file.
+        botSpam.sendMessage("Resetting leaderboard...");
+        botSpam.sendMessage(getLeaderboardEmbed(msgServer));
         writer.removeDocuments(new Document());
     }
 
