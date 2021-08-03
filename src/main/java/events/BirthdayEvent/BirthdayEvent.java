@@ -19,12 +19,6 @@ import exceptions.InvalidDateFormatException;
  */
 public class BirthdayEvent implements BotMessageEvent {
 
-    /**
-     * Constructs a new BirthdayEvent and initializes BirthdayReminders.
-     */
-    public BirthdayEvent() {
-        new BirthdayReminder();
-    }
 
     /**
      * Finds the birthday of member mentioned in the message, prints to channel
