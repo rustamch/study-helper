@@ -1,4 +1,5 @@
 package model;
+import events.StudyTimeEvent.StudyTimeEvent;
 import events.StudyTimeEvent.StudyTimeLogger;
 
 import javax.security.auth.login.LoginException;

@@ -6,6 +6,9 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import events.BotMessageEvent;
 import exceptions.InvalidDocumentException;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Represents a handler for !studytime commands
  */
