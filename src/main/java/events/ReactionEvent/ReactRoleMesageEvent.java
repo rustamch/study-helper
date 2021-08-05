@@ -1,22 +1,17 @@
 package events.ReactionEvent;
 
-import java.security.Permission;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.permission.PermissionState;
 import org.javacord.api.entity.permission.PermissionType;
-import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
-import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
-import org.javacord.core.entity.permission.PermissionsImpl;
 
 import events.BotMessageEvent;
 import exceptions.EmojiAlreadyAssociatedWithRoleException;
-import exceptions.InvalidMessageIdException;
 import model.Bot;
 
 public class ReactRoleMesageEvent implements BotMessageEvent {
@@ -74,25 +69,33 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
     }
     
     private void removeRoleFromRrMsg(MessageCreateEvent event, Message message, Server msgServer, Role role) {
+        event.getChannel().sendMessage("React to this message with emoji that you want to add!")
+        .thenAccept(reactMsg -> reactMsg.addReactionAddListener(reactEvent -> {
+            if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
+                try {
+                    ReactRoleMessage.addRoleToMsg(message.getId(), reactEvent.getEmoji(), role.getId());
+                    reactEvent.deleteMessage();
+                } catch (EmojiAlreadyAssociatedWithRoleException e) {
+                    event.getChannel().sendMessage("This emote is already used, please react with different emote.");
+                    reactEvent.removeReaction();
+                }
+            }
+        }).removeAfter(5, TimeUnit.MINUTES));
     }
 
     private void addRoleToRrMsg(MessageCreateEvent event, Message message, Server msgServer, Role role) {
-    }
-
-    private void addRoleToRrMsg(Message message, MessageCreateEvent event, Role role) {
         event.getChannel().sendMessage("React to this message with emoji that you want to add!")
-                .thenAccept(reactMsg -> reactMsg.addReactionAddListener(reactEvent -> {
-                    if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
-                        try {
-                            ReactRoleMessage.addRoleToMsg(message.getId(), reactEvent.getEmoji(), role.getId());
-                        } catch (EmojiAlreadyAssociatedWithRoleException e) {
-
-                        } catch (InvalidMessageIdException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                        reactEvent.deleteMessage().join();
-                    }
-                }).removeAfter(5, TimeUnit.MINUTES));
+        .thenAccept(reactMsg -> reactMsg.addReactionAddListener(reactEvent -> {
+            if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
+                try {
+                    ReactRoleMessage.addRoleToMsg(message.getId(), reactEvent.getEmoji(), role.getId());
+                    reactEvent.deleteMessage();
+                } catch (EmojiAlreadyAssociatedWithRoleException e) {
+                    event.getChannel().sendMessage("This emote is already used, please react with different emote.");
+                    reactEvent.removeReaction();
+                }
+            }
+        }).removeAfter(5, TimeUnit.MINUTES));
     }
+
 }

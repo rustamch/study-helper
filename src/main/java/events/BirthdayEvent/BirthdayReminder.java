@@ -1,4 +1,5 @@
 package events.BirthdayEvent;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -7,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-
 
 import org.bson.Document;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -20,8 +20,7 @@ import persistence.DBWriter;
 import persistence.SaveOption;
 import persistence.Writable;
 
-
-public class BirthdayReminder extends Writable  {
+public class BirthdayReminder extends Writable {
     private Timer timer;
     private final String EPOCH_KEY = "epoch";
     private final String COLLECTION_NAME = "bdayReminder";
@@ -38,13 +37,14 @@ public class BirthdayReminder extends Writable  {
     public Document toDoc() {
         Document saveFile = new Document();
         Instant now = Instant.now();
-        saveFile.put(ACCESS_KEY,"reminder_time");
-        saveFile.put(EPOCH_KEY,now.plus(1, ChronoUnit.DAYS).getEpochSecond());
+        saveFile.put(ACCESS_KEY, "reminder_time");
+        saveFile.put(EPOCH_KEY, now.plus(1, ChronoUnit.DAYS).getEpochSecond());
         return saveFile;
     }
 
     /**
      * Loads the time of the next birthday reminder.
+     * 
      * @return The time of the next birthday reminder.
      * @throws InvalidDocumentException
      */
@@ -56,8 +56,9 @@ public class BirthdayReminder extends Writable  {
     }
 
     /**
-     * Checks if the users have a birthday today. Stores the time of the next birthday reminder to the database.
-     * Sets a timer to the next birthday reminder.
+     * Checks if the users have a birthday today. Stores the time of the next
+     * birthday reminder to the database. Sets a timer to the next birthday
+     * reminder.
      */
     public void onTimer() {
         if (LocalDate.now().getDayOfMonth() == 1) {
@@ -78,8 +79,8 @@ public class BirthdayReminder extends Writable  {
                     user.getMutualServers().forEach(server -> {
                         EmbedBuilder builder = new EmbedBuilder().setTitle(title);
                         embeds.putIfAbsent(server, builder);
-                })
-            }
+                    });
+                });
             });
         }
     }
@@ -96,6 +97,7 @@ public class BirthdayReminder extends Writable  {
 
     /**
      * Sends a congradulations message to the users with a birthday today.
+     * 
      * @param memberIDs ids of the users with a birthday today.
      * @throws InterruptedException
      */
@@ -111,7 +113,7 @@ public class BirthdayReminder extends Writable  {
         }
     }
 
-    /** 
+    /**
      * Store the time of the next birthday reminder to the database.
      */
     private void storeNextReminderTime() {
@@ -120,8 +122,9 @@ public class BirthdayReminder extends Writable  {
     }
 
     /**
-     * Sets a timer for the next birthday reminder. If the time record on the databse
-     * points to the point of time before now - execute the birthday reminder routine.
+     * Sets a timer for the next birthday reminder. If the time record on the
+     * databse points to the point of time before now - execute the birthday
+     * reminder routine.
      */
     private void setNewTimer() {
         Instant now = Instant.now();
