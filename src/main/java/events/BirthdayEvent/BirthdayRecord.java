@@ -68,12 +68,19 @@ public class BirthdayRecord implements Writable {
         } catch (InvalidDocumentException e) {
             return null;
         }
-
     }
 
     public static Set<String> findMembersWithBdayOnGivenDay(LocalDate date) {
-        Bson filter = Filters.and(Filters.eq(MONTH_KEY, date.getMonthValue()),
+        return findMembersWithFilters(Filters.eq(MONTH_KEY, date.getMonthValue()),
                 Filters.eq(DAY_KEY, date.getDayOfMonth()));
+    }
+
+    public static Set<String> findAllMembersWithBdayOnGivenMonth(int monthVal) {
+        return findMembersWithFilters(Filters.eq(MONTH_KEY, monthVal);
+    }
+
+    private static Set<String> findMembersWithFilters(Bson ... filters) {
+        Bson filter = Filters.and(filters);
         FindIterable<Document> docs = READER.loadDocumentsWithFilter(filter);
         HashSet<String> set = new HashSet<>();
         for (Document doc : docs) {
