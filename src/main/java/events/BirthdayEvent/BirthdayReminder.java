@@ -1,4 +1,5 @@
 package events.BirthdayEvent;
+import java.awt.Color;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,8 +55,8 @@ public class BirthdayReminder implements DailyTask {
         memberIDs.forEach(id -> {
             Bot.API.getUserById(id).thenAccept(user -> {
                 user.getMutualServers().forEach(server -> {
-                    EmbedBuilder builder = msgMap.getOrDefault(server, new EmbedBuilder().setTitle(LocalDate.now().getMonth() + " Birthdays"));
-                    builder.addInlineField(user.getDisplayName(server) + " : ", BirthdayRecord.getDateById(user.getIdAsString()).toString());
+                    EmbedBuilder builder = msgMap.getOrDefault(server, new EmbedBuilder().setTitle(LocalDate.now().getMonth() + " Birthdays").setColor(Color.CYAN));
+                    builder.addInlineField(user.getDisplayName(server) + " : " + BirthdayRecord.getDateById(user.getIdAsString()).toString(), "");
                     msgMap.put(server, builder);
                 });
             });
