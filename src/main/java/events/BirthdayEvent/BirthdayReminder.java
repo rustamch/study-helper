@@ -49,7 +49,7 @@ public class BirthdayReminder implements DailyTask {
         });
     }
 
-    public void msgEachCommonServer(Set<String> memberIDs) {
+    public static void msgEachCommonServer(Set<String> memberIDs) {
         Map<Server, EmbedBuilder> msgMap = new HashMap<>();
         memberIDs.forEach(id -> {
             Bot.API.getUserById(id).thenAccept(user -> {
@@ -63,5 +63,5 @@ public class BirthdayReminder implements DailyTask {
         msgMap.entrySet().forEach(entry -> {
             entry.getKey().getTextChannelsByName("general").get(0).sendMessage(entry.getValue());
         });
-    }   
+    }
 }

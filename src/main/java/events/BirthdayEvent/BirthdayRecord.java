@@ -76,7 +76,7 @@ public class BirthdayRecord implements Writable {
     }
 
     public static Set<String> findAllMembersWithBdayOnGivenMonth(int monthVal) {
-        return findMembersWithFilters(Filters.eq(MONTH_KEY, monthVal);
+        return findMembersWithFilters(Filters.eq(MONTH_KEY, monthVal));
     }
 
     private static Set<String> findMembersWithFilters(Bson ... filters) {
