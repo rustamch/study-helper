@@ -7,6 +7,7 @@ import model.Bot;
 import model.DailyTask;
 
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.server.Server;
 
 
 public class BirthdayReminder implements DailyTask {
@@ -49,14 +50,18 @@ public class BirthdayReminder implements DailyTask {
     }
 
     public void msgEachCommonServer(Set<String> memberIDs) {
-        Map<String, EmbedBuilder> msgMap = new HashMap<>();
+        Map<Server, EmbedBuilder> msgMap = new HashMap<>();
         memberIDs.forEach(id -> {
             Bot.API.getUserById(id).thenAccept(user -> {
                 user.getMutualServers().forEach(server -> {
-                    EmbedBuilder builder = msgMap.getOrDefault(server.getIdAsString(), new EmbedBuilder());
-                    builder.addField(user.getDisplayName(server) + ": ", BirthdayRecord.getDateById(user.getIdAsString()).toString());
+                    EmbedBuilder builder = msgMap.getOrDefault(server, new EmbedBuilder().setTitle(LocalDate.now().getMonth() + " Birthdays"));
+                    builder.addField(user.getMentionTag() + ": ", BirthdayRecord.getDateById(user.getIdAsString()).toString());
+                    msgMap.put(server, builder);
                 });
             });
+        });
+        msgMap.entrySet().forEach(entry -> {
+            entry.getKey().getTextChannelsByName("general").get(0).sendMessage(entry.getValue());
         });
     }   
 }
