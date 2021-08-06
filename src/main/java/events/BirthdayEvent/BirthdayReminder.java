@@ -55,7 +55,7 @@ public class BirthdayReminder implements DailyTask {
             Bot.API.getUserById(id).thenAccept(user -> {
                 user.getMutualServers().forEach(server -> {
                     EmbedBuilder builder = msgMap.getOrDefault(server, new EmbedBuilder().setTitle(LocalDate.now().getMonth() + " Birthdays"));
-                    builder.addField(user.getDisplayName(server) + " : ", BirthdayRecord.getDateById(user.getIdAsString()).toString());
+                    builder.addInlineField(user.getDisplayName(server) + " : ", BirthdayRecord.getDateById(user.getIdAsString()).toString());
                     msgMap.put(server, builder);
                 });
             });
