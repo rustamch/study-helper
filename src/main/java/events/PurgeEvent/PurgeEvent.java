@@ -14,9 +14,11 @@ public class PurgeEvent implements BotMessageEvent {
             TextChannel channel = event.getChannel();
             event.getMessage().getUserAuthor().ifPresent(user -> {
                 if(channel.canManageMessages(user)) {
-                    channel.getMessages(num).thenAccept(messages -> {
-                        channel.bulkDelete(messages);
-                    });
+                    channel.sendMessage("Deleting " + num + " messages...").thenAccept(msg ->
+                        channel.getMessages(num + 1).thenAccept(msgs -> {
+                            channel.bulkDelete(msgs);
+                        })
+                    );
                 }
             });
         }
