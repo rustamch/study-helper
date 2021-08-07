@@ -5,7 +5,7 @@ import org.javacord.api.event.message.reaction.ReactionAddEvent;
 import org.javacord.api.event.message.reaction.ReactionRemoveEvent;
 import org.javacord.api.listener.message.reaction.ReactionAddListener;
 import org.javacord.api.listener.message.reaction.ReactionRemoveListener;
-
+  
 public class MessageReactionEvent implements ReactionAddListener, ReactionRemoveListener {
 
     @Override
@@ -24,7 +24,10 @@ public class MessageReactionEvent implements ReactionAddListener, ReactionRemove
             Emoji userReaction = event.getEmoji();
             long messageID = event.getMessageId();
             long userID = event.getUserId();
-            ReactRoleMessage.checkAndAddRole(messageID, userReaction, server, userID);
+            if (ReactRoleMessage.checkAndAddRole(messageID, userReaction, server, userID)) {
+
+
+            }
         });
     }
 }
