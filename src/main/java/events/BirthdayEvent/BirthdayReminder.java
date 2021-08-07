@@ -1,8 +1,14 @@
 package events.BirthdayEvent;
+import java.awt.Color;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import model.Bot;
 import model.DailyTask;
+
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.server.Server;
 
 
 public class BirthdayReminder implements DailyTask {
@@ -17,7 +23,12 @@ public class BirthdayReminder implements DailyTask {
      */
     private void checkBirthdays() {
         LocalDate today = LocalDate.now();
-        Set<String> ids = BirthdayRecord.findMembersWithBdayOnGivenDay(today);
+        Set<String> ids;
+        if (today.getDayOfMonth() == 1) {
+            ids = BirthdayRecord.findAllMembersWithBdayOnGivenMonth(today.getMonthValue());
+            msgEachCommonServer(ids);
+        }
+        ids = BirthdayRecord.findMembersWithBdayOnGivenDay(today);
         if (ids.size() > 0) {
             congratulateUsers(ids);
         }
@@ -36,6 +47,22 @@ public class BirthdayReminder implements DailyTask {
                     });
                 });
             });
+        });
+    }
+
+    public static void msgEachCommonServer(Set<String> memberIDs) {
+        Map<Server, EmbedBuilder> msgMap = new HashMap<>();
+        memberIDs.forEach(id -> {
+            Bot.API.getUserById(id).thenAccept(user -> {
+                user.getMutualServers().forEach(server -> {
+                    EmbedBuilder builder = msgMap.getOrDefault(server, new EmbedBuilder().setTitle(LocalDate.now().getMonth() + " Birthdays").setColor(Color.CYAN));
+                    builder.addField(BirthdayRecord.getDateById(user.getIdAsString()).toString(), " - "  + user.getMentionTag());
+                    msgMap.put(server, builder);
+                });
+            });
+        });
+        msgMap.entrySet().forEach(entry -> {
+            entry.getKey().getTextChannelsByName("general").get(0).sendMessage(entry.getValue());
         });
     }
 }
