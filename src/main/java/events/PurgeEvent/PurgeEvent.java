@@ -1,9 +1,6 @@
 package events.PurgeEvent;
 
-import java.util.function.Predicate;
-
 import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.message.Message;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import events.BotMessageEvent;
@@ -23,29 +20,15 @@ public class PurgeEvent implements BotMessageEvent {
         String subCommand = content[0];
         TextChannel channel = event.getChannel();
         if (subCommand.equalsIgnoreCase("all"))  {
+            channel.sendMessage("You have asked to delete all the messages!");
             channel.getMessagesWhile(message -> {
                 return true;
             }).thenAccept(messages -> channel.deleteMessages(messages));
-        } else if (subCommand.matches("\\d*")) {
+        } else if (subCommand.matches("(\\d+)")) {
             int num = Integer.parseInt(subCommand);
             channel.getMessages(num + 2).thenAccept(msgs -> {
-                channel.bulkDelete(msgs);
+                channel.deleteMessages(msgs);
             });
-        // } else {
-        //     event.getMessage().getUserAuthor().ifPresent(user -> {
-        //         if(channel.canManageMessages(user)) {
-        //             channel.sendMessage("Deleting " + content[0] + " messages...").thenAccept(msg -> {
-        //                 try {
-        //                     Thread.currentThread();
-        //                     Thread.sleep(1000);
-        //                     });
-        //                 } catch (InterruptedException e) {
-        //                     // do nothing
-        //                 } 
-        //             });
-        //         }
-        //     });
         }
- 
     }
 }
