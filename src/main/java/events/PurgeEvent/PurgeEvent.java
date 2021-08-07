@@ -9,8 +9,10 @@ public class PurgeEvent implements BotMessageEvent {
 
     @Override
     public void invoke(MessageCreateEvent event, String[] content) {
-        if (content.length > 0) {
-            int num = Integer.parseInt(content[0]);
+        if (content.length == 0) {
+            return;
+        } else {
+            int num = content[0].equalsIgnoreCase("all") ? Integer.MAX_VALUE : Integer.parseInt(content[0]);
             TextChannel channel = event.getChannel();
             event.getMessage().getUserAuthor().ifPresent(user -> {
                 if(channel.canManageMessages(user)) {
