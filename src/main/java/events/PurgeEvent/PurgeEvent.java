@@ -12,7 +12,8 @@ public class PurgeEvent implements BotMessageEvent {
         if (content.length == 0) {
             return;
         } else {
-            int num = content[0].equalsIgnoreCase("all") ? Integer.MAX_VALUE - 1: Integer.parseInt(content[0]);
+            // int num = content[0].equalsIgnoreCase("all") ? Integer.MAX_VALUE - 1: Integer.parseInt(content[0]);
+            int num = Integer.parseInt(content[0]);
             TextChannel channel = event.getChannel();
             event.getMessage().getUserAuthor().ifPresent(user -> {
                 if(channel.canManageMessages(user)) {
