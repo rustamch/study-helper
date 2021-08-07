@@ -59,7 +59,7 @@ public class MessageListener implements MessageCreateListener {
                 case "!studytime":
                     studyTimeEvent.invoke(event, content);
                     break;
-                case "!purge":
+                case "!del":
                     purgeEvent.invoke(event, content);
                     break;
             }
