@@ -22,7 +22,7 @@ public class PurgeEvent implements BotMessageEvent {
                             Thread.currentThread();
                             Thread.sleep(1000);
                             channel.getMessages(num + 2).thenAccept(msgs -> {
-                                channel.bulkDelete(msgs);
+                                channel.deleteMessages(msgs);
                             });
                         } catch (InterruptedException e) {
                             // do nothing
