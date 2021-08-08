@@ -24,7 +24,7 @@ public class StudyTimeEvent implements BotMessageEvent {
     Long time = studyTimeLeaderboard.getUserTime(event.getMessageAuthor().getIdAsString()) / 60;
     if (time > 0) {
       event.getChannel()
-          .sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for "  + time % 60 + " hour(s) " + time / 60 + " minutes");
+          .sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for "  + time / 60 + " hour(s) " + time % 60 + " minutes");
     } else {
       event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " has not studied yet.");
     }

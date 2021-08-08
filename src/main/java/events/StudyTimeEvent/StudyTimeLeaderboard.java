@@ -62,7 +62,7 @@ public class StudyTimeLeaderboard implements DailyTask {
             msgServer.getMemberById(entry.getKey()).ifPresent(user -> {
                 String name = user.getDisplayName(msgServer);
                 long minutes  = entry.getValue() / 60;
-                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + minutes % 60 + " hour(s) " + minutes / 60 + " minute(s) so far.", false);
+                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + minutes / 60 + " hour(s) " + minutes % 60 + " minute(s) so far.", false);
             });
             place++;
         }
