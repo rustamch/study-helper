@@ -3,6 +3,7 @@ package persistence;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -55,7 +56,7 @@ public class DBReader {
      * @throws InvalidDocumentException
      */
     public Document loadObject(Object accessValue) throws InvalidDocumentException {
-        Document document = collection.find(new Document(Writable.ACCESS_KEY, accessValue)).first();
+        Document document = collection.find(Filters.eq(Writable.ACCESS_KEY, accessValue)).first();
         if (document == null) {
             throw new InvalidDocumentException();
         }
