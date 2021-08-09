@@ -38,7 +38,7 @@ public class StudyTimeEvent implements BotMessageEvent {
         msgStudyTimeForUser(event);
         break;
       case "leaderboard":
-        if (content[1].equals("reset")) {
+        if (content.length > 1 && content[1].equals("reset")) {
           StudyTimeLeaderboard.loadTimeLeaderboard().resetLeaderboard();
         } else {
           StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
