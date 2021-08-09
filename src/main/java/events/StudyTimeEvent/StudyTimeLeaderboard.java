@@ -107,7 +107,7 @@ public class StudyTimeLeaderboard implements DailyTask {
      * Deletes all the StudyTimeRecords from the database and consequently
      * resets the leaderboard.
      */
-    private void resetLeaderboard() {
+    public void resetLeaderboard() {
         Server msgServer = Bot.API.getServersByName("Studium Praetorium").iterator().next();    // TODO: Change this after each server is associated with a different database
         TextChannel botSpam = msgServer.getTextChannelsByName("bot-spam").get(0);               // TODO: Change this after each server has a config file.
         botSpam.sendMessage("Resetting leaderboard...");
