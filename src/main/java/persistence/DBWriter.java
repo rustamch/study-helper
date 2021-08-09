@@ -21,7 +21,17 @@ public class DBWriter {
         this.collection = mongoClient.getDatabase("test").getCollection(collectionName);
         this.replaceOptions = new FindOneAndReplaceOptions();
         this.replaceOptions.upsert(true);
-    }   
+    }
+
+    /**
+     * Saves the document that was derived through method toDoc earlier.
+     * ASSUMES THAT ALL THE DOCUMENTS ARE DERIVED THROUGH Writable.toDoc() AND FOLLOW THE CONVENTION
+     * @param writeDoc a BSON document
+     */
+    public void saveDocument(Document writeDoc) {
+        assert writeDoc.containsKey(ACCESS_KEY);
+        this.collection.findOneAndReplace(Filters.eq(ACCESS_KEY, writeDoc.get(ACCESS_KEY)),writeDoc,this.replaceOptions);
+    }
 
     public void removeDocuments(Bson filter) {
         collection.deleteMany(filter);

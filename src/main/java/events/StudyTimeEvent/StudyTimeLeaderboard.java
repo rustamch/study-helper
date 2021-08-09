@@ -30,7 +30,7 @@ public class StudyTimeLeaderboard implements DailyTask {
     private static final String COLLECTION_NAME = "study_times";
     private static final DBReader reader = new DBReader(COLLECTION_NAME);
     private static final DBWriter writer = new DBWriter(COLLECTION_NAME);
-    private Map<String, Long> timesMap;
+    private final Map<String, Long> timesMap;
 
     /**
      * Either returns a leaderboard that was previously saved to the database or
@@ -48,8 +48,7 @@ public class StudyTimeLeaderboard implements DailyTask {
             Long time = doc.getLong(StudyTimeRecord.STUDY_TIME_KEY);
             timesMap.put(userId, time);
         }
-        StudyTimeLeaderboard leaderboard = new StudyTimeLeaderboard(timesMap);
-        return leaderboard;
+        return new StudyTimeLeaderboard(timesMap);
     }
 
     public EmbedBuilder getLeaderboardEmbed(Server msgServer) {
@@ -62,7 +61,8 @@ public class StudyTimeLeaderboard implements DailyTask {
             msgServer.getMemberById(entry.getKey()).ifPresent(user -> {
                 String name = user.getDisplayName(msgServer);
                 long minutes  = entry.getValue() / 60;
-                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + minutes / 60 + " hour(s) " + minutes % 60 + " minute(s) so far.", false);
+                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + minutes / 60
+                        + " hour(s) " + minutes % 60 + " minute(s) so far.", false);
             });
             place++;
         }
@@ -112,7 +112,18 @@ public class StudyTimeLeaderboard implements DailyTask {
         TextChannel botSpam = msgServer.getTextChannelsByName("bot-spam").get(0);               // TODO: Change this after each server has a config file.
         botSpam.sendMessage("Resetting leaderboard...");
         botSpam.sendMessage(getLeaderboardEmbed(msgServer));
-        writer.removeDocuments(new Document());
+        resetStudySessionRecord();
+    }
+
+    /**
+     * Sets the studytime of each user to 0 minutes.
+     */
+    private void resetStudySessionRecord() {
+        FindIterable<Document> docs = reader.loadAllDocuments();
+        for (Document doc : docs) {
+            doc.put(StudyTimeRecord.STUDY_TIME_KEY, 0);
+            writer.saveDocument(doc);
+        }
     }
 
     /**
