@@ -42,10 +42,10 @@ public class StudyTimeEvent implements BotMessageEvent {
           StudyTimeLeaderboard.loadTimeLeaderboard().resetLeaderboard();
         } else {
           StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
-          event.getServer().ifPresentOrElse(server -> {
+          event.getServer().ifPresent(server -> {
             EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(server);
             event.getChannel().sendMessage(eb);
-          }, () -> event.getChannel().sendMessage("Something went wrong O.o"));
+          });
         }
         break;
       case "sub":
