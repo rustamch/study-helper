@@ -6,7 +6,7 @@ import org.javacord.api.event.message.reaction.ReactionRemoveEvent;
 import org.javacord.api.listener.message.reaction.ReactionAddListener;
 import org.javacord.api.listener.message.reaction.ReactionRemoveListener;
 
-public class MessageReactionEvent implements ReactionAddListener, ReactionRemoveListener {
+public class MessageReactionListener implements ReactionAddListener, ReactionRemoveListener {
 
     @Override
     public void onReactionRemove(ReactionRemoveEvent event) {
