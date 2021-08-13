@@ -16,7 +16,6 @@ import persistence.SaveOption;
 
 // A manager for reminders
 public class ReminderManager {
-    private final String COLLECTION_NAME = "reminders";
 
     // checks for duplicates and adds reminder to reminders
     public void addReminder(MessageCreateEvent event)
@@ -25,6 +24,7 @@ public class ReminderManager {
         long epoch = adjustedInstant.getEpochSecond();
         long memberID = event.getMessageAuthor().getId();
         Reminder rem = new Reminder(epoch, memberID);
+        String COLLECTION_NAME = "reminders";
         DBWriter writer = new DBWriter(COLLECTION_NAME);
         writer.saveObject(rem, SaveOption.REPLACE_DUPLICATES_ONLY);
     }

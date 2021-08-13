@@ -72,10 +72,10 @@ public class ReactRoleMessage extends Writable {
     }
 
     /**
-     * TODO: write doc
-     * @param messageId
-     * @param emoji
-     * @throws NoSuchElementException
+     * Removes the emoji-role pair from reactRoleMessage
+     * @param messageId the snowflake ID of the reactRoleMessage
+     * @param emoji the emoji that should be removed from react role message.
+     * @throws NoSuchElementException thrown if reactRoleMessage with given ID doesn't exist
      */
     public static void rmRoleFromMsg(long messageId, Emoji emoji)
             throws NoSuchElementException, InvalidEmojiException {

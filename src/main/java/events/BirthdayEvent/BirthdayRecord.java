@@ -37,7 +37,6 @@ public class BirthdayRecord extends Writable {
      * 
      * @param id      user's id.
      * @param date    the date of the birthday.
-     * @param guildID the id of the guild.
      */
     public BirthdayRecord(String id, LocalDate date) {
         this.memberID = id;
@@ -95,7 +94,6 @@ public class BirthdayRecord extends Writable {
      * Records the birthday and saves it to DataBase
      * 
      * @param id id of the member
-     * @param date string representation of birthday
      * @throws InvalidDateFormatException when given date format is unrecognized
      * @throws IllegalDateException       when given date has illegal year/month/day
      *                                    values

@@ -11,7 +11,6 @@ import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
@@ -38,39 +37,32 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
      * @param message    A Message.
      * @param msgServer  A Server.
      * @param subCommand The sub command.
-     * @param roleName   The role name.
+     * @param roleId     The snowflake id of the role.
      */
     private void handleUserCommand(MessageCreateEvent event, Message message, Server msgServer, String subCommand,
-                                   String roleName) {
+                                   String roleId) {
         event.getMessageAuthor().asUser().ifPresent(user -> {
             if (msgServer.getPermissions(user).getState(PermissionType.ADMINISTRATOR) == PermissionState.ALLOWED) {
-                List<Role> rolesWithName = msgServer.getRolesByName(roleName);
-                if (rolesWithName.size() == 1) {
-                    Role role = rolesWithName.get(0);
+                msgServer.getRoleById(roleId).ifPresent(role -> {
                     switch (subCommand) {
                         case "add":
-                            addRoleToRrMsg(event, message, msgServer, role);
+                            addRoleToRrMsg(event, message, role);
                             break;
                         case "rm":
-                            removeRoleFromRrMsg(event, message, msgServer);
+                            removeRoleFromRrMsg(event, message);
                             break;
                         default:
                             event.getChannel().sendMessage("Invalid sub command!");
                             break;
                     }
-                } else if (rolesWithName.size() > 1) {
-                    event.getChannel().sendMessage("There are multiple with the given name on this server!");
-                } else {
-                    event.getChannel().sendMessage("There are no roles with the given name on the server!");
-                }
+                });
             } else {
                 event.getChannel().sendMessage("You don't have a permission to do this!");
             }
         });
-
     }
 
-    private void removeRoleFromRrMsg(MessageCreateEvent event, Message message, Server msgServer) {
+    private void removeRoleFromRrMsg(MessageCreateEvent event, Message message) {
         event.getChannel().sendMessage("React to this message with emoji that you want to add!")
                 .thenAccept(reactMsg -> reactMsg.addReactionAddListener(reactEvent -> {
                     if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
@@ -85,18 +77,19 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                             reactEvent.deleteMessage();
                         }
                     }
-                }).removeAfter(2, TimeUnit.MINUTES)).thenRun(() ->
-                        event.getChannel().sendMessage("You took too long bye!"));;
+                }).removeAfter(2, TimeUnit.MINUTES)).thenAccept(inst ->
+                        event.getChannel().sendMessage("You took too long bye!"));
     }
 
-    private void addRoleToRrMsg(MessageCreateEvent event, Message message, Server msgServer, Role role) {
+    private void addRoleToRrMsg(MessageCreateEvent event, Message message, Role role) {
         event.getChannel().sendMessage("React to this message with emoji that you want to add!")
                 .thenAccept(reactMsg -> reactMsg.addReactionAddListener(reactEvent -> {
                     if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
                         try {
                             Emoji userReaction = reactEvent.getEmoji();
-                            ReactRoleMessage.addRoleToMsg(message.getId(),userReaction, role.getId());
+                            ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
                             message.addReaction(userReaction);
+                            message.removeReactionByEmoji(reactEvent.getEmoji());
                             reactEvent.deleteMessage();
                         } catch (InvalidEmojiException e) {
                             event.getChannel().sendMessage("This emote is already used, please " +
@@ -104,7 +97,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                             reactEvent.removeReaction();
                         }
                     }
-                }).removeAfter(2, TimeUnit.MINUTES)).thenRun(() ->
+                }).removeAfter(2, TimeUnit.MINUTES)).thenAccept(inst ->
                         event.getChannel().sendMessage("You took too long bye!"));
     }
 
