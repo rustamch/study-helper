@@ -1,56 +1,57 @@
 package events.ReactionEvent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
+import exceptions.InvalidEmojiException;
+import exceptions.InvalidDocumentException;
 import org.bson.Document;
 import org.javacord.api.entity.emoji.Emoji;
-import org.javacord.api.entity.server.Server;
-
-import exceptions.EmojiAlreadyAssociatedWithRoleException;
-import exceptions.InvalidDocumentException;
-import exceptions.InvalidMessageIdException;
-import io.vavr.control.Option;
-import model.Bot;
 import persistence.DBReader;
+import persistence.DBWriter;
+import persistence.SaveOption;
 import persistence.Writable;
 
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
 /**
- *      
+ *
  */
 public class ReactRoleMessage extends Writable {
-    private static String COLLECTION_NAME = "reaction_role_msgs";
-    private static DBReader reader = new DBReader(COLLECTION_NAME);
-    private long msgId;
-    private Document reactRoleDoc;
-    
+    private static final String COLLECTION_NAME = "reaction_role_msgs";
+    private static final DBReader reader = new DBReader(COLLECTION_NAME);
+    private static final DBWriter writer = new DBWriter(COLLECTION_NAME);
+
+    private final long msgId;
+    private final Document reactRoleDoc;
+
 
     /**
      * Constructs a new ReactionRoleMessage from the data retrieved from the DB
-     * @param id the snowflake ID of the message.
-     * @param reacRoleDoc the BSON document that contains all the react role entries.
+     *
+     * @param id          the snowflake ID of the message.
+     * @param reactRoleDoc the BSON document that contains all the reactRole entries.
      */
-    public ReactRoleMessage(long id, Document reacRoleDoc) {
-        this.reactRoleDoc = reacRoleDoc;
+    public ReactRoleMessage(long id, Document reactRoleDoc) {
+        this.reactRoleDoc = reactRoleDoc;
         this.msgId = id;
     }
 
     /**
      * Constructs a new ReactionRoleMessage
+     *
      * @param id the snowflake ID of the message.
      */
     public ReactRoleMessage(long id) {
         this.msgId = id;
         this.reactRoleDoc = new Document();
+        this.reactRoleDoc.put(ACCESS_KEY, id);
     }
-
 
     /**
      * Loads a ReactRoleMessage with given ID from the database
-     * @param messageID the snoflake ID of the message
+     *
+     * @param messageID the snowflake ID of the message
      * @return an Optional that contains ReactRoleMessage if it was retrieved from the database,
-     *          or an empty Optional otherwise
+     * or an empty Optional otherwise
      */
     public static Optional<ReactRoleMessage> loadReactRoleMessage(long messageID) {
         try {
@@ -62,71 +63,34 @@ public class ReactRoleMessage extends Writable {
         }
     }
 
-    public static void addRoleToMsg(long messageId, Emoji emoji, long roleId) throws EmojiAlreadyAssociatedWithRoleException {
-        String emojiId = getEmojiId(emoji);
-        ReactRoleMessage rrMsg = loadReactRoleMessage(messageId).orElseThrow();
-        t
+    public static void addRoleToMsg(long messageId, Emoji emoji, long roleId)
+            throws InvalidEmojiException {
+        ReactRoleMessage reactRoleMessage = loadReactRoleMessage(messageId)
+                .orElse(new ReactRoleMessage(messageId));
+        reactRoleMessage.addRoleEmojiPair(emoji, roleId);
+        reactRoleMessage.save();
     }
 
+    /**
+     * TODO: write doc
+     * @param messageId
+     * @param emoji
+     * @throws NoSuchElementException
+     */
+    public static void rmRoleFromMsg(long messageId, Emoji emoji)
+            throws NoSuchElementException, InvalidEmojiException {
+        ReactRoleMessage reactRoleMessage = loadReactRoleMessage(messageId).orElseThrow(NoSuchElementException::new);
+        reactRoleMessage.rmRoleEmojiPair(emoji);
+    }
 
-    // public static void checkAndRemoveRole(long messageID, Emoji emoji, Server server, long userID) {
-    //     long serverID = server.getId();
-    //     String emojiId = getEmojiId(emoji);
-    //     getRoleID(messageID, emojiId, serverID).ifPresent(roleID -> 
-    //         server.getRoleById(roleID).ifPresent(role -> 
-    //             Bot.API.getUserById(userID).thenAccept(user ->
-    //                 role.removeUser(user))));
-    // }
-
-    // public static boolean checkAndAddRole(long messageID, Emoji emoji, Server server, long userID) {
-    //     long serverID = server.getId();
-    //     String emojiID = getEmojiId(emoji);
-    //     getRoleID(messageID, emojiID, serverID).ifPresent(roleID -> 
-    //         server.getRoleById(roleID).ifPresent(role -> 
-    //             Bot.API.getUserById(userID).thenAccept(user ->
-    //                 role.addUser(user))));
-    // }
-
-
-    // public static Optional<Long> getRoleID(long messageId, String emojiId, long serverId) {
-    //     try {
-    //         Document reactionRoleMsg = reader.loadObject(messageId);
-    //         Long roleID = reactionRoleMsg.getLong(emojiId);
-    //         if (roleID != null) {
-    //             return Optional.of(roleID);
-    //         } else {
-    //             return Optionall.empty();
-    //     }.empty();
-    //         }
-    //     } catch (InvalidDocumentException e) {
-    //         return Optiona
-    // }
-    
-    // public static Optional<Document> loadReactRoleMsgDoc(long messageId, long severId) {
-    //     try {
-    //         Document reactionRoleMsg = reader.loadObject(messageId);
-    //         reactionRoleMsg.
-    //         if (roleId != null) {
-    //             return Optional.of(roleId);
-    //         } else {
-    //             return Optional.empty();
-    //         }
-    //     } catch (InvalidDocumentException e) {
-    //         return Optional.empty();
-    //     }
-    // }
-
-    @Override
-    public Document toDoc() {
-        if (this.reactRoleDoc == null) {
-            Document retDoc = new Document();
-            retDoc.put(ACCESS_KEY, msgId);
-            return retDoc;
+    private void rmRoleEmojiPair(Emoji emoji) throws InvalidEmojiException {
+        String emojiId = getEmojiId(emoji);
+        if (reactRoleDoc.containsKey(emojiId)) {
+            this.reactRoleDoc.remove(emojiId);
         } else {
-            return this.reactRoleDoc;
+            throw new InvalidEmojiException();
         }
     }
-
 
     private static String getEmojiId(Emoji userReaction) {
         if (userReaction.asCustomEmoji().isPresent()) {
@@ -136,8 +100,21 @@ public class ReactRoleMessage extends Writable {
         }
     }
 
-    public void trackMsg(long id) {
-        if (reactRoleDoc)
+    private void save() {
+        writer.saveObject(this, SaveOption.DEFAULT);
+    }
+
+    @Override
+    public Document toDoc() {
+        return reactRoleDoc;
+    }
+
+    public void addRoleEmojiPair(Emoji userReaction, long roleId) throws InvalidEmojiException {
+        String emojiId = getEmojiId(userReaction);
+        if (reactRoleDoc.containsKey(emojiId)) {
+            throw new InvalidEmojiException();
+        }
+        this.reactRoleDoc.put(emojiId, roleId);
     }
 
     public Optional<String> getRoleIdByEmoji(Emoji userReaction) {
@@ -148,6 +125,4 @@ public class ReactRoleMessage extends Writable {
             return Optional.empty();
         }
     }
-
-
 }
