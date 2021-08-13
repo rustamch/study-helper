@@ -2,6 +2,8 @@ package model;
 
 import java.util.Arrays;
 
+import events.ReactionEvent.ReactRoleMesageEvent;
+import events.ReactionEvent.ReactRoleMessage;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
@@ -20,6 +22,7 @@ public class MessageListener implements MessageCreateListener {
     private BotMessageEvent oOEvent;
     private BotMessageEvent abtEvent;
     private BotMessageEvent studyTimeEvent;
+    private BotMessageEvent reactRoleMesageEvent;
 
     public MessageListener() {
         bdayEvent = new BirthdayEvent();
@@ -28,6 +31,7 @@ public class MessageListener implements MessageCreateListener {
         oOEvent = new DoraListener();
         abtEvent = new AboutEvent();
         studyTimeEvent = new StudyTimeEvent();
+        reactRoleMesageEvent = new ReactRoleMesageEvent();
     }
 
     @Override
@@ -55,6 +59,9 @@ public class MessageListener implements MessageCreateListener {
                     break;
                 case "!studytime":
                     studyTimeEvent.invoke(event, content);
+                    break;
+                case "!rr":
+                    reactRoleMesageEvent.invoke(event,content);
                     break;
             }
         }
