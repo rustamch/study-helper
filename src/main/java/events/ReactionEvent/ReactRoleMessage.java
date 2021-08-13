@@ -117,10 +117,10 @@ public class ReactRoleMessage extends Writable {
         this.reactRoleDoc.put(emojiId, roleId);
     }
 
-    public Optional<String> getRoleIdByEmoji(Emoji userReaction) {
+    public Optional<Long> getRoleIdByEmoji(Emoji userReaction) {
         String emojiId = getEmojiId(userReaction);
         if (reactRoleDoc.containsKey(emojiId)) {
-            return Optional.of(reactRoleDoc.getString(emojiId));
+            return Optional.of(reactRoleDoc.getLong(emojiId));
         } else {
             return Optional.empty();
         }
