@@ -9,6 +9,7 @@ import org.javacord.api.listener.message.MessageCreateListener;
 
 import events.BotMessageEvent;
 import events.BirthdayEvent.BirthdayEvent;
+import events.PurgeEvent.PurgeEvent;
 import events.ReminderEvent.ReminderEvent;
 import events.SimpleEvents.AboutEvent;
 import events.SimpleEvents.DoraListener;
@@ -23,6 +24,7 @@ public class MessageListener implements MessageCreateListener {
     private BotMessageEvent abtEvent;
     private BotMessageEvent studyTimeEvent;
     private BotMessageEvent reactRoleMesageEvent;
+    private BotMessageEvent purgeEvent;
 
     public MessageListener() {
         bdayEvent = new BirthdayEvent();
@@ -31,7 +33,9 @@ public class MessageListener implements MessageCreateListener {
         oOEvent = new DoraListener();
         abtEvent = new AboutEvent();
         studyTimeEvent = new StudyTimeEvent();
+
         reactRoleMesageEvent = new ReactRoleMesageEvent();
+        purgeEvent = new PurgeEvent();
     }
 
     @Override
@@ -62,6 +66,9 @@ public class MessageListener implements MessageCreateListener {
                     break;
                 case "!rr":
                     reactRoleMesageEvent.invoke(event,content);
+                    break;
+                case "!del":
+                    purgeEvent.invoke(event, content);
                     break;
             }
         }

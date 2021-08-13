@@ -3,6 +3,7 @@ package events.BirthdayEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,12 +20,6 @@ import exceptions.InvalidDateFormatException;
  */
 public class BirthdayEvent implements BotMessageEvent {
 
-    /**
-     * Constructs a new BirthdayEvent and initializes BirthdayReminders.
-     */
-    public BirthdayEvent() {
-        new BirthdayReminder();
-    }
 
     /**
      * Finds the birthday of member mentioned in the message, prints to channel
@@ -35,38 +30,44 @@ public class BirthdayEvent implements BotMessageEvent {
      *              up
      */
     private void lookupBDay(MessageCreateEvent event, String name) {
-        Server msgServer = event.getServer().orElseThrow(() -> new IllegalStateException("Server not found"));
-        Pattern p = Pattern.compile("\\d{18}");
-        Matcher matcher = p.matcher(name);
-        User user;
-        if (matcher.find()) {
-            user = msgServer.getMemberById(matcher.group(0))
-                    .orElse(event.getApi().getUserById(matcher.group(0)).join());
-            event.getServer().ifPresent(actionServer -> {
-                LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
-                if (bday == null) {
-                    event.getChannel().sendMessage(
-                            "The " + user.getDisplayName(actionServer) + " hasn't saved his birthday yet.");
-                } else {
-                    event.getChannel().sendMessage(
-                            "The " + user.getDisplayName(actionServer) + "'s birthday is " + bday.toString());
-                }
-            });
+        // TODO: delete aft testing
+        if (name.equals("month")) {
+            Set<String> ids = BirthdayRecord.findAllMembersWithBdayOnGivenMonth(LocalDate.now().getMonthValue());
+            BirthdayReminder.msgEachCommonServer(ids);
         } else {
-            List<User> usersWithName = new ArrayList<>(msgServer.getMembersByDisplayName(name));
-            if (usersWithName.isEmpty()) {
-                event.getChannel().sendMessage("There are no users with a given name on this server");
-            } else if (usersWithName.size() == 1) {
-                user = usersWithName.get(0);
-                LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
-                if (bday == null) {
-                    event.getChannel().sendMessage(name + " hasn't saved their birthday yet.");
-                } else {
-                    event.getChannel().sendMessage(name + "'s birthday is " + bday.toString());
-                }
+            Server msgServer = event.getServer().orElseThrow(() -> new IllegalStateException("Server not found"));
+            Pattern p = Pattern.compile("\\d{18}");
+            Matcher matcher = p.matcher(name);
+            User user;
+            if (matcher.find()) {
+                user = msgServer.getMemberById(matcher.group(0))
+                        .orElse(event.getApi().getUserById(matcher.group(0)).join());
+                event.getServer().ifPresent(actionServer -> {
+                    LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
+                    if (bday == null) {
+                        event.getChannel().sendMessage(
+                                "The " + user.getDisplayName(actionServer) + " hasn't saved his birthday yet.");
+                    } else {
+                        event.getChannel().sendMessage(
+                                "The " + user.getDisplayName(actionServer) + "'s birthday is " + bday.toString());
+                    }
+                });
             } else {
-                event.getChannel()
-                        .sendMessage("There are multiple users with the name " + name + ". Please be more specific.");
+                List<User> usersWithName = new ArrayList<>(msgServer.getMembersByDisplayName(name));
+                if (usersWithName.isEmpty()) {
+                    event.getChannel().sendMessage("There are no users with a given name on this server");
+                } else if (usersWithName.size() == 1) {
+                    user = usersWithName.get(0);
+                    LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
+                    if (bday == null) {
+                        event.getChannel().sendMessage(name + " hasn't saved their birthday yet.");
+                    } else {
+                        event.getChannel().sendMessage(name + "'s birthday is " + bday.toString());
+                    }
+                } else {
+                    event.getChannel()
+                            .sendMessage("There are multiple users with the name " + name + ". Please be more specific.");
+                }
             }
         }
     }

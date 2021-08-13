@@ -19,7 +19,7 @@ import com.mongodb.client.model.Filters;
 /**
  * Represents a birthday manager that manages members' events.birthdays
  */
-public class BirthdayRecord extends Writable {
+public class BirthdayRecord implements Writable {
     public static final String COLLECTION_NAME = "bdayLog";
     public static final String YEAR_KEY = "year";
     public static final String MONTH_KEY = "month";
@@ -67,20 +67,20 @@ public class BirthdayRecord extends Writable {
         } catch (InvalidDocumentException e) {
             return null;
         }
-
     }
 
     public static Set<String> findMembersWithBdayOnGivenDay(LocalDate date) {
-        return findMemberWithGivenFilters(Filters.eq(MONTH_KEY, date.getMonthValue()),
-        Filters.eq(DAY_KEY, date.getDayOfMonth()));
+
+        return findMembersWithFilters(Filters.eq(MONTH_KEY, date.getMonthValue()),
+                Filters.eq(DAY_KEY, date.getDayOfMonth()));
     }
 
-    public static Set<String> findMembersWithBdayOnGivenMonth(int monthVal) {
-        return findMemberWithGivenFilters(Filters.eq(MONTH_KEY, monthVal));
+    public static Set<String> findAllMembersWithBdayOnGivenMonth(int monthVal) {
+        return findMembersWithFilters(Filters.eq(MONTH_KEY, monthVal));
     }
 
-    private static Set<String> findMemberWithGivenFilters(Bson ... f) {
-        Bson filter = Filters.and(f);
+    private static Set<String> findMembersWithFilters(Bson ... filters) {
+        Bson filter = Filters.and(filters);
         FindIterable<Document> docs = READER.loadDocumentsWithFilter(filter);
         HashSet<String> set = new HashSet<>();
         for (Document doc : docs) {

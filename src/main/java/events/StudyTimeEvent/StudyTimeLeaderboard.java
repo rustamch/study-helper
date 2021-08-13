@@ -1,6 +1,8 @@
 package events.StudyTimeEvent;
 
 import java.awt.Color;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,10 +11,14 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 
 import org.bson.Document;
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 
+import model.Bot;
+import model.DailyTask;
 import persistence.DBReader;
+import persistence.DBWriter;
 import persistence.Writable;
 
 /**
@@ -20,10 +26,11 @@ import persistence.Writable;
  * respective studyTime. Outside classes can iterate through user ids in the
  * leaderboard and get studytime of the given user by calling getUserTime.
  */
-public class StudyTimeLeaderboard {
+public class StudyTimeLeaderboard implements DailyTask {
     private static final String COLLECTION_NAME = "study_times";
     private static final DBReader reader = new DBReader(COLLECTION_NAME);
-    private Map<String, Long> timesMap;
+    private static final DBWriter writer = new DBWriter(COLLECTION_NAME);
+    private final Map<String, Long> timesMap;
 
     /**
      * Either returns a leaderboard that was previously saved to the database or
@@ -41,8 +48,7 @@ public class StudyTimeLeaderboard {
             Long time = doc.getLong(StudyTimeRecord.STUDY_TIME_KEY);
             timesMap.put(userId, time);
         }
-        StudyTimeLeaderboard leaderboard = new StudyTimeLeaderboard(timesMap);
-        return leaderboard;
+        return new StudyTimeLeaderboard(timesMap);
     }
 
     public EmbedBuilder getLeaderboardEmbed(Server msgServer) {
@@ -55,7 +61,8 @@ public class StudyTimeLeaderboard {
             msgServer.getMemberById(entry.getKey()).ifPresent(user -> {
                 String name = user.getDisplayName(msgServer);
                 long minutes  = entry.getValue() / 60;
-                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + minutes + " minutes so far.", false);
+                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + minutes / 60
+                        + " hour(s) " + minutes % 60 + " minute(s) so far.", false);
             });
             place++;
         }
@@ -87,6 +94,45 @@ public class StudyTimeLeaderboard {
      */
     public Long getUserTime(String memberID) {
         return timesMap.get(memberID);
+    }
+
+    @Override
+    public void execute() {
+        if (needsToBeReset()) {
+            resetLeaderboard();
+        }
+    }
+
+    /**
+     * Deletes all the StudyTimeRecords from the database and consequently
+     * resets the leaderboard.
+     */
+    public void resetLeaderboard() {
+        Server msgServer = Bot.API.getServersByName("Studium Praetorium").iterator().next();    // TODO: Change this after each server is associated with a different database
+        TextChannel botSpam = msgServer.getTextChannelsByName("bot-spam").get(0);               // TODO: Change this after each server has a config file.
+        botSpam.sendMessage("Resetting leaderboard...");
+        botSpam.sendMessage(getLeaderboardEmbed(msgServer));
+        resetStudySessionRecord();
+    }
+
+    /**
+     * Sets the studytime of each user to 0 minutes.
+     */
+    private void resetStudySessionRecord() {
+        FindIterable<Document> docs = reader.loadAllDocuments();
+        for (Document doc : docs) {
+            doc.put(StudyTimeRecord.STUDY_TIME_KEY, 0);
+            writer.saveDocument(doc);
+        }
+    }
+
+    /**
+     * Returns whether leaderboard needs to be reset or not.
+     * @return a boolean value that indicates whether leaderboard needs to be reset or not 
+     */
+    private boolean needsToBeReset() {
+        LocalDate today = LocalDate.now();
+        return today.getDayOfWeek() == DayOfWeek.MONDAY;
     }
 
 }

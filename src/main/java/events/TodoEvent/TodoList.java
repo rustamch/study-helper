@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import org.bson.Document;
 
-public class TodoList extends Writable {
+public class TodoList implements Writable {
     private List<Todo> todoList = new ArrayList<>();
     private long userID;
 

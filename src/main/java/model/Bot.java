@@ -1,4 +1,5 @@
 package model;
+
 import events.ReactionEvent.MessageReactionListener;
 import events.StudyTimeEvent.StudyTimeLogger;
 
@@ -20,6 +21,7 @@ public class Bot {
         API.addMessageCreateListener(new MessageListener());
         API.addListener(new StudyTimeLogger());
         API.addListener(new MessageReactionListener());
+        new DailyExecutor();  
     }
 }
 
