@@ -68,6 +68,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                     if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
                         try {
                             ReactRoleMessage.rmRoleFromMsg(message.getId(), reactEvent.getEmoji());
+                            message.removeReactionByEmoji(reactEvent.getEmoji());
                             reactEvent.deleteMessage();
                         } catch (InvalidEmojiException e) {
                             event.getChannel().sendMessage("Emoji isn't associated with any role, try again!");
@@ -77,7 +78,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                             reactEvent.deleteMessage();
                         }
                     }
-                }).removeAfter(2, TimeUnit.MINUTES)).thenAccept(inst ->
+                }).removeAfter(2, TimeUnit.MINUTES)).whenCompleteAsync((a, b) ->
                         event.getChannel().sendMessage("You took too long bye!"));
     }
 
@@ -97,7 +98,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                             reactEvent.removeReaction();
                         }
                     }
-                }).removeAfter(2, TimeUnit.MINUTES)).thenAccept(inst ->
+                }).removeAfter(2, TimeUnit.MINUTES)).whenCompleteAsync((a, b)->
                         event.getChannel().sendMessage("You took too long bye!"));
     }
 

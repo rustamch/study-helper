@@ -25,7 +25,7 @@ public class MessageReactionListener implements ReactionAddListener, ReactionRem
             Emoji userReaction = event.getEmoji();
             long messageID = event.getMessageId();
             ReactRoleMessage.loadReactRoleMessage(messageID).ifPresent(rrMsg ->
-                    rrMsg.getRoleIdByEmoji(userReaction).ifPresentOrElse(roleId ->
+                     rrMsg.getRoleIdByEmoji(userReaction).ifPresentOrElse(roleId ->
                             server.getRoleById(roleId).ifPresent(role ->
                                     server.addRoleToUser(user, role)), event::removeReaction));
         }));
