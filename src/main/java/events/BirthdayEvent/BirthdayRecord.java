@@ -43,6 +43,10 @@ public class BirthdayRecord implements Writable {
         this.date = date;
     }
 
+    public static Set<String> findMembersWithBdayOnGivenMonth(int monthValue) {
+        return findMembersWithFilters(Filters.eq(MONTH_KEY, monthValue));
+    }
+
     @Override
     public Document toDoc() {
         Document doc = new Document();
@@ -95,8 +99,6 @@ public class BirthdayRecord implements Writable {
      * 
      * @param id id of the member
      * @throws InvalidDateFormatException when given date format is unrecognized
-     * @throws IllegalDateException       when given date has illegal year/month/day
-     *                                    values
      */
     public static void recordBDay(String id, LocalDate bdayDate) {
         BirthdayRecord bday = new BirthdayRecord(id, bdayDate);

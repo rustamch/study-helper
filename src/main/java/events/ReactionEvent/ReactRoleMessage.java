@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  *
  */
-public class ReactRoleMessage extends Writable {
+public class ReactRoleMessage implements Writable {
     private static final String COLLECTION_NAME = "reaction_role_msgs";
     private static final DBReader reader = new DBReader(COLLECTION_NAME);
     private static final DBWriter writer = new DBWriter(COLLECTION_NAME);
