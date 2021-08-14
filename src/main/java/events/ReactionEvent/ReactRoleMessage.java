@@ -37,7 +37,6 @@ public class ReactRoleMessage implements Writable {
 
     /**
      * Constructs a new ReactionRoleMessage
-     *
      * @param id the snowflake ID of the message.
      */
     public ReactRoleMessage(long id) {
@@ -81,6 +80,7 @@ public class ReactRoleMessage implements Writable {
             throws NoSuchElementException, InvalidEmojiException {
         ReactRoleMessage reactRoleMessage = loadReactRoleMessage(messageId).orElseThrow(NoSuchElementException::new);
         reactRoleMessage.rmRoleEmojiPair(emoji);
+        reactRoleMessage.save();
     }
 
     private void rmRoleEmojiPair(Emoji emoji) throws InvalidEmojiException {
