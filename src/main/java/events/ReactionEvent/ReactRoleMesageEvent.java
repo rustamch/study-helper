@@ -75,8 +75,8 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                             reactEvent.deleteMessage();
                         }
                     }
-                }).removeAfter(2, TimeUnit.MINUTES)).whenCompleteAsync((a, b) ->
-                        event.getChannel().sendMessage("You took too long bye!"));
+                }).removeAfter(2, TimeUnit.MINUTES).addRemoveHandler(() ->
+                        event.getChannel().sendMessage("You took too long bye!")));
     }
 
     private void addRoleToRrMsg(MessageCreateEvent event, Message message, Role role) {
@@ -95,7 +95,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                             reactEvent.removeReaction();
                         }
                     }
-                }).removeAfter(2, TimeUnit.MINUTES)).whenCompleteAsync((a, b)->
-                        event.getChannel().sendMessage("You took too long bye!"));
+                }).removeAfter(2, TimeUnit.MINUTES).addRemoveHandler(() ->
+                        event.getChannel().sendMessage("You took too long bye!")));
     }
 }
