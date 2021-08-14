@@ -11,6 +11,7 @@ import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
@@ -18,17 +19,15 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
 
     @Override
     public void invoke(MessageCreateEvent event, String[] content) {
-        String subCommand = content[0];
-        String messageLink = content[1];
-        String roleName = content[2];
-        Bot.API.getMessageByLink(messageLink).ifPresentOrElse(messageIncompl ->
-                messageIncompl.thenAccept(message -> message.getServer().ifPresent(msgServer -> {
-                    handleUserCommand(event, message, msgServer, subCommand, roleName);
-                })).exceptionally(fn -> {
-                    event.getChannel().sendMessage("The link doesn't point to a valid message!");
-                    return null;
-                }), () -> event.getChannel().sendMessage("The link format is invalid!"));
+        Message msg = event.getMessage();
+        msg.getReferencedMessage().ifPresentOrElse(refMsg -> {
+            List<Role> roles = msg.getMentionedRoles();
+            roles.forEach(role -> 
+                msg.getServer().ifPresent(msgServer ->
+                    handleUserCommand(event, msg, msgServer, content[0], role)));
+        }, () -> event.getChannel().sendMessage("Please reply to the message you wish to attach reaction roles to!"));
     }
+
 
     /**
      * Handles the user command.
@@ -37,25 +36,23 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
      * @param message    A Message.
      * @param msgServer  A Server.
      * @param subCommand The sub command.
-     * @param roleId     The snowflake id of the role.
+     * @param role       A Role
      */
     private void handleUserCommand(MessageCreateEvent event, Message message, Server msgServer, String subCommand,
-                                   String roleId) {
+                                   Role role) {
         event.getMessageAuthor().asUser().ifPresent(user -> {
             if (msgServer.getPermissions(user).getState(PermissionType.ADMINISTRATOR) == PermissionState.ALLOWED) {
-                msgServer.getRoleById(roleId).ifPresent(role -> {
-                    switch (subCommand) {
-                        case "add":
-                            addRoleToRrMsg(event, message, role);
-                            break;
-                        case "rm":
-                            removeRoleFromRrMsg(event, message);
-                            break;
-                        default:
-                            event.getChannel().sendMessage("Invalid sub command!");
-                            break;
-                    }
-                });
+                switch (subCommand) {
+                    case "add":
+                        addRoleToRrMsg(event, message, role);
+                        break;
+                    case "rm":
+                        removeRoleFromRrMsg(event, message);
+                        break;
+                    default:
+                        event.getChannel().sendMessage("Invalid sub command!");
+                        break;
+                }
             } else {
                 event.getChannel().sendMessage("You don't have a permission to do this!");
             }
@@ -63,7 +60,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
     }
 
     private void removeRoleFromRrMsg(MessageCreateEvent event, Message message) {
-        event.getChannel().sendMessage("React to this message with emoji that you want to add!")
+        event.getChannel().sendMessage("React to this message with emoji that you want to remove!")
                 .thenAccept(reactMsg -> reactMsg.addReactionAddListener(reactEvent -> {
                     if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
                         try {
@@ -101,5 +98,4 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                 }).removeAfter(2, TimeUnit.MINUTES)).whenCompleteAsync((a, b)->
                         event.getChannel().sendMessage("You took too long bye!"));
     }
-
 }
