@@ -65,19 +65,14 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
         for(int i = 0; i < roles.size(); i++) {
             Role role = roles.get(i);
             Emoji emoji = emojis.get(i);
-            message.addReactionAddListener(reactEvent -> {
-                if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
-                    try {
-                        ReactRoleMessage.addRoleToMsg(message.getId(), emoji, role.getId());
-                        message.addReaction(emoji);
-                        message.removeReactionByEmoji(emoji);
-                    } catch (InvalidEmojiException e) {
-                        event.getChannel().sendMessage(emoji.getMentionTag() + " is already used, please " +
-                                "react with a different emote.");
-                        reactEvent.removeReaction();
-                    }
-                }
-            });
+            try {
+                ReactRoleMessage.addRoleToMsg(message.getId(), emoji, role.getId());
+                message.addReaction(emoji);
+                message.removeReactionByEmoji(emoji);
+            } catch (InvalidEmojiException e) {
+                event.getChannel().sendMessage(emoji.getMentionTag() + " is already used, please " +
+                        "react with a different emote.");
+            }
         }
     }
 
