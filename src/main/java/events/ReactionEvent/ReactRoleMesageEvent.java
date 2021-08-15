@@ -51,6 +51,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                         break;
                     case "bulkAdd":
                         bulkAddRolesToMsg(event, message, roles, message.getCustomEmojis());
+                        break;
                     default:
                         event.getChannel().sendMessage("Invalid sub command!");
                         break;
