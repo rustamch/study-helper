@@ -63,6 +63,10 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
     }
 
     private void bulkAddRolesToMsg(MessageCreateEvent event, Message message, List<Role> roles, List<CustomEmoji> emojis) {
+        if (roles.size() == 0 || roles.size() != emojis.size()) {
+            event.getChannel().sendMessage("Please double check!");
+            return;
+        }
         for(int i = 0; i < roles.size(); i++) {
             Role role = roles.get(i);
             Emoji emoji = emojis.get(i);
