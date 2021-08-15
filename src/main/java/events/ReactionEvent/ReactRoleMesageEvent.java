@@ -2,8 +2,6 @@ package events.ReactionEvent;
 
 import events.BotMessageEvent;
 import exceptions.InvalidEmojiException;
-import model.Bot;
-
 import org.javacord.api.entity.emoji.CustomEmoji;
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.Message;
@@ -16,6 +14,7 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReactRoleMesageEvent implements BotMessageEvent {
 
@@ -36,7 +35,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
      * @param message    A Message.
      * @param msgServer  A Server.
      * @param subCommand The sub command.
-     * @param roles       A ist of Role
+     * @param role       A Role
      */
     private void handleUserCommand(MessageCreateEvent event, Message message, Server msgServer, String subCommand,
                                    List<Role> roles) {
@@ -69,7 +68,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
             event.getChannel().sendMessage("Role/emoji mismatch!");
             throw new RuntimeException();
         }
-        for(int i = 0; i < roles.size(); i++) {
+        for (int i = 0; i < roles.size(); i++) {
             Role role = roles.get(i);
             Emoji emoji = emojis.get(i);
             try {
@@ -85,41 +84,55 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
 
     private void removeRoleFromRrMsg(MessageCreateEvent event, Message message) {
         event.getChannel().sendMessage("React to this message with emoji that you want to remove!")
-                .thenAccept(reactMsg -> reactMsg.addReactionAddListener(reactEvent -> {
-                    if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
-                        try {
-                            ReactRoleMessage.rmRoleFromMsg(message.getId(), reactEvent.getEmoji());
-                            message.removeReactionByEmoji(reactEvent.getEmoji());
-                            reactEvent.deleteMessage();
-                        } catch (InvalidEmojiException e) {
-                            event.getChannel().sendMessage("Emoji isn't associated with any role, try again!");
-                            reactEvent.deleteMessage();
-                        } catch (NoSuchElementException e) {
-                            event.getChannel().sendMessage("You haven't added any reaction roles to this message");
-                            reactEvent.deleteMessage();
+                .thenAccept(reactMsg -> {
+                    AtomicBoolean completed = new AtomicBoolean(false);
+                    reactMsg.addReactionAddListener(reactEvent -> {
+                        if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
+                            try {
+                                ReactRoleMessage.rmRoleFromMsg(message.getId(), reactEvent.getEmoji());
+                                message.removeReactionByEmoji(reactEvent.getEmoji());
+                            } catch (InvalidEmojiException e) {
+                                event.getChannel().sendMessage("Emoji isn't associated with any role, try again!");
+                                reactEvent.deleteMessage();
+                            } catch (NoSuchElementException e) {
+                                event.getChannel().sendMessage("You haven't added any reaction roles to this message");
+                            } finally {
+                                completed.set(true);
+                            }
                         }
-                    }
-                }).removeAfter(2, TimeUnit.MINUTES).addRemoveHandler(() ->
-                        event.getChannel().sendMessage("You took too long bye!")));
+                    }).removeAfter(2, TimeUnit.MINUTES).addRemoveHandler(() -> {
+                        if (!completed.get()) {
+                            event.getChannel().sendMessage("You took too long bye!");
+                        }
+                    });
+                });
     }
 
     private void addRoleToRrMsg(MessageCreateEvent event, Message message, Role role) {
         event.getChannel().sendMessage(role.getName() + ": React to this message with emoji that you want to add!")
-                .thenAccept(reactMsg -> reactMsg.addReactionAddListener(reactEvent -> {
-                    if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
-                        try {
-                            Emoji userReaction = reactEvent.getEmoji();
-                            ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
-                            message.addReaction(userReaction);
-                            message.removeReactionByEmoji(reactEvent.getEmoji());
-                            reactEvent.deleteMessage();
-                        } catch (InvalidEmojiException e) {
-                            event.getChannel().sendMessage("This emote is already used, please " +
-                                    "react with a different emote.");
-                            reactEvent.removeReaction();
+                .thenAccept(reactMsg -> {
+                    AtomicBoolean completed = new AtomicBoolean(false);
+                    reactMsg.addReactionAddListener(reactEvent -> {
+                        if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
+                            try {
+                                Emoji userReaction = reactEvent.getEmoji();
+                                ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
+                                message.addReaction(userReaction);
+                                message.removeReactionByEmoji(reactEvent.getEmoji());
+                                reactEvent.deleteMessage();
+                            } catch (InvalidEmojiException e) {
+                                event.getChannel().sendMessage("This emote is already used, please " +
+                                        "react with a different emote.");
+                                reactEvent.removeReaction();
+                            } finally {
+                                completed.set(true);
+                            }
                         }
-                    }
-                }).removeAfter(2, TimeUnit.MINUTES).addRemoveHandler(() ->
-                        event.getChannel().sendMessage("You took too long bye!")));
+                    }).removeAfter(2, TimeUnit.MINUTES).addRemoveHandler(() ->{
+                        if (!completed.get()) {
+                            event.getChannel().sendMessage("You took too long bye!");
+                        }
+                    });
+                });
     }
 }
