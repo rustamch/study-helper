@@ -24,7 +24,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
             List<Role> roles = msg.getMentionedRoles();
             roles.forEach(role -> 
                 msg.getServer().ifPresent(msgServer ->
-                    handleUserCommand(event, msg, msgServer, content[0], role)));
+                    handleUserCommand(event, refMsg, msgServer, content[0], role)));
         }, () -> event.getChannel().sendMessage("Please reply to the message you wish to attach reaction roles to!"));
     }
 
