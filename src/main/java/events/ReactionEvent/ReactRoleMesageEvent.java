@@ -36,7 +36,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
      * @param message    A Message.
      * @param msgServer  A Server.
      * @param subCommand The sub command.
-     * @param role       A Role
+     * @param roles       A ist of Role
      */
     private void handleUserCommand(MessageCreateEvent event, Message message, Server msgServer, String subCommand,
                                    List<Role> roles) {
@@ -63,9 +63,11 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
     }
 
     private void bulkAddRolesToMsg(MessageCreateEvent event, Message message, List<Role> roles, List<CustomEmoji> emojis) {
-        if (roles.size() == 0 || roles.size() != emojis.size()) {
-            event.getChannel().sendMessage("Please double check!");
-            return;
+        if (roles.size() == 0) {event.getChannel().sendMessage("No roles mentioned"); throw new RuntimeException();}
+        if (emojis.size() == 0) {event.getChannel().sendMessage("No emojis mentioned"); throw new RuntimeException();}
+        if (roles.size() != emojis.size()) {
+            event.getChannel().sendMessage("Role/emoji mismatch!");
+            throw new RuntimeException();
         }
         for(int i = 0; i < roles.size(); i++) {
             Role role = roles.get(i);
