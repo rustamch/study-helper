@@ -80,7 +80,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
     }
 
     private void addRoleToRrMsg(MessageCreateEvent event, Message message, Role role) {
-        event.getChannel().sendMessage("React to this message with emoji that you want to add!")
+        event.getChannel().sendMessage(role.getName() + ": React to this message with emoji that you want to add!")
                 .thenAccept(reactMsg -> reactMsg.addReactionAddListener(reactEvent -> {
                     if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
                         try {
