@@ -2,7 +2,6 @@ package events.ReactionEvent;
 
 import events.BotMessageEvent;
 import exceptions.InvalidEmojiException;
-import org.javacord.api.entity.emoji.CustomEmoji;
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.permission.PermissionState;
@@ -10,6 +9,7 @@ import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,13 +18,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReactRoleMesageEvent implements BotMessageEvent {
 
+    private static final long TIMEOUT_SECONDS = 120;
+    private static final long PER_ROLE_BONUS = 30;
+
     @Override
     public void invoke(MessageCreateEvent event, String[] content) {
         Message msg = event.getMessage();
         msg.getReferencedMessage().ifPresentOrElse(refMsg -> {
             List<Role> roles = msg.getMentionedRoles();
             msg.getServer().ifPresent(msgServer -> handleUserCommand(event, refMsg, msgServer, content[0], roles));
-        }, () -> event.getChannel().sendMessage("Please reply to the message you wish to attach reaction roles to!"));
+        }, () -> event.getChannel()
+                .sendMessage("Please reply to the message you wish to attach reaction roles to!"));
     }
 
 
@@ -35,7 +39,7 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
      * @param message    A Message.
      * @param msgServer  A Server.
      * @param subCommand The sub command.
-     * @param role       A Role
+     * @param roles      A list of roles mentioned in the message.
      */
     private void handleUserCommand(MessageCreateEvent event, Message message, Server msgServer, String subCommand,
                                    List<Role> roles) {
@@ -43,13 +47,10 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
             if (msgServer.getPermissions(user).getState(PermissionType.ADMINISTRATOR) == PermissionState.ALLOWED) {
                 switch (subCommand) {
                     case "add":
-                        roles.forEach(role -> addRoleToRrMsg(event, message, role));
+                        addRolesToRrMsg(event, message, roles);
                         break;
                     case "rm":
                         removeRoleFromRrMsg(event, message);
-                        break;
-                    case "bulkAdd":
-                        bulkAddRolesToMsg(event, message, roles, message.getCustomEmojis());
                         break;
                     default:
                         event.getChannel().sendMessage("Invalid sub command!");
@@ -61,27 +62,12 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
         });
     }
 
-    private void bulkAddRolesToMsg(MessageCreateEvent event, Message message, List<Role> roles, List<CustomEmoji> emojis) {
-        if (roles.size() == 0) {event.getChannel().sendMessage("No roles mentioned"); throw new RuntimeException();}
-        if (emojis.size() == 0) {event.getChannel().sendMessage("No emojis mentioned"); throw new RuntimeException();}
-        if (roles.size() != emojis.size()) {
-            event.getChannel().sendMessage("Role/emoji mismatch!");
-            throw new RuntimeException();
-        }
-        for (int i = 0; i < roles.size(); i++) {
-            Role role = roles.get(i);
-            Emoji emoji = emojis.get(i);
-            try {
-                ReactRoleMessage.addRoleToMsg(message.getId(), emoji, role.getId());
-                message.addReaction(emoji);
-                message.removeReactionByEmoji(emoji);
-            } catch (InvalidEmojiException e) {
-                event.getChannel().sendMessage(emoji.getMentionTag() + " is already used, please " +
-                        "react with a different emote.");
-            }
-        }
-    }
-
+    /**
+     * Removes a role reaction from ReactRoleMessage.
+     *
+     * @param event   A MessageCreateEvent that contains all information about the message that contains the RR request.
+     * @param message The message that ReactRole needs to be added to
+     */
     private void removeRoleFromRrMsg(MessageCreateEvent event, Message message) {
         event.getChannel().sendMessage("React to this message with emoji that you want to remove!")
                 .thenAccept(reactMsg -> {
@@ -92,10 +78,12 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                                 ReactRoleMessage.rmRoleFromMsg(message.getId(), reactEvent.getEmoji());
                                 message.removeReactionByEmoji(reactEvent.getEmoji());
                             } catch (InvalidEmojiException e) {
-                                event.getChannel().sendMessage("Emoji isn't associated with any role, try again!");
+                                event.getChannel()
+                                        .sendMessage("Emoji isn't associated with any role, try again!");
                                 reactEvent.deleteMessage();
                             } catch (NoSuchElementException e) {
-                                event.getChannel().sendMessage("You haven't added any reaction roles to this message");
+                                event.getChannel()
+                                        .sendMessage("You haven't added any reaction roles to this message");
                             } finally {
                                 completed.set(true);
                             }
@@ -108,31 +96,43 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                 });
     }
 
-    private void addRoleToRrMsg(MessageCreateEvent event, Message message, Role role) {
-        event.getChannel().sendMessage(role.getName() + ": React to this message with emoji that you want to add!")
-                .thenAccept(reactMsg -> {
-                    AtomicBoolean completed = new AtomicBoolean(false);
-                    reactMsg.addReactionAddListener(reactEvent -> {
-                        if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
-                            try {
-                                Emoji userReaction = reactEvent.getEmoji();
-                                ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
-                                message.addReaction(userReaction);
-                                message.removeReactionByEmoji(reactEvent.getEmoji());
-                                reactEvent.deleteMessage();
-                            } catch (InvalidEmojiException e) {
-                                event.getChannel().sendMessage("This emote is already used, please " +
-                                        "react with a different emote.");
-                                reactEvent.removeReaction();
-                            } finally {
-                                completed.set(true);
+    /**
+     * Adds role(s) to ReactRole message.
+     *
+     * @param event   A MessageCreateEvent that contains all information about the message that contains the RR request.
+     * @param message The message that ReactRole needs to be added to.
+     * @param roles   A list of roles that need to be added to the ReactRoleMessage.
+     */
+    private void addRolesToRrMsg(MessageCreateEvent event, Message message, @NotNull List<Role> roles) {
+        roles.forEach(role -> {
+            long listenerTimeout = TIMEOUT_SECONDS + (roles.size() - 1) * PER_ROLE_BONUS;
+            event.getChannel()
+                    .sendMessage(role.getName() +
+                            ": React to this message with emoji that you want to associate with role!")
+                    .thenAccept(reactMsg -> {
+                        AtomicBoolean completed = new AtomicBoolean(false);
+                        reactMsg.addReactionAddListener(reactEvent -> {
+                            if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
+                                try {
+                                    Emoji userReaction = reactEvent.getEmoji();
+                                    ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
+                                    message.addReaction(userReaction);
+                                    message.removeReactionByEmoji(reactEvent.getEmoji());
+                                    reactEvent.deleteMessage();
+                                } catch (InvalidEmojiException e) {
+                                    event.getChannel().sendMessage("This emote is already used," +
+                                            " please react with a different emote.");
+                                    reactEvent.removeReaction();
+                                } finally {
+                                    completed.set(true);
+                                }
                             }
-                        }
-                    }).removeAfter(2, TimeUnit.MINUTES).addRemoveHandler(() ->{
-                        if (!completed.get()) {
-                            event.getChannel().sendMessage("You took too long bye!");
-                        }
+                        }).removeAfter(listenerTimeout, TimeUnit.SECONDS).addRemoveHandler(() -> {
+                            if (!completed.get()) {
+                                event.getChannel().sendMessage("You took too long bye!");
+                            }
+                        });
                     });
-                });
+        });
     }
 }
