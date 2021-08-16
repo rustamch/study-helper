@@ -2,8 +2,7 @@ package model;
 
 import java.util.Arrays;
 
-import events.ReactionEvent.ReactRoleMesageEvent;
-import events.ReactionEvent.ReactRoleMessage;
+import events.ReactionEvent.ReactRoleMessageEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
@@ -34,7 +33,7 @@ public class MessageListener implements MessageCreateListener {
         abtEvent = new AboutEvent();
         studyTimeEvent = new StudyTimeEvent();
 
-        reactRoleMesageEvent = new ReactRoleMesageEvent();
+        reactRoleMesageEvent = new ReactRoleMessageEvent();
         purgeEvent = new PurgeEvent();
     }
 

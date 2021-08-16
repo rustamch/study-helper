@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ReactRoleMesageEvent implements BotMessageEvent {
+public class ReactRoleMessageEvent implements BotMessageEvent {
 
     private static final long TIMEOUT_SECONDS = 120;
     private static final long PER_ROLE_BONUS = 30;
@@ -117,7 +117,6 @@ public class ReactRoleMesageEvent implements BotMessageEvent {
                                     Emoji userReaction = reactEvent.getEmoji();
                                     ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
                                     message.addReaction(userReaction);
-                                    message.removeReactionByEmoji(reactEvent.getEmoji());
                                     reactEvent.deleteMessage();
                                 } catch (InvalidEmojiException e) {
                                     event.getChannel().sendMessage("This emote is already used," +
