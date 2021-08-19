@@ -116,12 +116,9 @@ public class ReactRoleMessageEvent implements BotMessageEvent {
                                 try {
                                     Emoji userReaction = reactEvent.getEmoji();
                                     ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
-                                    message.addReaction(reactEvent.getEmoji())
-                                            .thenAccept(cmpl -> reactEvent.deleteMessage())
-                                            .exceptionally(e -> {
-                                                e.printStackTrace();
-                                               return null;
-                                            });
+                                    if (message.addReaction(reactEvent.getEmoji()).isCompletedExceptionally()) {
+                                        reactEvent.getEmoji().asCustomEmoji().ifPresent(message::addReaction);
+                                    }
                                 } catch (InvalidEmojiException e) {
                                     event.getChannel().sendMessage("This emote is already used," +
                                             " please react with a different emote.");

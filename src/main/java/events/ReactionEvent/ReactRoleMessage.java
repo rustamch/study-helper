@@ -1,5 +1,6 @@
 package events.ReactionEvent;
 
+import com.mongodb.client.model.Filters;
 import exceptions.InvalidEmojiException;
 import exceptions.InvalidDocumentException;
 import org.bson.Document;
@@ -124,5 +125,9 @@ public class ReactRoleMessage implements Writable {
         } else {
             return Optional.empty();
         }
+    }
+
+    public void deleteRrMessage() {
+        writer.removeDocuments(Filters.eq(ACCESS_KEY,this.msgId));
     }
 }
