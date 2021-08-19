@@ -9,7 +9,6 @@ import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -47,7 +46,8 @@ public class ReactRoleMessageEvent implements BotMessageEvent {
             if (msgServer.getPermissions(user).getState(PermissionType.ADMINISTRATOR) == PermissionState.ALLOWED) {
                 switch (subCommand) {
                     case "add":
-                        addRolesToRrMsg(event, message, roles);
+                        long listenerTimeout = TIMEOUT_SECONDS + (roles.size() - 1) * PER_ROLE_BONUS;
+                        roles.forEach(role -> addRoleToRrMsg(event, message, role, listenerTimeout));
                         break;
                     case "rm":
                         removeRoleFromRrMsg(event, message);
@@ -101,44 +101,41 @@ public class ReactRoleMessageEvent implements BotMessageEvent {
      *
      * @param event   A MessageCreateEvent that contains all information about the message that contains the RR request.
      * @param message The message that ReactRole needs to be added to.
-     * @param roles   A list of roles that need to be added to the ReactRoleMessage.
+     * @param role    A role that needs to be added to the ReactRoleMessage.
      */
-    private void addRolesToRrMsg(MessageCreateEvent event, Message message, @NotNull List<Role> roles) {
-        roles.forEach(role -> {
-            long listenerTimeout = TIMEOUT_SECONDS + (roles.size() - 1) * PER_ROLE_BONUS;
-            event.getChannel()
-                    .sendMessage(role.getName() +
-                            ": React to this message with emoji that you want to associate with role!")
-                    .thenAccept(reactMsg -> {
-                        AtomicBoolean completed = new AtomicBoolean(false);
-                        reactMsg.addReactionAddListener(reactEvent -> {
-                            if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
-                                Emoji userReaction = reactEvent.getEmoji();
-                                    message.addReaction(userReaction).thenAccept(cmpl ->  {
-                                        try {
-                                            ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
-                                            completed.set(true);
-                                            reactEvent.deleteMessage();
-                                        } catch (InvalidEmojiException e) {
-                                            event.getChannel()
-                                                    .sendMessage("This emoji is already used please react " +
-                                                            "with a different emoji!");
-                                            reactEvent.removeReaction();
-                                        }
-                                    }).exceptionally(e -> {
-                                        event.getChannel().sendMessage("This emoji ain’t familia >:( " +
-                                                "Please react with emoji that is either a standard discord emoji or " +
-                                                "belongs to this server!");
-                                        reactEvent.removeReaction();
-                                        return null;
-                                    });
-                            }
-                        }).removeAfter(listenerTimeout, TimeUnit.SECONDS).addRemoveHandler(() -> {
-                            if (!completed.get()) {
-                                event.getChannel().sendMessage("You took too long bye!");
-                            }
-                        });
+    private void addRoleToRrMsg(MessageCreateEvent event, Message message, Role role, long listenerTimeout) {
+        event.getChannel()
+                .sendMessage(role.getName() +
+                        ": React to this message with emoji that you want to associate with role!")
+                .thenAccept(reactMsg -> {
+                    AtomicBoolean completed = new AtomicBoolean(false);
+                    reactMsg.addReactionAddListener(reactEvent -> {
+                        if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
+                            Emoji userReaction = reactEvent.getEmoji();
+                            message.addReaction(userReaction).thenAccept(cmpl -> {
+                                try {
+                                    ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
+                                    completed.set(true);
+                                    reactEvent.deleteMessage();
+                                } catch (InvalidEmojiException e) {
+                                    event.getChannel()
+                                            .sendMessage("This emoji is already used please react " +
+                                                    "with a different emoji!");
+                                    reactEvent.removeReaction();
+                                }
+                            }).exceptionally(e -> {
+                                event.getChannel().sendMessage("This emoji ain’t familia >:( " +
+                                        "Please react with emoji that is either a standard discord emoji or " +
+                                        "belongs to this server!");
+                                reactEvent.removeReaction();
+                                return null;
+                            });
+                        }
+                    }).removeAfter(listenerTimeout, TimeUnit.SECONDS).addRemoveHandler(() -> {
+                        if (!completed.get()) {
+                            event.getChannel().sendMessage("You took too long bye!");
+                        }
                     });
-        });
+                });
     }
 }
