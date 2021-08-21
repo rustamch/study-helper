@@ -112,24 +112,23 @@ public class ReactRoleMessageEvent implements BotMessageEvent {
                     reactMsg.addReactionAddListener(reactEvent -> {
                         if (reactEvent.getUserId() == event.getMessageAuthor().getId()) {
                             Emoji userReaction = reactEvent.getEmoji();
-                            message.addReaction(userReaction).thenAccept(cmpl -> {
+                            if (userReaction.isUnicodeEmoji() || userReaction.isKnownCustomEmoji()) {
                                 try {
                                     ReactRoleMessage.addRoleToMsg(message.getId(), userReaction, role.getId());
                                     completed.set(true);
-                                    reactEvent.deleteMessage();
+                                    message.addReaction(userReaction).thenRun(reactEvent::deleteMessage);
                                 } catch (InvalidEmojiException e) {
                                     event.getChannel()
                                             .sendMessage("This emoji is already used please react " +
                                                     "with a different emoji!");
                                     reactEvent.removeReaction();
                                 }
-                            }).exceptionally(e -> {
+                            } else {
                                 event.getChannel().sendMessage("This emoji ain’t familia >:( " +
                                         "Please react with emoji that is either a standard discord emoji or " +
                                         "belongs to this server!");
                                 reactEvent.removeReaction();
-                                return null;
-                            });
+                            }
                         }
                     }).removeAfter(listenerTimeout, TimeUnit.SECONDS).addRemoveHandler(() -> {
                         if (!completed.get()) {
