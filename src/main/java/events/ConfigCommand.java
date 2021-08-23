@@ -16,6 +16,8 @@ public class ConfigCommand implements BotMessageEvent {
                             server.getRoleById(roleId).ifPresentOrElse(role -> {
                                 long serverId = server.getId();
                                 ServerConfig.setStudyRoleForServer(serverId, roleId);
+                                event.getChannel().sendMessage("Successfully set the study role to be " +
+                                        role.getName() + "role !");
                             }, () -> event.getChannel()
                                     .sendMessage("It looks like id you provided isn't associated" +
                                             " with any role on this server!"));
