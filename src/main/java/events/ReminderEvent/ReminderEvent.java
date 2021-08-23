@@ -16,14 +16,13 @@ import exceptions.InvalidTimeInMinutesException;
 
 public class ReminderEvent implements ActionListener, BotMessageEvent {
     private final ReminderManager reminderManager;
-    private final Timer timer;
 
     /**
      * Constructs a new reminder and sets the timer to check time very minute.
      */
     public ReminderEvent() {
         reminderManager = new ReminderManager();
-        timer = new Timer(60000, this);
+        Timer timer = new Timer(60000, this);
         timer.setRepeats(true);
         timer.start();
     }

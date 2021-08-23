@@ -48,7 +48,6 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
     /**
      * Sends a message that tells for how long the given user has studied.
      * 
-     * @param memberID    id of the member who just finished their study session.
      * @param timeElapsed amount of time in miliseconds.
      */
     private void sendTimeElapsedMessage(TextChannel records, String name, long timeElapsed) {

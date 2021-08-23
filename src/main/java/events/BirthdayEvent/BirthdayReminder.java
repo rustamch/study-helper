@@ -1,9 +1,11 @@
 package events.BirthdayEvent;
+
 import java.awt.Color;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import model.Bot;
 import model.DailyTask;
 
@@ -16,6 +18,22 @@ public class BirthdayReminder implements DailyTask {
     @Override
     public void execute() {
         checkBirthdays();
+    }
+
+    private void monthlyBDayUpdate() {
+        Set<String> ids = BirthdayRecord.findMembersWithBdayOnGivenMonth(LocalDate.now().getMonthValue());
+        String title = LocalDate.now().getMonth() + " Birthdays";
+        if (!ids.isEmpty()) {
+            Map<Server, EmbedBuilder> embeds = new HashMap<>();
+            ids.forEach(id -> {
+                Bot.API.getUserById(id).thenAccept(user -> {
+                    user.getMutualServers().forEach(server -> {
+                        EmbedBuilder builder = new EmbedBuilder().setTitle(title);
+                        embeds.putIfAbsent(server, builder);
+                    });
+                });
+            });
+        }
     }
 
     /**
@@ -36,6 +54,7 @@ public class BirthdayReminder implements DailyTask {
 
     /**
      * Sends a congradulations message to the users with a birthday today.
+     * 
      * @param memberIDs ids of the users with a birthday today.
      */
     public void congratulateUsers(Set<String> memberIDs) {
@@ -49,6 +68,7 @@ public class BirthdayReminder implements DailyTask {
             });
         });
     }
+
 
     public static void msgEachCommonServer(Set<String> memberIDs) {
         Map<Server, EmbedBuilder> msgMap = new HashMap<>();

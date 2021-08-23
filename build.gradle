@@ -4,8 +4,8 @@ version = '1.0-SNAPSHOT'
 
 description = """"""
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 task stage(dependsOn: ['build', 'clean'])
 build.mustRunAfter clean
@@ -18,7 +18,9 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation ("org.mongodb:mongodb-driver:3.6.3")
+    implementation ('org.mongodb:mongodb-driver:3.12.10')
+    implementation 'org.jetbrains:annotations:20.1.0'
+    implementation 'org.jetbrains:annotations:20.1.0'
     dependencies { implementation 'org.javacord:javacord:3.3.2' }
 }
 

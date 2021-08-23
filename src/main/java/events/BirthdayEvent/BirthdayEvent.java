@@ -79,7 +79,6 @@ public class BirthdayEvent implements BotMessageEvent {
      * 
      * @param event message event
      * @param date  string representation of a date
-     * @param id    name of the member
      */
     private void setBDay(MessageCreateEvent event, String date) {
         try {

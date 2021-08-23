@@ -16,3 +16,4 @@ target/
 build
 bin/
 .vscode/
+.gradle

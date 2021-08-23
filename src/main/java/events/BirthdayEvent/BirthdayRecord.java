@@ -37,11 +37,14 @@ public class BirthdayRecord implements Writable {
      * 
      * @param id      user's id.
      * @param date    the date of the birthday.
-     * @param guildID the id of the guild.
      */
     public BirthdayRecord(String id, LocalDate date) {
         this.memberID = id;
         this.date = date;
+    }
+
+    public static Set<String> findMembersWithBdayOnGivenMonth(int monthValue) {
+        return findMembersWithFilters(Filters.eq(MONTH_KEY, monthValue));
     }
 
     @Override
@@ -71,6 +74,7 @@ public class BirthdayRecord implements Writable {
     }
 
     public static Set<String> findMembersWithBdayOnGivenDay(LocalDate date) {
+
         return findMembersWithFilters(Filters.eq(MONTH_KEY, date.getMonthValue()),
                 Filters.eq(DAY_KEY, date.getDayOfMonth()));
     }
@@ -94,10 +98,7 @@ public class BirthdayRecord implements Writable {
      * Records the birthday and saves it to DataBase
      * 
      * @param id id of the member
-     * @param date string representation of birthday
      * @throws InvalidDateFormatException when given date format is unrecognized
-     * @throws IllegalDateException       when given date has illegal year/month/day
-     *                                    values
      */
     public static void recordBDay(String id, LocalDate bdayDate) {
         BirthdayRecord bday = new BirthdayRecord(id, bdayDate);
