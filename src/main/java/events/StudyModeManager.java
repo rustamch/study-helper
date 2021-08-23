@@ -1,8 +1,8 @@
 package events;
 
 import model.Bot;
-import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.server.Server;
+import org.javacord.api.entity.user.User;
 import org.javacord.api.event.server.role.UserRoleAddEvent;
 import org.javacord.api.event.server.role.UserRoleRemoveEvent;
 import org.javacord.api.listener.server.role.UserRoleAddListener;
@@ -20,7 +20,7 @@ public class StudyModeManager implements UserRoleAddListener, UserRoleRemoveList
         if (ServerConfig.isStudyRole(roleId, serverId)) {
             Bot.API.getOwner().thenAccept(owner ->
                     owner.sendMessage("Putting user " + event.getUser().getName() + " into study mode!"));
-            switchUserToStudyMode(event.getUser(),server);
+            switchUserToStudyMode(event.getUser(), server);
         }
     }
 
@@ -30,7 +30,7 @@ public class StudyModeManager implements UserRoleAddListener, UserRoleRemoveList
         long roleId = event.getRole().getId();
         long serverId = server.getId();
         if (ServerConfig.isStudyRole(roleId, serverId)) {
-            kickUserOutOfStudyMode(event.getUser(),server);
+            kickUserOutOfStudyMode(event.getUser(), server);
         }
     }
 
@@ -47,11 +47,18 @@ public class StudyModeManager implements UserRoleAddListener, UserRoleRemoveList
      *
      * @param user user that needs to be put into StudyMode.
      */
-    private void switchUserToStudyMode(User user,Server currServer) {
+    private void switchUserToStudyMode(User user, Server currServer) {
         Collection<Server> servers = user.getMutualServers();
         servers.remove(currServer);
-        servers.forEach(server ->
-                ServerConfig.getStudyRoleForServer(server).ifPresent(studyRole ->
-                        server.addRoleToUser(user, studyRole)));
+        servers.forEach(server -> {
+            Bot.API.getOwner().thenAccept(owner ->
+                    owner.sendMessage("Adding a role on server " + server.getName()));
+            ServerConfig.getStudyRoleForServer(server).ifPresent(studyRole -> {
+                Bot.API.getOwner().thenAccept(owner ->
+                        owner.sendMessage("Adding role " + studyRole.getName() + "on server " +
+                                server.getName()));
+                server.addRoleToUser(user, studyRole);
+            });
+        });
     }
 }
