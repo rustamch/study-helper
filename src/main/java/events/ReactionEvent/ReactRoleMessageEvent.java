@@ -77,6 +77,8 @@ public class ReactRoleMessageEvent implements BotMessageEvent {
                             try {
                                 ReactRoleMessage.rmRoleFromMsg(message.getId(), reactEvent.getEmoji());
                                 message.removeReactionByEmoji(reactEvent.getEmoji());
+                                reactEvent.deleteMessage();
+                                completed.set(true);
                             } catch (InvalidEmojiException e) {
                                 event.getChannel()
                                         .sendMessage("Emoji isn't associated with any role, try again!");
@@ -84,8 +86,6 @@ public class ReactRoleMessageEvent implements BotMessageEvent {
                             } catch (NoSuchElementException e) {
                                 event.getChannel()
                                         .sendMessage("You haven't added any reaction roles to this message");
-                            } finally {
-                                completed.set(true);
                             }
                         }
                     }).removeAfter(2, TimeUnit.MINUTES).addRemoveHandler(() -> {
