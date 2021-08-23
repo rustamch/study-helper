@@ -1,5 +1,6 @@
 package events;
 
+import model.Bot;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.server.role.UserRoleAddEvent;
@@ -17,6 +18,8 @@ public class StudyModeManager implements UserRoleAddListener, UserRoleRemoveList
         long roleId = event.getRole().getId();
         long serverId = server.getId();
         if (ServerConfig.isStudyRole(roleId, serverId)) {
+            Bot.API.getOwner().thenAccept(owner ->
+                    owner.sendMessage("Putting user " + event.getUser().getName() + " into study mode!"));
             switchUserToStudyMode(event.getUser(),server);
         }
     }
