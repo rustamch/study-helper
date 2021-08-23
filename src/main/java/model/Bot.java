@@ -2,9 +2,8 @@ package model;
 
 import events.MessageDeleteListener;
 import events.ReactionEvent.MessageReactionListener;
+import events.StudyModeManager;
 import events.StudyTimeEvent.StudyTimeLogger;
-
-import javax.security.auth.login.LoginException;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -26,6 +25,7 @@ public class Bot {
         API.addListener(new StudyTimeLogger());
         API.addMessageDeleteListener(new MessageDeleteListener());
         API.addListener(new MessageReactionListener());
+        API.addListener(new StudyModeManager());
         new DailyExecutor();  
     }
 }

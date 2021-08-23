@@ -43,16 +43,12 @@ public class ServerConfig implements Writable {
         return  Optional.empty();
     }
 
-    /**
-     * Checks if the given role is the study role for the given server.
-     * @param role A role that needs to be checked
-     * @param server A server on which StudyRole needs to be retrieved
-     * @return true if the role is StudyRole, false otherwise
-     */
-    public static boolean isStudyRole(Role role, Server server) {
-        if (getStudyRoleForServer(server).isPresent()) {
-            return role.equals(getStudyRoleForServer(server).get());
-        } else {
+    public static boolean isStudyRole(long roleId, long serverId) {
+        try {
+            Document readDoc = reader.loadObject(serverId);
+            long studyRoleId = readDoc.getLong(STUDY_ROLE_KEY);
+            return studyRoleId == roleId;
+        } catch (InvalidDocumentException e) {
             return false;
         }
     }

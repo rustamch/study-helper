@@ -30,21 +30,7 @@ public class MessageReactionListener implements ReactionAddListener, ReactionRem
                     rrMsg.getRoleIdByEmoji(userReaction).ifPresentOrElse(roleId ->
                             server.getRoleById(roleId).ifPresent(role -> {
                                 server.addRoleToUser(user, role);
-                                if (ServerConfig.isStudyRole(role, server)) {
-                                    switchUserToStudyMode(user);
-                                }
                             }), event::removeReaction));
         }));
-    }
-
-    /**
-     * Adds the StudyRole to the user on every server where the bot is present.
-     *
-     * @param user user that needs to be put into StudyMode.
-     */
-    private void switchUserToStudyMode(User user) {
-        user.getMutualServers().forEach(server ->
-                ServerConfig.getStudyRoleForServer(server).ifPresent(studyRole ->
-                        server.addRoleToUser(user, studyRole)));
     }
 }
