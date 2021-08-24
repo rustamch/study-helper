@@ -37,9 +37,10 @@ public class StudyModeManager implements UserRoleAddListener, UserRoleRemoveList
     private void kickUserOutOfStudyMode(User user, Server currServer) {
         Collection<Server> servers = user.getMutualServers();
         servers.remove(currServer);
-        servers.forEach(server ->
-                ServerConfig.getStudyRoleForServer(server).ifPresent(studyRole ->
-                        server.removeRoleFromUser(user, studyRole)));
+        Bot.API.getServers().forEach(server ->
+                server.getMemberById(user.getId()).ifPresent(member ->
+                        ServerConfig.getStudyRoleForServer(server).ifPresent(studyRole ->
+                                server.removeRoleFromUser(member, studyRole))));
     }
 
     /**
@@ -50,15 +51,9 @@ public class StudyModeManager implements UserRoleAddListener, UserRoleRemoveList
     private void switchUserToStudyMode(User user, Server currServer) {
         Collection<Server> servers = user.getMutualServers();
         servers.remove(currServer);
-        Bot.API.getOwner().thenAccept(owner -> {
-            owner.sendMessage("Number of mutual servers is " + servers.size());
-            servers.forEach(server ->
-                    ServerConfig.getStudyRoleForServer(server).ifPresent(studyRole -> {
-                        owner.sendMessage("Adding role " + studyRole.getName() + "on server " +
-                                server.getName());
-                        server.addRoleToUser(user, studyRole);
-
-                    }));
-        });
+        Bot.API.getServers().forEach(server ->
+                server.getMemberById(user.getId()).ifPresent(member ->
+                        ServerConfig.getStudyRoleForServer(server).ifPresent(studyRole ->
+                                server.addRoleToUser(member, studyRole))));
     }
 }
