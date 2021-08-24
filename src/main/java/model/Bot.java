@@ -4,8 +4,6 @@ import events.MessageDeleteListener;
 import events.ReactionEvent.MessageReactionListener;
 import events.StudyTimeEvent.StudyTimeLogger;
 
-import javax.security.auth.login.LoginException;
-
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.intent.Intent;
@@ -26,7 +24,7 @@ public class Bot {
         API.addListener(new StudyTimeLogger());
         API.addMessageDeleteListener(new MessageDeleteListener());
         API.addListener(new MessageReactionListener());
-        new DailyExecutor();  
+        new DailyExecutor();
     }
 }
 
