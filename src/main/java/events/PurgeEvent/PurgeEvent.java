@@ -12,23 +12,22 @@ public class PurgeEvent implements BotMessageEvent {
         if (content.length == 0) {
             return;
         } else {
-            // int num = content[0].equalsIgnoreCase("all") ? Integer.MAX_VALUE - 1: Integer.parseInt(content[0]);
-            int num = Integer.parseInt(content[0]);
-            TextChannel channel = event.getChannel();
-            event.getMessage().getUserAuthor().ifPresent(user -> {
-                if(channel.canManageMessages(user)) {
-                    channel.sendMessage("Deleting " + content[0] + " messages...").thenAccept(msg -> {
-                        try {
-                            Thread.currentThread();
-                            Thread.sleep(1000);
-                            channel.getMessages(num + 2).thenAccept(msgs -> {
-                                channel.bulkDelete(msgs);
-                            });
-                        } catch (InterruptedException e) {
-                            // do nothing
-                        } 
-                    });
-                }
+            handleSubCommand(event, content);
+        }
+    }
+
+    private void handleSubCommand(MessageCreateEvent event, String[] content) {
+        String subCommand = content[0];
+        TextChannel channel = event.getChannel();
+        if (subCommand.equalsIgnoreCase("all"))  {
+            channel.sendMessage("You have asked to delete all the messages!");
+            channel.getMessagesWhile(message -> {
+                return true;
+            }).thenAccept(messages -> channel.deleteMessages(messages));
+        } else if (subCommand.matches("(\\d+)")) {
+            int num = Integer.parseInt(subCommand);
+            channel.getMessages(num + 2).thenAccept(msgs -> {
+                channel.deleteMessages(msgs);
             });
         }
     }
