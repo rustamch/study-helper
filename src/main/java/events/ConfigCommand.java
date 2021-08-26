@@ -46,9 +46,11 @@ public class ConfigCommand implements BotMessageEvent {
     private void createStudyRole(MessageCreateEvent event, String[] content, Server server) {
         server.createRoleBuilder().setName("studying").create().thenAccept(role -> {
             ServerConfig.setStudyRoleForServer(server.getId(), role.getId());
-            server.getTextChannels().forEach(textChannel -> {
-                textChannel.createUpdater().addPermissionOverwrite(role,
-                        Permissions.fromBitmask(0x0, 0x0000010400));
+            server.getChannelCategories().forEach(channelCategory -> {
+                channelCategory
+                        .createUpdater()
+                        .addPermissionOverwrite(role, Permissions.fromBitmask(0,66560))
+                        .update();
             });
         });
     }
