@@ -52,6 +52,7 @@ public class ConfigCommand implements BotMessageEvent {
                         .addPermissionOverwrite(role, Permissions.fromBitmask(0,66560))
                         .update();
             });
+            event.getChannel().sendMessage("Successfully configured study-role!");
         });
     }
 
