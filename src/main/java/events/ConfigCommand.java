@@ -9,7 +9,7 @@ public class ConfigCommand implements BotMessageEvent {
     @Override
     public void invoke(MessageCreateEvent event, String[] content) {
         if (event.getMessageAuthor().isServerAdmin()) {
-            if (content[0] == null) {
+            if (content[0] != null) {
                 handleSubCommand(event, content);
             } else {
                 event.getChannel().sendMessage("Please enter a valid subcommand!" +
