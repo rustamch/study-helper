@@ -31,27 +31,33 @@ public class ConfigCommand implements BotMessageEvent {
 
     private void handleStudyRoleCommands(MessageCreateEvent event, String[] content) {
         String studySubCommand = content[1];
-            event.getServer().ifPresent(server -> {
-                switch (studySubCommand) {
-                    case ("set"):
-                        setStudyRole(event,content,server);
-                        break;
-                    case ("auto-config"):
-                        createStudyRole(event,content,server);
-                       break;
-                }
-            });
+        event.getServer().ifPresent(server -> {
+            switch (studySubCommand) {
+                case ("set"):
+                    setStudyRole(event, content, server);
+                    break;
+                case ("auto-config"):
+                    createStudyRole(event, content, server);
+                    break;
+            }
+        });
     }
 
     private void createStudyRole(MessageCreateEvent event, String[] content, Server server) {
         server.createRoleBuilder().setName("studying").create().thenAccept(role -> {
             ServerConfig.setStudyRoleForServer(server.getId(), role.getId());
-            server.getChannelCategories().forEach(channelCategory -> {
-                channelCategory
-                        .createUpdater()
-                        .addPermissionOverwrite(role, Permissions.fromBitmask(0,66560))
-                        .update();
-            });
+            server.getChannelCategories().forEach(channelCategory ->
+                    channelCategory.createUpdater()
+                            .addPermissionOverwrite(role, Permissions.fromBitmask(0, 66560))
+                            .update());
+            server.getTextChannels().forEach(textChannel ->
+                    textChannel.createUpdater()
+                            .addPermissionOverwrite(role, Permissions.fromBitmask(0, 66560))
+                            .update());
+            server.getVoiceChannels().forEach(voiceChannel ->
+                    voiceChannel.createUpdater()
+                            .addPermissionOverwrite(role, Permissions.fromBitmask(0, 1049600))
+                            .update());
             event.getChannel().sendMessage("Successfully configured study-role!");
         });
     }
