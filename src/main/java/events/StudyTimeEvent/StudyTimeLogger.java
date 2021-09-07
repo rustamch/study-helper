@@ -7,8 +7,6 @@ import org.javacord.api.event.channel.server.voice.ServerVoiceChannelMemberLeave
 import org.javacord.api.listener.channel.server.voice.ServerVoiceChannelMemberJoinListener;
 import org.javacord.api.listener.channel.server.voice.ServerVoiceChannelMemberLeaveListener;
 
-import exceptions.InvalidDocumentException;
-
 public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, ServerVoiceChannelMemberLeaveListener {
     public static final String STUDY_CHANNEL = ".*study.*";
 
@@ -19,11 +17,12 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
             User user = event.getUser();
             TextChannel textChannel = event.getServer().getTextChannelsByName("study-records").get(0);
             StudyTimeRecord record;
+            record = StudyTimeRecord.getStudySession(user.getIdAsString());
             try {
-                record = StudyTimeRecord.getStudySession(user.getIdAsString());
                 long timeElapsed = record.finishSession();
+                record.save();
                 sendTimeElapsedMessage(textChannel, user.getDisplayName(event.getServer()), timeElapsed);
-            } catch (InvalidDocumentException e) {
+            } catch (IllegalStateException e) {
                 textChannel.sendMessage("Something went wrong!");
             }
         }
@@ -34,11 +33,9 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
         if (event.getChannel().getName().matches(STUDY_CHANNEL)) {
             User user = event.getUser();
             TextChannel textChannel = event.getServer().getTextChannelsByName("study-records").get(0);
-            StudyTimeRecord record;
-            try {
-                record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
-            } catch (InvalidDocumentException e) {
-                record = new StudyTimeRecord(user.getIdAsString());
+            StudyTimeRecord record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
+            if (record.inProgress()) {
+                record.finishSession();
             }
             record.trackSession();
             textChannel.sendMessage(user.getDisplayName(event.getServer()) + " has started studying!");
@@ -47,7 +44,7 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
 
     /**
      * Sends a message that tells for how long the given user has studied.
-     * 
+     *
      * @param timeElapsed amount of time in miliseconds.
      */
     private void sendTimeElapsedMessage(TextChannel records, String name, long timeElapsed) {

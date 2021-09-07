@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import events.ConfigCommand;
 import events.ReactionEvent.ReactRoleMessageEvent;
+import events.studysession.StudySessionEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
@@ -17,15 +18,16 @@ import events.StudyTimeEvent.StudyTimeEvent;
 import events.TodoEvent.TodoEvent;
 
 public class MessageListener implements MessageCreateListener {
-    private BotMessageEvent bdayEvent;
-    private BotMessageEvent todoEvent;
-    private BotMessageEvent reminderEvent;
-    private BotMessageEvent oOEvent;
-    private BotMessageEvent abtEvent;
-    private BotMessageEvent studyTimeEvent;
-    private BotMessageEvent reactRoleMesageEvent;
-    private BotMessageEvent purgeEvent;
-    private BotMessageEvent configCommand;
+    private final BotMessageEvent bdayEvent;
+    private final BotMessageEvent todoEvent;
+    private final BotMessageEvent reminderEvent;
+    private final BotMessageEvent oOEvent;
+    private final BotMessageEvent abtEvent;
+    private final BotMessageEvent studyTimeEvent;
+    private final BotMessageEvent reactRoleMesageEvent;
+    private final BotMessageEvent purgeEvent;
+    private final BotMessageEvent configCommand;
+    private final BotMessageEvent studySessionCommand;
 
     public MessageListener() {
         bdayEvent = new BirthdayEvent();
@@ -37,6 +39,7 @@ public class MessageListener implements MessageCreateListener {
         reactRoleMesageEvent = new ReactRoleMessageEvent();
         purgeEvent = new PurgeEvent();
         configCommand = new ConfigCommand();
+        studySessionCommand = new StudySessionEvent();
     }
 
     @Override
@@ -73,6 +76,9 @@ public class MessageListener implements MessageCreateListener {
                     break;
                 case "!config":
                     configCommand.invoke(event,content);
+                    break;
+                case "!studysession":
+                    studySessionCommand.invoke(event,content);
                     break;
             }
         }
