@@ -48,7 +48,7 @@ public class ServerConfig implements Writable {
         }
     }
 
-    public static Optional<TextChannel> getTextChannelForServer(Server server) {
+    public static Optional<TextChannel> getRecordsChannelForServer(Server server) {
         try {
             long serverId = server.getId();
             Document readDoc = reader.loadObject(serverId);

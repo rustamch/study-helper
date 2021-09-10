@@ -1,5 +1,6 @@
 package events.StudyTimeEvent;
 
+import events.ServerConfig;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.channel.server.voice.ServerVoiceChannelMemberJoinEvent;
@@ -15,7 +16,8 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
     public void onServerVoiceChannelMemberLeave(ServerVoiceChannelMemberLeaveEvent event) {
         if (event.getChannel().getName().matches(STUDY_CHANNEL)) {
             User user = event.getUser();
-            TextChannel textChannel = event.getServer().getTextChannelsByName("study-records").get(0);
+            TextChannel textChannel = ServerConfig.getRecordsChannelForServer(event.getServer())
+                    .orElse(event.getServer().getSystemChannel().orElseThrow());
             StudyTimeRecord record;
             record = StudyTimeRecord.getStudySession(user.getIdAsString());
             try {
@@ -32,7 +34,8 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
     public void onServerVoiceChannelMemberJoin(ServerVoiceChannelMemberJoinEvent event) {
         if (event.getChannel().getName().matches(STUDY_CHANNEL)) {
             User user = event.getUser();
-            TextChannel textChannel = event.getServer().getTextChannelsByName("study-records").get(0);
+            TextChannel textChannel = ServerConfig.getRecordsChannelForServer(event.getServer())
+                    .orElse(event.getServer().getSystemChannel().orElseThrow());
             StudyTimeRecord record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
             if (record.inProgress()) {
                 record.finishSession();

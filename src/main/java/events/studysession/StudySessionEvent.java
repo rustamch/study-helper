@@ -1,25 +1,25 @@
 package events.studysession;
 
 import events.BotMessageEvent;
+import events.ServerConfig;
 import events.StudyTimeEvent.StudyTimeRecord;
+import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.permission.Role;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import java.util.TimerTask;
 
-import static events.StudyTimeEvent.StudyTimeRecord.getStudySession;
 
 public class StudySessionEvent extends TimerTask implements BotMessageEvent {
 
     public StudySessionEvent() {
-        Timer timer = new Timer(60000, e -> {
-            run();
-        });
+        Timer timer = new Timer(60000, e -> run());
     }
 
     public void run() {
@@ -31,17 +31,33 @@ public class StudySessionEvent extends TimerTask implements BotMessageEvent {
 
     @Override
     public void invoke(MessageCreateEvent event, String[] content) {
-        getEndOfSession(content).ifPresentOrElse(endEpoch -> {
-            String memberId = event.getMessageAuthor().getIdAsString();
-            StudyTimeRecord record = StudyTimeRecord.getStudySession(memberId);
-            if (record.inProgress()) {
-                record.finishSession();
-            }
-            record.setEndTime(endEpoch);
-            record.trackSession();
-        }, () -> event.getChannel().sendMessage("The amount of time you specified isn't valid!"));
+        getEndOfSession(content).ifPresentOrElse(endEpoch -> event.getServer().ifPresent(server ->
+                event.getMessageAuthor().asUser().ifPresent(user -> {
+                    if (memberIsInStudyMode(user.getRoles(server), server)) {
+                        String memberId = event.getMessageAuthor().getIdAsString();
+                        StudyTimeRecord record = StudyTimeRecord.getStudySession(memberId);
+                        if (record.inProgress()) {
+                            record.finishSession();
+                        }
+                        record.setEndTime(endEpoch);
+                        record.trackSession();
+                        TextChannel recordsChannel = ServerConfig.getRecordsChannelForServer(server)
+                                .orElse(server.getSystemChannel().orElseThrow());
+                        recordsChannel.sendMessage((event.getMessageAuthor().getDisplayName() + " has started studying!"));
+                    } else {
+                        event.getChannel().sendMessage("You need to be in study mode to start a study session!");
+                    }
+                })), () -> event.getChannel().sendMessage("The amount of time you specified isn't valid!"));
     }
 
+    private boolean memberIsInStudyMode(List<Role> roles, Server server) {
+        if (ServerConfig.getStudyRoleForServer(server).isPresent()) {
+            Role studyRole = ServerConfig.getStudyRoleForServer(server).get();
+            return roles.contains(studyRole);
+        } else {
+            return false;
+        }
+    }
 
 
     /**
