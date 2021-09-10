@@ -67,10 +67,6 @@ public class StudyTimeRecord implements Writable  {
    }
 
     @Override
-    /**
-     * 
-     * @return a document that contains information about current session 
-     */
     public Document toDoc() {
         Document doc = new Document();
         doc.put(ACCESS_KEY, memberID);
@@ -103,6 +99,10 @@ public class StudyTimeRecord implements Writable  {
         this.endTime = endTime;
         this.memberID = memberID;
         this.studyTime = studyTime;
+    }
+
+    public String getMemberId() {
+        return this.memberID;
     }
 
     /**

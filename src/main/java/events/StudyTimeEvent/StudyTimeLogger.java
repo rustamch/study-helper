@@ -2,6 +2,7 @@ package events.StudyTimeEvent;
 
 import events.ServerConfig;
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.channel.server.voice.ServerVoiceChannelMemberJoinEvent;
 import org.javacord.api.event.channel.server.voice.ServerVoiceChannelMemberLeaveEvent;
@@ -15,17 +16,18 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
     @Override
     public void onServerVoiceChannelMemberLeave(ServerVoiceChannelMemberLeaveEvent event) {
         if (event.getChannel().getName().matches(STUDY_CHANNEL)) {
-            User user = event.getUser();
-            TextChannel textChannel = ServerConfig.getRecordsChannelForServer(event.getServer())
-                    .orElse(event.getServer().getSystemChannel().orElseThrow());
-            StudyTimeRecord record = StudyTimeRecord.getStudySession(user.getIdAsString());
-            try {
-                long timeElapsed = record.finishSession();
+            StudyTimeRecord record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
+            long timeElapsed = record.finishSession();
+            String displayName = event.getUser().getDisplayName(event.getServer());
+            ServerConfig.getRecordsChannelForServer(event.getServer()).ifPresentOrElse(recordsChannel -> {
+                sendTimeElapsedMessage(recordsChannel, displayName, timeElapsed);
                 record.save();
-                sendTimeElapsedMessage(textChannel, user.getDisplayName(event.getServer()), timeElapsed);
-            } catch (IllegalStateException e) {
-                textChannel.sendMessage("Something went wrong!");
-            }
+            }, () -> {
+                Server server = event.getServer();
+                server.getOwner().ifPresent(owner ->
+                        owner.sendMessage("Please setup a records channel on your server using " +
+                                "`!config study-records <textChannelId>`!"));
+            });
         }
     }
 
@@ -33,14 +35,20 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
     public void onServerVoiceChannelMemberJoin(ServerVoiceChannelMemberJoinEvent event) {
         if (event.getChannel().getName().matches(STUDY_CHANNEL)) {
             User user = event.getUser();
-            ServerConfig.getRecordsChannelForServer(event.getServer()).ifPresent(recordsChannel -> {
-                StudyTimeRecord record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
-                if (record.inProgress()) {
-                    record.finishSession();
-                }
-                record.trackSession();
-                recordsChannel.sendMessage(user.getDisplayName(event.getServer()) + " has started studying!");
-            });
+            StudyTimeRecord record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
+            if (record.inProgress()) {
+                record.finishSession();
+            }
+            record.trackSession();
+            ServerConfig.getRecordsChannelForServer(event.getServer()).ifPresentOrElse(recordsChannel ->
+                            recordsChannel.sendMessage(user.getDisplayName(event.getServer()) +
+                                    " has started studying!"),
+                    () -> {
+                        Server server = event.getServer();
+                        server.getOwner().ifPresent(owner ->
+                                owner.sendMessage("Please setup a records channel on your server using " +
+                                        "`!config study-records <textChannelId>`!"));
+                    });
         }
     }
 

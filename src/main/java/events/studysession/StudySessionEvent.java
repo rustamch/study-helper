@@ -3,6 +3,7 @@ package events.studysession;
 import events.BotMessageEvent;
 import events.ServerConfig;
 import events.StudyTimeEvent.StudyTimeRecord;
+import model.Bot;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
@@ -24,7 +25,12 @@ public class StudySessionEvent extends TimerTask implements BotMessageEvent {
 
     public void run() {
         StudyTimeRecord.getDueStudySessions().forEach(record -> {
-            record.finishSession();
+            long timeElapsed = record.finishSession();
+            Bot.API.getServersByName("Studium Praetorium").forEach(server ->
+                    server.getMemberById(record.getMemberId()).ifPresent(user ->
+                            ServerConfig.getRecordsChannelForServer(server).ifPresent(records ->
+                                    sendTimeElapsedMessage(records, user.getDisplayName(server), timeElapsed))
+                    ));
             record.save();
         });
     }
@@ -41,9 +47,12 @@ public class StudySessionEvent extends TimerTask implements BotMessageEvent {
                         }
                         record.setEndTime(endEpoch);
                         record.trackSession();
-                        TextChannel recordsChannel = ServerConfig.getRecordsChannelForServer(server)
-                                .orElse(server.getSystemChannel().orElseThrow());
-                        recordsChannel.sendMessage((event.getMessageAuthor().getDisplayName() + " has started studying!"));
+                        ServerConfig.getRecordsChannelForServer(server).ifPresentOrElse(recordsChannel ->
+                                        recordsChannel.sendMessage(user.getDisplayName(server) +
+                                                " has started studying!"),
+                                () -> server.getOwner().ifPresent(owner ->
+                                        owner.sendMessage("Please setup a records channel on your server " +
+                                                "using `!config study-records <textChannelId>`!")));
                     } else {
                         event.getChannel().sendMessage("You need to be in study mode to start a study session!");
                     }
@@ -83,6 +92,23 @@ public class StudySessionEvent extends TimerTask implements BotMessageEvent {
             return Optional.empty();
         }
         return Optional.empty();
+    }
+
+    /**
+     * Sends a message that tells for how long the given user has studied.
+     *
+     * @param timeElapsed amount of time in miliseconds.
+     */
+    private void sendTimeElapsedMessage(TextChannel records, String name, long timeElapsed) {
+        String msg;
+        if (timeElapsed / 1000 > 3600)
+            msg = name + " has studied for **" + timeElapsed / 60 / 60 + "** hours" + " and " + timeElapsed / 60 % 60
+                    + " minutes!";
+        else if (timeElapsed > 60)
+            msg = name + " has studied for **" + timeElapsed / 60 + "** minutes!";
+        else
+            msg = name + " has studied for **" + timeElapsed + "** seconds!";
+        records.sendMessage(msg);
     }
 
 
