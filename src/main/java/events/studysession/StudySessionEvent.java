@@ -9,23 +9,22 @@ import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
 
+import javax.swing.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class StudySessionEvent extends TimerTask implements BotMessageEvent {
-    private final Timer timer;
+public class StudySessionEvent implements BotMessageEvent {
 
     public StudySessionEvent() {
-        this.timer = new Timer();
-        timer.schedule(this, 60000);
+        Timer timer = new Timer(60000, e -> run());
+        timer.setRepeats(true);
+        timer.start();
     }
 
-    @Override
     public void run() {
         StudyTimeRecord.getDueStudySessions().forEach(record -> {
             long timeElapsed = record.finishSession();
@@ -36,7 +35,6 @@ public class StudySessionEvent extends TimerTask implements BotMessageEvent {
                     ));
             record.save();
         });
-        this.timer.schedule(this,60000);
     }
 
     @Override
