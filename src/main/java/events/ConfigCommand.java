@@ -38,10 +38,26 @@ public class ConfigCommand implements BotMessageEvent {
             case ("help"):
                 sendHelpMessage(event);
                 break;
+            case ("records-channel"):
+                setRecordsChannel(event, content);
+                break;
             default:
                 event.getChannel().sendMessage("Please enter a valid subcommand!" +
                         "Please use !config help to learn more.");
                 break;
+        }
+    }
+
+    private void setRecordsChannel(MessageCreateEvent event, String[] content) {
+        if (content[1] != null) {
+            try {
+                long textChannelId = Long.parseLong(content[1]);
+                event.getServer().ifPresent(server ->
+                        server.getTextChannelById(content[1]).ifPresent(textChannel ->
+                                ServerConfig.setRecordsChannel(server.getId(), textChannelId)));
+            } catch (NumberFormatException e) {
+                event.getChannel().sendMessage("Please provide valid ID for the textchannel!");
+            }
         }
     }
 
