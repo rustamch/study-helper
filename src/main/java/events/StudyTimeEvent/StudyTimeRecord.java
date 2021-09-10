@@ -53,15 +53,16 @@ public class StudyTimeRecord implements Writable  {
    public static List<StudyTimeRecord> getDueStudySessions() {
         List<StudyTimeRecord> records = new ArrayList<>();
         long currEpoch = Instant.now().getEpochSecond();
-        Bson filter = Filters.and(Filters.lte(END_TIME_KEY,currEpoch),
-                Filters.nor(Filters.eq(END_TIME_KEY,-1)));
+        Bson filter = Filters.lte(END_TIME_KEY,currEpoch);
         reader.loadDocumentsWithFilter(filter).forEach((Consumer<? super Document>) doc -> {
-            long startTime = doc.getLong(START_TIME_KEY);
             long endTime = doc.getLong(END_TIME_KEY);
-            long studyTime = doc.getLong(STUDY_TIME_KEY);
-            String memberID = doc.getString(ACCESS_KEY);
-            StudyTimeRecord rec = new StudyTimeRecord(memberID,startTime,endTime,studyTime);
-            records.add(rec);
+            if (endTime != -1) {
+                long startTime = doc.getLong(START_TIME_KEY);
+                long studyTime = doc.getLong(STUDY_TIME_KEY);
+                String memberID = doc.getString(ACCESS_KEY);
+                StudyTimeRecord rec = new StudyTimeRecord(memberID, startTime, endTime, studyTime);
+                records.add(rec);
+            }
         });
         return  records;
    }

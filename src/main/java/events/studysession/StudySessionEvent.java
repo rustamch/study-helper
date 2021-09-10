@@ -47,8 +47,6 @@ public class StudySessionEvent extends TimerTask implements BotMessageEvent {
                         String memberId = event.getMessageAuthor().getIdAsString();
                         StudyTimeRecord record = StudyTimeRecord.getStudySession(memberId);
                         ServerConfig.getRecordsChannelForServer(server).ifPresentOrElse(recordsChannel -> {
-                            recordsChannel.sendMessage(user.getDisplayName(server) +
-                                    " has started studying!");
                             if (record.inProgress()) {
                                 long timeElapsed = record.finishSession();
                                 String displayName = event.getMessageAuthor().getDisplayName();
@@ -56,6 +54,8 @@ public class StudySessionEvent extends TimerTask implements BotMessageEvent {
                             }
                             record.setEndTime(endEpoch);
                             record.trackSession();
+                            recordsChannel.sendMessage(user.getDisplayName(server) +
+                                    " has started studying!");
                         }, () -> server.getOwner().ifPresent(owner ->
                                 owner.sendMessage("Please setup a records channel on your server " +
                                         "using `!config study-records <textChannelId>`!")));
