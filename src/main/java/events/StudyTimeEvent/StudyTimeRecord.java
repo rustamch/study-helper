@@ -54,7 +54,7 @@ public class StudyTimeRecord implements Writable  {
         List<StudyTimeRecord> records = new ArrayList<>();
         long currEpoch = Instant.now().getEpochSecond();
         Bson filter = Filters.and(Filters.lte(END_TIME_KEY,currEpoch),
-                Filters.not(Filters.eq(END_TIME_KEY,-1)));
+                Filters.nor(Filters.eq(END_TIME_KEY,-1)));
         reader.loadDocumentsWithFilter(filter).forEach((Consumer<? super Document>) doc -> {
             long startTime = doc.getLong(START_TIME_KEY);
             long endTime = doc.getLong(END_TIME_KEY);
