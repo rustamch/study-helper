@@ -18,8 +18,7 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
             User user = event.getUser();
             TextChannel textChannel = ServerConfig.getRecordsChannelForServer(event.getServer())
                     .orElse(event.getServer().getSystemChannel().orElseThrow());
-            StudyTimeRecord record;
-            record = StudyTimeRecord.getStudySession(user.getIdAsString());
+            StudyTimeRecord record = StudyTimeRecord.getStudySession(user.getIdAsString());
             try {
                 long timeElapsed = record.finishSession();
                 record.save();
@@ -34,14 +33,14 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
     public void onServerVoiceChannelMemberJoin(ServerVoiceChannelMemberJoinEvent event) {
         if (event.getChannel().getName().matches(STUDY_CHANNEL)) {
             User user = event.getUser();
-            TextChannel textChannel = ServerConfig.getRecordsChannelForServer(event.getServer())
-                    .orElse(event.getServer().getSystemChannel().orElseThrow());
-            StudyTimeRecord record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
-            if (record.inProgress()) {
-                record.finishSession();
-            }
-            record.trackSession();
-            textChannel.sendMessage(user.getDisplayName(event.getServer()) + " has started studying!");
+            ServerConfig.getRecordsChannelForServer(event.getServer()).ifPresent(recordsChannel -> {
+                StudyTimeRecord record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
+                if (record.inProgress()) {
+                    record.finishSession();
+                }
+                record.trackSession();
+                recordsChannel.sendMessage(user.getDisplayName(event.getServer()) + " has started studying!");
+            });
         }
     }
 
