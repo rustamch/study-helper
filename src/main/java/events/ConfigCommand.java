@@ -31,20 +31,25 @@ public class ConfigCommand implements BotMessageEvent {
      */
     private void handleSubCommand(MessageCreateEvent event, String[] content) {
         String subCommand = content[0];
-        switch (subCommand) {
-            case ("studyrole"):
-                handleStudyRoleCommands(event, content);
-                break;
-            case ("help"):
-                sendHelpMessage(event);
-                break;
-            case ("records-channel"):
-                setRecordsChannel(event, content);
-                break;
-            default:
-                event.getChannel().sendMessage("Please enter a valid subcommand!" +
-                        "Please use !config help to learn more.");
-                break;
+        if (subCommand != null) {
+            switch (subCommand) {
+                case ("studyrole"):
+                    handleStudyRoleCommands(event, content);
+                    break;
+                case ("help"):
+                    sendHelpMessage(event);
+                    break;
+                case ("records-channel"):
+                    setRecordsChannel(event, content);
+                    break;
+                default:
+                    event.getChannel().sendMessage("Please enter a valid subcommand!" +
+                            "Please use !config help to learn more.");
+                    break;
+            }
+        } else {
+            event.getChannel().sendMessage("Please enter a valid subcommand!" +
+                    "Please use !config help to learn more.");
         }
     }
 
@@ -52,9 +57,14 @@ public class ConfigCommand implements BotMessageEvent {
         if (content[1] != null) {
             try {
                 long textChannelId = Long.parseLong(content[1]);
-                event.getServer().ifPresent(server ->
-                        server.getTextChannelById(content[1]).ifPresent(textChannel ->
-                                ServerConfig.setRecordsChannel(server.getId(), textChannelId)));
+                event.getServer().ifPresent(server -> {
+                    server.getTextChannelById(textChannelId).ifPresentOrElse(textChannel -> {
+                        ServerConfig.setRecordsChannel(server.getId(), textChannelId);
+                        event.getChannel().sendMessage("Successfully set the study-records channel to be `" +
+                                        textChannel.getName() + "`!");
+                    }, () -> event.getChannel()
+                            .sendMessage("Please provide valid ID for the textchannel!"));
+                });
             } catch (NumberFormatException e) {
                 event.getChannel().sendMessage("Please provide valid ID for the textchannel!");
             }

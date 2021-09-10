@@ -1,6 +1,7 @@
 package events;
 
 import exceptions.InvalidDocumentException;
+import model.Bot;
 import org.bson.Document;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.permission.Role;
@@ -52,9 +53,9 @@ public class ServerConfig implements Writable {
         try {
             long serverId = server.getId();
             Document readDoc = reader.loadObject(serverId);
-            long recordsChannelId = readDoc.getLong(RECORDS_CHANNEL_KEY);
-            if (server.getTextChannelById(recordsChannelId).isPresent()){
-                return Optional.of(server.getTextChannelById(recordsChannelId).get());
+            long channelId = readDoc.getLong(RECORDS_CHANNEL_KEY);
+            if (server.getTextChannelById(channelId).isPresent()) {
+                return Optional.of(server.getTextChannelById(channelId).get());
             } else {
                 return Optional.empty();
             }
