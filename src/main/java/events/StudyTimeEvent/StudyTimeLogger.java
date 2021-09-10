@@ -36,19 +36,20 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
         if (event.getChannel().getName().matches(STUDY_CHANNEL)) {
             User user = event.getUser();
             StudyTimeRecord record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
-            if (record.inProgress()) {
-                record.finishSession();
-            }
-            record.trackSession();
-            ServerConfig.getRecordsChannelForServer(event.getServer()).ifPresentOrElse(recordsChannel ->
-                            recordsChannel.sendMessage(user.getDisplayName(event.getServer()) +
-                                    " has started studying!"),
-                    () -> {
-                        Server server = event.getServer();
-                        server.getOwner().ifPresent(owner ->
-                                owner.sendMessage("Please setup a records channel on your server using " +
-                                        "`!config study-records <textChannelId>`!"));
-                    });
+            ServerConfig.getRecordsChannelForServer(event.getServer()).ifPresentOrElse(recordsChannel -> {
+                String displayName = user.getDisplayName(event.getServer());
+                if (record.inProgress()) {
+                    long timeElapsed = record.finishSession();
+                    sendTimeElapsedMessage(recordsChannel, displayName, timeElapsed);
+                }
+                record.trackSession();
+                recordsChannel.sendMessage(displayName + " has started studying!");
+            }, () -> {
+                Server server = event.getServer();
+                server.getOwner().ifPresent(owner ->
+                        owner.sendMessage("Please setup a records channel on your server using " +
+                                "`!config study-records <textChannelId>`!"));
+            });
         }
     }
 

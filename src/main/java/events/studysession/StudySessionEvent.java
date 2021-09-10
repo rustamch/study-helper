@@ -14,13 +14,14 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.TimerTask;
 
 
-public class StudySessionEvent extends TimerTask implements BotMessageEvent {
+public class StudySessionEvent implements BotMessageEvent {
 
     public StudySessionEvent() {
         Timer timer = new Timer(60000, e -> run());
+        timer.setDelay(60000);
+        timer.setRepeats(true);
     }
 
     public void run() {
