@@ -19,12 +19,11 @@ public class StudyTimeEvent implements BotMessageEvent {
    * 
    * @param event a JDA event
    */
-  private void msgStudyTimeForUser(MessageCreateEvent event) {
-    StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
-    long time = studyTimeLeaderboard.getUserTime(event.getMessageAuthor().getIdAsString()) / 60;
-    if (time > 0) {
+  private void msgStudyTimeForUser(MessageCreateEvent event) {;
+    long studytimeMin = StudyTimeRecord.getUserStudytime(event.getMessageAuthor().getIdAsString()) / 60;
+    if (studytimeMin > 0) {
       event.getChannel()
-          .sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for "  + time / 60 + " hour(s) " + time % 60 + " minutes");
+          .sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for "  + studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minutes");
     } else {
       event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " has not studied yet.");
     }

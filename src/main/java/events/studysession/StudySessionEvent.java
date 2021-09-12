@@ -57,6 +57,8 @@ public class StudySessionEvent implements BotMessageEvent {
                         }, () -> server.getOwner().ifPresent(owner ->
                                 owner.sendMessage("Please setup a records channel on your server " +
                                         "using `!config study-records <textChannelId>`!")));
+                        event.getChannel().sendMessage(user.getMentionTag()+
+                                ", you’ve started a study session. Be productive!");
                     } else {
                         event.getChannel().sendMessage("You need to be in study mode to start a study session!");
                     }
@@ -84,7 +86,7 @@ public class StudySessionEvent implements BotMessageEvent {
             long numTemp = Long.parseLong(content[0]);
             if (content[1] != null) {
                 Instant now = Instant.now();
-                if (content[1].matches("min|m")) {
+                if (content[1].matches("min|m|mins")) {
                     return Optional.of(now.plus(numTemp, ChronoUnit.MINUTES).getEpochSecond());
                 } else if (content[1].matches("hr|hours|hour")) {
                     return Optional.of(now.plus(numTemp, ChronoUnit.HOURS).getEpochSecond());

@@ -67,6 +67,15 @@ public class StudyTimeRecord implements Writable  {
         return  records;
    }
 
+    public static long getUserStudytime(String userId) {
+        try {
+            Document doc = reader.loadObject(userId);
+            return doc.getLong(STUDY_TIME_KEY);
+        } catch (InvalidDocumentException e) {
+            return 0;
+        }
+    }
+
     @Override
     public Document toDoc() {
         Document doc = new Document();
