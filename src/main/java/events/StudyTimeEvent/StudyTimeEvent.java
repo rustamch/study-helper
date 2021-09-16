@@ -7,6 +7,9 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import events.BotMessageEvent;
 import exceptions.InvalidDocumentException;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Represents a handler for !studytime commands
  */
@@ -35,8 +38,9 @@ public class StudyTimeEvent implements BotMessageEvent {
     String command = content[0];
     switch (command) {
       case "check":
-        if (content.length > 1 && content[1].matches("\\d[18]")) {
-          msgStudyTimeForUser(content[1], event);
+        if (content.length > 1 &&  Pattern.compile("\\d{18}").matcher(content[1]).find()) {
+          String userId = Pattern.compile("\\d{18}").matcher(content[1]).group();
+          msgStudyTimeForUser(userId, event);
         } else {
           msgStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
         }
