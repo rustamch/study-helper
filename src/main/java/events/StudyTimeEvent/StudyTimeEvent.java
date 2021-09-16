@@ -35,7 +35,7 @@ public class StudyTimeEvent implements BotMessageEvent {
     String command = content[0];
     switch (command) {
       case "check":
-        if (content[1] != null && content[1].matches("\\d[18]")) {
+        if (content.length > 1 && content[1].matches("\\d[18]")) {
           msgStudyTimeForUser(content[1], event);
         } else {
           msgStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
