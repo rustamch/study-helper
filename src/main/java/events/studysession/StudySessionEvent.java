@@ -82,9 +82,10 @@ public class StudySessionEvent implements BotMessageEvent {
                     try {
                         long timeElapsed = record.finishSession();
                         record.save();
-                        sendTimeElapsedMessage(event.getChannel(), user.getDisplayName(server), timeElapsed);
+                        ServerConfig.getRecordsChannelForServer(server).ifPresent(textChannel ->
+                            sendTimeElapsedMessage(textChannel,user.getDisplayName(server), timeElapsed));
                         event.getChannel().sendMessage(user.getMentionTag() + " you have just ended your " +
-                                "study session and you have studied for " + timeElapsed + " minutes! Good job!");
+                                "study session and you have studied for " + timeElapsed / 60 + " minutes! Good job!");
                     } catch (IllegalStateException e) {
                         event.getChannel().sendMessage("You aren't in active study session right now!");
                     }
