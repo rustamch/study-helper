@@ -1,5 +1,6 @@
 package events.StudyTimeEvent;
 
+import model.Bot;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.Event;
 import org.javacord.api.event.message.MessageCreateEvent;
@@ -25,12 +26,14 @@ public class StudyTimeEvent implements BotMessageEvent {
    */
   private void msgStudyTimeForUser(String userId, MessageCreateEvent event) {
     long studytimeMin = StudyTimeRecord.getUserStudytime(userId) / 60;
-    if (studytimeMin > 0) {
-      event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for " +
-              studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minute(s)");
-    } else {
-      event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " has not studied yet.");
-    }
+    Bot.API.getCachedUserById(userId).ifPresent(user -> {
+        if (studytimeMin > 0) {
+          event.getChannel().sendMessage(user.getMentionTag() + " has studied for " +
+                  studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minute(s)");
+        } else {
+          event.getChannel().sendMessage(user.getMentionTag() + " has not studied yet.");
+        }
+    });
   }
 
   @Override
