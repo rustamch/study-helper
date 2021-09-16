@@ -38,9 +38,13 @@ public class StudyTimeEvent implements BotMessageEvent {
     String command = content[0];
     switch (command) {
       case "check":
-        if (content.length > 1 &&  Pattern.compile("\\d{18}").matcher(content[1]).find()) {
-          String userId = Pattern.compile("\\d{18}").matcher(content[1]).group(0);
-          msgStudyTimeForUser(userId, event);
+        if (content.length > 1) {
+          Pattern p = Pattern.compile("\\d{18}");
+          Matcher matcher = p.matcher(content[1]);
+          if (matcher.find()) {
+            String userId = matcher.group(0);
+            msgStudyTimeForUser(userId, event);
+          }
         } else {
           msgStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
         }
