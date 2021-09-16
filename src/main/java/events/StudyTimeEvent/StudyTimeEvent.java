@@ -1,6 +1,7 @@
 package events.StudyTimeEvent;
 
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.event.Event;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import events.BotMessageEvent;
@@ -19,11 +20,11 @@ public class StudyTimeEvent implements BotMessageEvent {
    * 
    * @param event a JDA event
    */
-  private void msgStudyTimeForUser(MessageCreateEvent event) {;
-    long studytimeMin = StudyTimeRecord.getUserStudytime(event.getMessageAuthor().getIdAsString()) / 60;
+  private void msgStudyTimeForUser(String userId, MessageCreateEvent event) {
+    long studytimeMin = StudyTimeRecord.getUserStudytime(userId) / 60;
     if (studytimeMin > 0) {
-      event.getChannel()
-          .sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for "  + studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minutes");
+      event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for " +
+              studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minute(s)");
     } else {
       event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " has not studied yet.");
     }
@@ -34,7 +35,11 @@ public class StudyTimeEvent implements BotMessageEvent {
     String command = content[0];
     switch (command) {
       case "check":
-        msgStudyTimeForUser(event);
+        if (content[1] != null && content[1].matches("\\d[18]")) {
+          msgStudyTimeForUser(content[1], event);
+        } else {
+          msgStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
+        }
         break;
       case "leaderboard":
         if (content.length > 1 && content[1].equals("reset")) {

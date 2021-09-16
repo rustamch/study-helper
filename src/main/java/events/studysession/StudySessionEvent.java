@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.TimerTask;
 
 
 public class StudySessionEvent implements BotMessageEvent {
@@ -39,6 +38,17 @@ public class StudySessionEvent implements BotMessageEvent {
 
     @Override
     public void invoke(MessageCreateEvent event, String[] content) {
+        if (content[0] != null) {
+            if (content[0].matches("\\d.|\\d.\\w.")) {
+                startStudySession(event, content);
+            } else if (content[0].equals("leave")) {
+                logOffUser(event);
+            }
+        }
+
+    }
+
+    private void startStudySession(MessageCreateEvent event, String[] content) {
         getEndOfSession(content).ifPresentOrElse(endEpoch -> event.getServer().ifPresent(server ->
                 event.getMessageAuthor().asUser().ifPresent(user -> {
                     if (memberIsInStudyMode(user.getRoles(server), server)) {
@@ -57,12 +67,26 @@ public class StudySessionEvent implements BotMessageEvent {
                         }, () -> server.getOwner().ifPresent(owner ->
                                 owner.sendMessage("Please setup a records channel on your server " +
                                         "using `!config study-records <textChannelId>`!")));
-                        event.getChannel().sendMessage(user.getMentionTag()+
+                        event.getChannel().sendMessage(user.getMentionTag() +
                                 ", you’ve started a study session. Be productive!");
                     } else {
                         event.getChannel().sendMessage("You need to be in study mode to start a study session!");
                     }
                 })), () -> event.getChannel().sendMessage("The amount of time you specified isn't valid!"));
+    }
+
+    private void logOffUser(MessageCreateEvent event) {
+        event.getMessageAuthor().asUser().ifPresent(user ->
+                event.getServer().ifPresent(server -> {
+                    StudyTimeRecord record = StudyTimeRecord.getStudySession(user.getIdAsString());
+                    try {
+                        long timeElapsed = record.finishSession();
+                        record.save();
+                        sendTimeElapsedMessage(event.getChannel(), user.getDisplayName(server), timeElapsed);
+                    } catch (IllegalStateException e) {
+                        event.getChannel().sendMessage("You aren't in active study session right now!");
+                    }
+                }));
     }
 
     private boolean memberIsInStudyMode(List<Role> roles, Server server) {
