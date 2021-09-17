@@ -39,7 +39,7 @@ public class StudySessionEvent implements BotMessageEvent {
     @Override
     public void invoke(MessageCreateEvent event, String[] content) {
         if (content[0] != null) {
-            if (content[0].matches("\\d*|\\d+\\w*")) {
+            if (content[0].matches("\\d+|\\d+\\w*")) {
                 startStudySession(event, content);
             } else if (content[0].equals("leave")) {
                 logOffUser(event);
