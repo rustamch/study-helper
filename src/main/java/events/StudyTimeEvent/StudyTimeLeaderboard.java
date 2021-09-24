@@ -10,6 +10,7 @@ import java.util.Map;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 
+import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -38,14 +39,27 @@ public class StudyTimeLeaderboard implements DailyTask {
      * 
      * @return a leaderboard that contains user ids and the time they studied
      */
-    public static StudyTimeLeaderboard loadTimeLeaderboard() {
+    public static StudyTimeLeaderboard loadGlobalLeaderboard() {
         FindIterable<Document> docs = reader.loadAllDocuments()
-                .sort(new BasicDBObject(StudyTimeRecord.STUDY_TIME_KEY, -1))
+                .sort(new BasicDBObject(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY, -1))
                 .limit(StudyTimeEvent.NUMBER_OF_USERS_ON_LEADERBOARD);
         Map<String, Long> timesMap = new LinkedHashMap<>();
         for (Document doc : docs) {
             String userId = doc.getString(Writable.ACCESS_KEY);
-            Long time = doc.getLong(StudyTimeRecord.STUDY_TIME_KEY);
+            Long time = doc.getLong(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY);
+            timesMap.put(userId, time);
+        }
+        return new StudyTimeLeaderboard(timesMap);
+    }
+
+    public static StudyTimeLeaderboard loadWeeklyLeaderboard() {
+        FindIterable<Document> docs = reader.loadAllDocuments()
+                .sort(new BasicDBObject(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY, -1))
+                .limit(StudyTimeEvent.NUMBER_OF_USERS_ON_LEADERBOARD);
+        Map<String, Long> timesMap = new LinkedHashMap<>();
+        for (Document doc : docs) {
+            String userId = doc.getString(Writable.ACCESS_KEY);
+            Long time = doc.getLong(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY);
             timesMap.put(userId, time);
         }
         return new StudyTimeLeaderboard(timesMap);
@@ -96,12 +110,6 @@ public class StudyTimeLeaderboard implements DailyTask {
         return timesMap.get(memberID);
     }
 
-    @Override
-    public void execute() {
-        if (needsToBeReset()) {
-            resetLeaderboard();
-        }
-    }
 
     /**
      * Deletes all the StudyTimeRecords from the database and consequently
@@ -121,7 +129,7 @@ public class StudyTimeLeaderboard implements DailyTask {
     private void resetStudySessionRecord() {
         FindIterable<Document> docs = reader.loadAllDocuments();
         for (Document doc : docs) {
-            doc.put(StudyTimeRecord.STUDY_TIME_KEY, 0);
+            doc.put(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY, 0);
             writer.saveDocument(doc);
         }
     }
@@ -135,4 +143,10 @@ public class StudyTimeLeaderboard implements DailyTask {
         return today.getDayOfWeek() == DayOfWeek.MONDAY;
     }
 
+    @Override
+    public void execute()  {
+        if (needsToBeReset()) {
+            resetLeaderboard();
+        }
+    }
 }

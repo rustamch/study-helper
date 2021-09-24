@@ -19,13 +19,9 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
             User user = event.getUser();
             TextChannel textChannel = event.getServer().getTextChannelsByName("study-records").get(0);
             StudyTimeRecord record;
-            try {
-                record = StudyTimeRecord.getStudySession(user.getIdAsString());
-                long timeElapsed = record.finishSession();
-                sendTimeElapsedMessage(textChannel, user.getDisplayName(event.getServer()), timeElapsed);
-            } catch (InvalidDocumentException e) {
-                textChannel.sendMessage("Something went wrong!");
-            }
+            record = StudyTimeRecord.getStudySession(user.getIdAsString());
+            long timeElapsed = record.finishSession();
+            sendTimeElapsedMessage(textChannel, user.getDisplayName(event.getServer()), timeElapsed);
         }
     }
 
@@ -35,11 +31,7 @@ public class StudyTimeLogger implements ServerVoiceChannelMemberJoinListener, Se
             User user = event.getUser();
             TextChannel textChannel = event.getServer().getTextChannelsByName("study-records").get(0);
             StudyTimeRecord record;
-            try {
-                record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
-            } catch (InvalidDocumentException e) {
-                record = new StudyTimeRecord(user.getIdAsString());
-            }
+            record = StudyTimeRecord.getStudySession(event.getUser().getIdAsString());
             record.trackSession();
             textChannel.sendMessage(user.getDisplayName(event.getServer()) + " has started studying!");
         }

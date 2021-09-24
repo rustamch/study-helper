@@ -15,10 +15,6 @@ import org.javacord.api.entity.server.Server;
 
 public class BirthdayReminder implements DailyTask {
 
-    @Override
-    public void execute() {
-        checkBirthdays();
-    }
 
     private void monthlyBDayUpdate() {
         Set<String> ids = BirthdayRecord.findMembersWithBdayOnGivenMonth(LocalDate.now().getMonthValue());
@@ -84,5 +80,10 @@ public class BirthdayReminder implements DailyTask {
         msgMap.entrySet().forEach(entry -> {
             entry.getKey().getTextChannelsByName("general").get(0).sendMessage(entry.getValue());
         });
+    }
+
+    @Override
+    public void execute() {
+        checkBirthdays();
     }
 }
