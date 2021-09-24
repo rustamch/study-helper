@@ -25,7 +25,8 @@ public class Bot {
         DBWriter writer = new DBWriter(COLLECTION_NAME);
         reader.loadAllDocuments().forEach((Consumer<? super Document>) document -> {
             document.put(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY,document.getLong("study_time"));
-            document.put(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY,0L);
+            long weeklyStudyTime = 0;
+            document.put(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY,weeklyStudyTime);
             document.remove("study_time");
             writer.saveDocument(document);
         });
