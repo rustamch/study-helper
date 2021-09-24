@@ -2,7 +2,6 @@ package events.StudyTimeEvent;
 
 import model.Bot;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.event.Event;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import events.BotMessageEvent;
@@ -53,15 +52,7 @@ public class StudyTimeEvent implements BotMessageEvent {
         }
         break;
       case "leaderboard":
-        if (content.length > 1 && content[1].equals("reset")) {
-          StudyTimeLeaderboard.loadTimeLeaderboard().resetLeaderboard();
-        } else {
-          StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
-          event.getServer().ifPresent(server -> {
-            EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(server);
-            event.getChannel().sendMessage(eb);
-          });
-        }
+        processesLeaderboardComm(event, content);
         break;
       case "sub":
         if (content.length > 1) {
@@ -76,6 +67,26 @@ public class StudyTimeEvent implements BotMessageEvent {
           event.getChannel().sendMessage("You need to specify how much you want to subtract!");
         }
         break;
+    }
+  }
+
+  private void processesLeaderboardComm(MessageCreateEvent event, String[] content) {
+    if (content.length > 1) {
+      if (content[1].equals("reset")) {
+        StudyTimeLeaderboard.loadGlobalLeaderboard().resetLeaderboard();
+      } else if (content[1].equals("weekly")) {
+        StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadWeeklyLeaderboard();
+        event.getServer().ifPresent(server -> {
+          EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(server);
+          event.getChannel().sendMessage(eb);
+        });
+      }
+    } else {
+      StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadGlobalLeaderboard();
+      event.getServer().ifPresent(server -> {
+        EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(server);
+        event.getChannel().sendMessage(eb);
+      });
     }
   }
 }
