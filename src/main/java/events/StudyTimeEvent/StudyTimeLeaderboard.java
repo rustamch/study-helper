@@ -123,7 +123,8 @@ public class StudyTimeLeaderboard {
     private static void resetWeeklyStudyTime() {
         FindIterable<Document> docs = reader.loadAllDocuments();
         for (Document doc : docs) {
-            doc.put(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY, 0);
+            long zero = 0;
+            doc.put(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY,zero);
             writer.saveDocument(doc);
         }
     }
