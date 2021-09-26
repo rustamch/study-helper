@@ -60,7 +60,7 @@ public class StudyTimeRecord implements Writable  {
             if (endTime != -1) {
                 long startTime = doc.getLong(START_TIME_KEY);
                 long globalStudyTime = doc.getLong(GLOBAL_STUDY_TIME_KEY);
-                long weeklyStudyTime = doc.getLong(START_TIME_KEY);
+                long weeklyStudyTime = doc.getLong(WEEKLY_STUDY_TIME_KEY);
                 String memberID = doc.getString(ACCESS_KEY);
                 StudyTimeRecord rec = new StudyTimeRecord(memberID, startTime, endTime, globalStudyTime, weeklyStudyTime);
                 records.add(rec);
