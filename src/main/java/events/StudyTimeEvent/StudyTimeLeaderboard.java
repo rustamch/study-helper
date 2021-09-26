@@ -16,7 +16,6 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 
 import model.Bot;
-import model.DailyTask;
 import persistence.DBReader;
 import persistence.DBWriter;
 import persistence.Writable;
@@ -26,7 +25,7 @@ import persistence.Writable;
  * respective studyTime. Outside classes can iterate through user ids in the
  * leaderboard and get studytime of the given user by calling getUserTime.
  */
-public class StudyTimeLeaderboard implements DailyTask {
+public class StudyTimeLeaderboard {
     private static final String COLLECTION_NAME = "study_times";
     private static final DBReader reader = new DBReader(COLLECTION_NAME);
     private static final DBWriter writer = new DBWriter(COLLECTION_NAME);
@@ -99,17 +98,7 @@ public class StudyTimeLeaderboard implements DailyTask {
         this.timesMap = new HashMap<>();
     }
 
-    /**
-     * Returns amount of time user with provided id has studied
-     * 
-     * @param memberID id of the user
-     * @return the amount of time the user with the given id has studied
-     */
-    public Long getUserTime(String memberID) {
-        return timesMap.get(memberID);
-    }
 
-    @Override
     public void execute() {
         if (needsToBeReset()) {
             resetLeaderboard();
@@ -125,16 +114,16 @@ public class StudyTimeLeaderboard implements DailyTask {
         TextChannel botSpam = msgServer.getTextChannelsByName("bot-spam").get(0);               // TODO: Change this after each server has a config file.
         botSpam.sendMessage("Resetting leaderboard...");
         botSpam.sendMessage(getLeaderboardEmbed(msgServer));
-        resetStudySessionRecord();
+        resetWeeklyStudyTime();
     }
 
     /**
      * Sets the studytime of each user to 0 minutes.
      */
-    private void resetStudySessionRecord() {
+    private static void resetWeeklyStudyTime() {
         FindIterable<Document> docs = reader.loadAllDocuments();
         for (Document doc : docs) {
-            doc.put(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY, 0);
+            doc.put(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY, 0);
             writer.saveDocument(doc);
         }
     }
@@ -143,9 +132,14 @@ public class StudyTimeLeaderboard implements DailyTask {
      * Returns whether leaderboard needs to be reset or not.
      * @return a boolean value that indicates whether leaderboard needs to be reset or not 
      */
-    private boolean needsToBeReset() {
+    private static boolean needsToBeReset() {
         LocalDate today = LocalDate.now();
         return today.getDayOfWeek() == DayOfWeek.MONDAY;
     }
 
+    public static void dailyExecutorSchedule() {
+        if (needsToBeReset()) {
+            resetWeeklyStudyTime();
+        }
+    }
 }
