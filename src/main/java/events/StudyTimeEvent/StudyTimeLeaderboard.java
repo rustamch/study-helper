@@ -135,7 +135,7 @@ public class StudyTimeLeaderboard {
      */
     private static boolean needsToBeReset() {
         LocalDate today = LocalDate.now();
-        return today.getDayOfWeek() == DayOfWeek.MONDAY;
+        return today.getDayOfWeek() == DayOfWeek.SUNDAY;
     }
 
     public static void dailyExecutorSchedule() {
