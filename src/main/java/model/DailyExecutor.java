@@ -47,7 +47,7 @@ public class DailyExecutor extends TimerTask implements Writable {
         Document timeDoc;
         try {
             timeDoc = reader.loadObject(ACCESS_VALUE);
-            this.nextExecutionTime = timeDoc.getDate(EPOCH_KEY).toInstant();
+            this.nextExecutionTime = Instant.ofEpochSecond(timeDoc.getLong(EPOCH_KEY));
         } catch (InvalidDocumentException e) {
             nextExecutionTime = Instant.now();
         }
@@ -85,7 +85,7 @@ public class DailyExecutor extends TimerTask implements Writable {
 
     @Override
     public void run() {
-        tasksToExecute.forEach(task -> run());
+        tasksToExecute.forEach(Runnable::run);
         this.nextExecutionTime = Instant.now().plus(24, ChronoUnit.HOURS);
         save();
         scheduleNextExecution();
@@ -96,9 +96,9 @@ public class DailyExecutor extends TimerTask implements Writable {
     public Document toDoc() {
         Document retDoc = new Document();
         retDoc.put(ACCESS_KEY, ACCESS_VALUE);
-        retDoc.put(EPOCH_KEY, nextExecutionTime);
+        retDoc.put(EPOCH_KEY, nextExecutionTime.getEpochSecond());
         return retDoc;
     }
 
-    
+
 }
