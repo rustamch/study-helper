@@ -49,7 +49,7 @@ public class DailyExecutor extends TimerTask implements Writable {
             timeDoc = reader.loadObject(ACCESS_VALUE);
             this.nextExecutionTime = timeDoc.getDate(EPOCH_KEY).toInstant();
         } catch (InvalidDocumentException e) {
-            nextExecutionTime = Instant.now().plus(24, ChronoUnit.HOURS);
+            nextExecutionTime = Instant.now();
         }
     }
 
