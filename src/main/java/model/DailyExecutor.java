@@ -59,7 +59,11 @@ public class DailyExecutor extends TimerTask implements Writable {
      */
     private void scheduleNextExecution() {
         long timeUntilNextExecution = getTimeUntilNextExecution();
-        timer.schedule(this, timeUntilNextExecution);
+        if (timeUntilNextExecution == 0) {
+            run();
+        } else {
+            timer.schedule(this, timeUntilNextExecution);
+        }
     }
 
     private void save() {
