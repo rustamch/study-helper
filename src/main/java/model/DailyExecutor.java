@@ -2,6 +2,7 @@ package model;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -46,7 +47,7 @@ public class DailyExecutor extends TimerTask implements Writable {
         Document timeDoc;
         try {
             timeDoc = reader.loadObject(ACCESS_VALUE);
-            this.nextExecutionTime = Instant.ofEpochSecond(timeDoc.getLong(EPOCH_KEY));
+            this.nextExecutionTime = timeDoc.getDate(EPOCH_KEY).toInstant();
         } catch (InvalidDocumentException e) {
             nextExecutionTime = Instant.now().plus(24, ChronoUnit.HOURS);
         }
@@ -57,9 +58,7 @@ public class DailyExecutor extends TimerTask implements Writable {
      * Schedules the next execution.
      */
     private void scheduleNextExecution() {
-        this.nextExecutionTime = Instant.now().plus(24, ChronoUnit.HOURS);
         long timeUntilNextExecution = getTimeUntilNextExecution();
-        save();
         timer.schedule(this, timeUntilNextExecution);
     }
 
@@ -83,6 +82,8 @@ public class DailyExecutor extends TimerTask implements Writable {
     @Override
     public void run() {
         tasksToExecute.forEach(task -> run());
+        this.nextExecutionTime = Instant.now().plus(24, ChronoUnit.HOURS);
+        save();
         scheduleNextExecution();
     }
 
