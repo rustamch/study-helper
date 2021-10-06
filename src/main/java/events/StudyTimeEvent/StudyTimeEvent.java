@@ -20,18 +20,30 @@ public class StudyTimeEvent implements BotMessageEvent {
   /**
    * Constructs and sends a message that tells user for how long has he studied
    * already.
-   * 
+   *
    * @param event a JDA event
    */
   private void msgStudyTimeForUser(String userId, MessageCreateEvent event) {
     long studytimeMin = StudyTimeRecord.getUserStudytime(userId) / 60;
     Bot.API.getCachedUserById(userId).ifPresent(user -> {
-        if (studytimeMin > 0) {
-          event.getChannel().sendMessage(user.getMentionTag() + " has studied for " +
-                  studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minute(s)");
-        } else {
-          event.getChannel().sendMessage(user.getMentionTag() + " has not studied yet.");
-        }
+      if (studytimeMin > 0) {
+        event.getChannel().sendMessage(user.getMentionTag() + " has studied for " +
+                studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minute(s)");
+      } else {
+        event.getChannel().sendMessage(user.getMentionTag() + " has not studied yet.");
+      }
+    });
+  }
+
+  private void msgWeeklyStudyTimeForUser(String userId, MessageCreateEvent event) {
+    long studytimeMin = StudyTimeRecord.getUserWeeklyStudytime(userId) / 60;
+    Bot.API.getCachedUserById(userId).ifPresent(user -> {
+      if (studytimeMin > 0) {
+        event.getChannel().sendMessage(user.getMentionTag() + " has studied for " +
+                studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minute(s)");
+      } else {
+        event.getChannel().sendMessage(user.getMentionTag() + " has not studied yet.");
+      }
     });
   }
 
@@ -41,11 +53,15 @@ public class StudyTimeEvent implements BotMessageEvent {
     switch (command) {
       case "check":
         if (content.length > 1) {
-          Pattern p = Pattern.compile("\\d{18}");
-          Matcher matcher = p.matcher(content[1]);
-          if (matcher.find()) {
-            String userId = matcher.group(0);
-            msgStudyTimeForUser(userId, event);
+          if (content[1].equals("weekly")) {
+            msgStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
+          } else {
+            Pattern p = Pattern.compile("\\d{18}");
+            Matcher matcher = p.matcher(content[1]);
+            if (matcher.find()) {
+              String userId = matcher.group(0);
+              msgStudyTimeForUser(userId, event);
+            }
           }
         } else {
           msgStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
