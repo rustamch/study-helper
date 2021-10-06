@@ -54,7 +54,7 @@ public class StudyTimeEvent implements BotMessageEvent {
       case "check":
         if (content.length > 1) {
           if (content[1].equals("weekly")) {
-            msgStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
+            msgWeeklyStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
           } else {
             Pattern p = Pattern.compile("\\d{18}");
             Matcher matcher = p.matcher(content[1]);
