@@ -1,10 +1,14 @@
 package events.StudyTimeEvent;
 
+import model.Bot;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import events.BotMessageEvent;
 import exceptions.InvalidDocumentException;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents a handler for !studytime commands
@@ -16,18 +20,31 @@ public class StudyTimeEvent implements BotMessageEvent {
   /**
    * Constructs and sends a message that tells user for how long has he studied
    * already.
-   * 
+   *
    * @param event a JDA event
    */
-  private void msgStudyTimeForUser(MessageCreateEvent event) {
-    StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
-    long time = studyTimeLeaderboard.getUserTime(event.getMessageAuthor().getIdAsString()) / 60;
-    if (time > 0) {
-      event.getChannel()
-          .sendMessage(event.getMessageAuthor().getDisplayName() + " has studied for "  + time / 60 + " hour(s) " + time % 60 + " minutes");
-    } else {
-      event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + " has not studied yet.");
-    }
+  private void msgStudyTimeForUser(String userId, MessageCreateEvent event) {
+    long studytimeMin = StudyTimeRecord.getUserStudytime(userId) / 60;
+    Bot.API.getCachedUserById(userId).ifPresent(user -> {
+      if (studytimeMin > 0) {
+        event.getChannel().sendMessage(user.getMentionTag() + " has studied for " +
+                studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minute(s)");
+      } else {
+        event.getChannel().sendMessage(user.getMentionTag() + " has not studied yet.");
+      }
+    });
+  }
+
+  private void msgWeeklyStudyTimeForUser(String userId, MessageCreateEvent event) {
+    long studytimeMin = StudyTimeRecord.getUserWeeklyStudytime(userId) / 60;
+    Bot.API.getCachedUserById(userId).ifPresent(user -> {
+      if (studytimeMin > 0) {
+        event.getChannel().sendMessage(user.getMentionTag() + " has studied for " +
+                studytimeMin / 60 + " hour(s) " + studytimeMin % 60 + " minute(s)");
+      } else {
+        event.getChannel().sendMessage(user.getMentionTag() + " has not studied yet.");
+      }
+    });
   }
 
   @Override
@@ -35,18 +52,23 @@ public class StudyTimeEvent implements BotMessageEvent {
     String command = content[0];
     switch (command) {
       case "check":
-        msgStudyTimeForUser(event);
+        if (content.length > 1) {
+          if (content[1].equals("weekly")) {
+            msgWeeklyStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
+          } else {
+            Pattern p = Pattern.compile("\\d{18}");
+            Matcher matcher = p.matcher(content[1]);
+            if (matcher.find()) {
+              String userId = matcher.group(0);
+              msgStudyTimeForUser(userId, event);
+            }
+          }
+        } else {
+          msgStudyTimeForUser(event.getMessageAuthor().getIdAsString(),event);
+        }
         break;
       case "leaderboard":
-        if (content.length > 1 && content[1].equals("reset")) {
-          StudyTimeLeaderboard.loadTimeLeaderboard().resetLeaderboard();
-        } else {
-          StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadTimeLeaderboard();
-          event.getServer().ifPresent(server -> {
-            EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(server);
-            event.getChannel().sendMessage(eb);
-          });
-        }
+        processesLeaderboardComm(event, content);
         break;
       case "sub":
         if (content.length > 1) {
@@ -61,6 +83,26 @@ public class StudyTimeEvent implements BotMessageEvent {
           event.getChannel().sendMessage("You need to specify how much you want to subtract!");
         }
         break;
+    }
+  }
+
+  private void processesLeaderboardComm(MessageCreateEvent event, String[] content) {
+    if (content.length > 1) {
+      if (content[1].equals("reset")) {
+        StudyTimeLeaderboard.loadGlobalLeaderboard().resetLeaderboard();
+      } else if (content[1].equals("weekly")) {
+        StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadWeeklyLeaderboard();
+        event.getServer().ifPresent(server -> {
+          EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(server);
+          event.getChannel().sendMessage(eb);
+        });
+      }
+    } else {
+      StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadGlobalLeaderboard();
+      event.getServer().ifPresent(server -> {
+        EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(server);
+        event.getChannel().sendMessage(eb);
+      });
     }
   }
 }
