@@ -89,7 +89,7 @@ public class StudyTimeEvent implements BotMessageEvent {
   private void processesLeaderboardComm(MessageCreateEvent event, String[] content) {
     if (content.length > 1) {
       if (content[1].equals("reset")) {
-        StudyTimeLeaderboard.loadGlobalLeaderboard().resetLeaderboard();
+        StudyTimeLeaderboard.loadGlobalLeaderboard(event.getMessageAuthor().getIdAsString()).resetLeaderboard();
       } else if (content[1].equals("weekly")) {
         StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadWeeklyLeaderboard();
         event.getServer().ifPresent(server -> {
@@ -98,7 +98,7 @@ public class StudyTimeEvent implements BotMessageEvent {
         });
       }
     } else {
-      StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadGlobalLeaderboard();
+      StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadGlobalLeaderboard(event.getMessageAuthor().getIdAsString());
       event.getServer().ifPresent(server -> {
         EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(server);
         event.getChannel().sendMessage(eb);

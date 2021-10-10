@@ -11,10 +11,12 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 
+import exceptions.InvalidDocumentException;
 import model.Bot;
 import persistence.DBReader;
 import persistence.DBWriter;
@@ -37,15 +39,25 @@ public class StudyTimeLeaderboard {
      * 
      * @return a leaderboard that contains user ids and the time they studied
      */
-    public static StudyTimeLeaderboard loadGlobalLeaderboard() {
+    public static StudyTimeLeaderboard loadGlobalLeaderboard(String callerId) {
         FindIterable<Document> docs = reader.loadAllDocuments()
                 .sort(new BasicDBObject(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY, -1))
                 .limit(StudyTimeEvent.NUMBER_OF_USERS_ON_LEADERBOARD);
+        
         Map<String, Long> timesMap = new LinkedHashMap<>();
         for (Document doc : docs) {
             String userId = doc.getString(Writable.ACCESS_KEY);
             Long time = doc.getLong(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY);
             timesMap.put(userId, time);
+        }
+        if(!timesMap.containsKey(callerId)){
+            try {
+                Document usr = reader.loadObject(callerId);
+                Long time = usr.getLong(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY);
+                timesMap.put(callerId, time);
+            } catch (InvalidDocumentException e) {
+                System.out.println("unable to get user that called this");
+            }
         }
         return new StudyTimeLeaderboard(timesMap);
     }
@@ -64,10 +76,12 @@ public class StudyTimeLeaderboard {
     }
 
     public EmbedBuilder getLeaderboardEmbed(Server msgServer) {
+
         EmbedBuilder leaderboard = new EmbedBuilder();
         leaderboard.setTitle("\uD83D\uDCD8 Grind Leaderboard");
         leaderboard.setColor(new Color(0x9CD08F));
         int place = 1;
+
         for (Map.Entry<String, Long> entry : timesMap.entrySet()) {
             final int currPlace = place;
             msgServer.getMemberById(entry.getKey()).ifPresent(user -> {
