@@ -91,7 +91,7 @@ public class StudyTimeEvent implements BotMessageEvent {
       if (content[1].equals("reset")) {
         StudyTimeLeaderboard.loadGlobalLeaderboard(event.getMessageAuthor().getIdAsString()).resetLeaderboard();
       } else if (content[1].equals("weekly")) {
-        StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadWeeklyLeaderboard();
+        StudyTimeLeaderboard studyTimeLeaderboard = StudyTimeLeaderboard.loadWeeklyLeaderboard(event.getMessageAuthor().getIdAsString());
         event.getServer().ifPresent(server -> {
           EmbedBuilder eb = studyTimeLeaderboard.getLeaderboardEmbed(server);
           event.getChannel().sendMessage(eb);
