@@ -31,7 +31,7 @@ public class StudyTimeLeaderboard {
     private static final String COLLECTION_NAME = "study_times";
     private static final DBReader reader = new DBReader(COLLECTION_NAME);
     private static final DBWriter writer = new DBWriter(COLLECTION_NAME);
-    private final Map<String, Long> timesMap;
+    private final Map<String, StudyTimeLeaderboardRow> timesMap;
 
     /**
      * Either returns a leaderboard that was previously saved to the database or
@@ -40,39 +40,34 @@ public class StudyTimeLeaderboard {
      * @return a leaderboard that contains user ids and the time they studied
      */
     public static StudyTimeLeaderboard loadGlobalLeaderboard(String callerId) {
+        return loadLeaderboardBase(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY, callerId);
+    }
+
+    private static StudyTimeLeaderboard loadLeaderboardBase(String docKey, String callerId){
         FindIterable<Document> docs = reader.loadAllDocuments()
-                .sort(new BasicDBObject(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY, -1))
-                .limit(StudyTimeEvent.NUMBER_OF_USERS_ON_LEADERBOARD);
+                .sort(new BasicDBObject(docKey, -1));
         
-        Map<String, Long> timesMap = new LinkedHashMap<>();
+        Map<String, StudyTimeLeaderboardRow> timesMap = new LinkedHashMap<>();
+        int position = 1;
+        boolean foundUser = false;
         for (Document doc : docs) {
             String userId = doc.getString(Writable.ACCESS_KEY);
-            Long time = doc.getLong(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY);
-            timesMap.put(userId, time);
-        }
-        if(!timesMap.containsKey(callerId)){
-            try {
-                Document usr = reader.loadObject(callerId);
-                Long time = usr.getLong(StudyTimeRecord.GLOBAL_STUDY_TIME_KEY);
-                timesMap.put(callerId, time);
-            } catch (InvalidDocumentException e) {
-                System.out.println("unable to get user that called this");
+
+            if((position <= StudyTimeEvent.NUMBER_OF_USERS_ON_LEADERBOARD || (!foundUser && userId.equals(callerId)))){
+                Long time = doc.getLong(docKey);
+                timesMap.put(userId, new StudyTimeLeaderboardRow(time, position));
+                foundUser = true;
+            }
+            position++;
+            if(position > StudyTimeEvent.NUMBER_OF_USERS_ON_LEADERBOARD && foundUser){
+                break;
             }
         }
         return new StudyTimeLeaderboard(timesMap);
     }
 
-    public static StudyTimeLeaderboard loadWeeklyLeaderboard() {
-        FindIterable<Document> docs = reader.loadAllDocuments()
-                .sort(new BasicDBObject(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY, -1))
-                .limit(StudyTimeEvent.NUMBER_OF_USERS_ON_LEADERBOARD);
-        Map<String, Long> timesMap = new LinkedHashMap<>();
-        for (Document doc : docs) {
-            String userId = doc.getString(Writable.ACCESS_KEY);
-            Long time = doc.getLong(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY);
-            timesMap.put(userId, time);
-        }
-        return new StudyTimeLeaderboard(timesMap);
+    public static StudyTimeLeaderboard loadWeeklyLeaderboard(String callerId) {
+        return loadLeaderboardBase(StudyTimeRecord.WEEKLY_STUDY_TIME_KEY, callerId);
     }
 
     public EmbedBuilder getLeaderboardEmbed(Server msgServer) {
@@ -80,17 +75,13 @@ public class StudyTimeLeaderboard {
         EmbedBuilder leaderboard = new EmbedBuilder();
         leaderboard.setTitle("\uD83D\uDCD8 Grind Leaderboard");
         leaderboard.setColor(new Color(0x9CD08F));
-        int place = 1;
-
-        for (Map.Entry<String, Long> entry : timesMap.entrySet()) {
-            final int currPlace = place;
+        for (Map.Entry<String, StudyTimeLeaderboardRow> entry : timesMap.entrySet()) {
             msgServer.getMemberById(entry.getKey()).ifPresent(user -> {
                 String name = user.getDisplayName(msgServer);
-                long minutes  = entry.getValue() / 60;
-                leaderboard.addField(currPlace + ". " + name, name + " has studied for " + minutes / 60
+                long minutes  = entry.getValue().getTime() / 60;
+                leaderboard.addField(entry.getValue().getPosition() + ". " + name, name + " has studied for " + minutes / 60
                         + " hour(s) " + minutes % 60 + " minute(s) so far.", false);
             });
-            place++;
         }
         return leaderboard;
     }
@@ -101,7 +92,7 @@ public class StudyTimeLeaderboard {
      * @param timesMap a map that contains id of the users and the amount of time
      *                 they studied
      */
-    public StudyTimeLeaderboard(Map<String, Long> timesMap) {
+    public StudyTimeLeaderboard(Map<String, StudyTimeLeaderboardRow> timesMap) {
         this.timesMap = timesMap;
     }
 
