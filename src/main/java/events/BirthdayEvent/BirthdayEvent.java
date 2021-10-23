@@ -31,7 +31,6 @@ public class BirthdayEvent implements BotMessageEvent {
      *              up
      */
     private void lookupBDay(MessageCreateEvent event, String name) {
-        // TODO: delete aft testing
         if (name.equals("month")) {
             Set<String> ids = BirthdayRecord.findAllMembersWithBdayOnGivenMonth(LocalDate.now().getMonthValue());
             BirthdayReminder.msgEachCommonServer(ids);
