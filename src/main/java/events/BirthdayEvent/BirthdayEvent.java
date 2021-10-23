@@ -3,6 +3,7 @@ package events.BirthdayEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,11 +46,10 @@ public class BirthdayEvent implements BotMessageEvent {
                 event.getServer().ifPresent(actionServer -> {
                     LocalDate bday = BirthdayRecord.getDateById(user.getIdAsString());
                     if (bday == null) {
-                        event.getChannel().sendMessage(
-                                "The " + user.getDisplayName(actionServer) + " hasn't saved his birthday yet.");
+                        event.getChannel().sendMessage(user.getDisplayName(actionServer) + " hasn't saved their " +
+                                "birthday yet.");
                     } else {
-                        event.getChannel().sendMessage(
-                                "The " + user.getDisplayName(actionServer) + "'s birthday is " + bday.toString());
+                        event.getChannel().sendMessage(user.getDisplayName(actionServer) + "'s birthday is " + bday);
                     }
                 });
             } else {
@@ -62,7 +62,7 @@ public class BirthdayEvent implements BotMessageEvent {
                     if (bday == null) {
                         event.getChannel().sendMessage(name + " hasn't saved their birthday yet.");
                     } else {
-                        event.getChannel().sendMessage(name + "'s birthday is " + bday.toString());
+                        event.getChannel().sendMessage(name + "'s birthday is " + bday);
                     }
                 } else {
                     event.getChannel()
@@ -85,7 +85,7 @@ public class BirthdayEvent implements BotMessageEvent {
             LocalDate bdayDate = getDateFromStr(date);
             BirthdayRecord.recordBDay(event.getMessageAuthor().getIdAsString(), bdayDate);
             event.getChannel().sendMessage(
-                    event.getMessageAuthor().getDisplayName() + "'s birthday is set to " + bdayDate.toString());
+                    event.getMessageAuthor().getDisplayName() + "'s birthday is set to " + bdayDate);
         } catch (InvalidDateFormatException e) {
             event.getChannel().sendMessage("Sorry, birthday format illegal. Not recorded.");
         } catch (IllegalDateException e) {
@@ -103,7 +103,7 @@ public class BirthdayEvent implements BotMessageEvent {
      *                                    values
      */
     public static LocalDate getDateFromStr(String inpt) throws InvalidDateFormatException, IllegalDateException {
-        String[] lst = inpt.split("[.\\/]");
+        String[] lst = inpt.split("[./]");
         return LocalDate.of(Integer.parseInt(lst[0]), Integer.parseInt(lst[1]), Integer.parseInt(lst[2]));
     }
 
@@ -114,7 +114,7 @@ public class BirthdayEvent implements BotMessageEvent {
      * @return a String representation of a date
      */
     public String getMemberBday(String id) {
-        return BirthdayRecord.getDateById(id).toString();
+        return Objects.requireNonNull(BirthdayRecord.getDateById(id)).toString();
     }
 
     /**
